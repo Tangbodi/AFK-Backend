@@ -129,7 +129,7 @@ public class UsersController {
         } else {
             usersInfoService.UpdateUserEmail(userId, userEmailDTO.getEmail());
             usersVerificationService.UpdateUserEmail(userId, userEmailDTO.getEmail());
-            ApiResponse apiResponse = ApiResponse.success("User email successfully updated");
+            ApiResponse apiResponse = ApiResponse.success("User email successfully updated!!!");
             return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
         }
     }
