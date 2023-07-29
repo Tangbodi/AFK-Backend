@@ -1,0 +1,61 @@
+package com.example.demo.Controller;
+
+import com.example.demo.Service.UsersVerification.UsersVerificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+
+@Controller
+public class EmailVerificationController {
+    private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
+    @Autowired
+    private UsersVerificationService usersVerificationService;
+
+    @GetMapping("/user/register/email-validation")
+    public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+        boolean isRedirected = true;
+        HttpSession session = request.getSession();
+        session.setAttribute("isRedirected", isRedirected);
+        String redirectURL;
+        if (usersVerificationService.GetByToken(token)) {
+            redirectURL = "https://www.nybing.com/email-verified";
+        } else {
+            redirectURL = "https://www.nybing.com/link-expired";
+        }
+        isRedirected = (boolean) session.getAttribute("isRedirected");//true
+        if (isRedirected) {
+            isRedirected = false;
+            logger.info("isRedirected: {}" + isRedirected);
+            session.setAttribute("isRedirected", isRedirected);//false
+            response.sendRedirect(redirectURL);
+        }
+    }
+
+    @GetMapping("/user/login/email-validation")
+    public void ShowEmailValidationPageViaLoginLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+        boolean isRedirected = true;
+        HttpSession session = request.getSession();
+        session.setAttribute("isRedirected", isRedirected);
+        String redirectURL;
+        if (usersVerificationService.GetByToken(token)) {
+            redirectURL = "https://www.nybing.com/email-verified";
+        } else {
+            redirectURL = "https://www.nybing.com/link-expired";
+        }
+        isRedirected = (boolean) session.getAttribute("isRedirected");//true
+        if (isRedirected) {
+            isRedirected = false;
+            logger.info("isRedirected: {}" + isRedirected);
+            session.setAttribute("isRedirected", isRedirected);//false
+            response.sendRedirect(redirectURL);
+        }
+    }
+}

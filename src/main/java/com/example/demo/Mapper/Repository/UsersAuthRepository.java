@@ -4,7 +4,8 @@ import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import java.util.Optional;
 @Repository
 public interface UsersAuthRepository extends JpaRepository<UsersAuth,String> {
+    Optional<UsersAuth> findByUsername(String username);
 }

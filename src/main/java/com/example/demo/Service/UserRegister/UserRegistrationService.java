@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -32,21 +33,24 @@ public class UserRegistrationService {
     private UsersPostsSettingService usersPostsSettingService;
 
     public UsersInfo CheckUsernameExists(String username) {
-        UsersInfo usersInfo = usersInfoRepository.findByUsername(username);
+        UsersInfo usersInfo = usersInfoService.CheckUsernameExists(username);
         return usersInfo;
     }
+
     public UsersInfo CheckEmailExists(String email) {
-        UsersInfo usersInfo = usersInfoRepository.findByEmail(email);
+        UsersInfo usersInfo = usersInfoService.CheckEmailExists(email);
         return usersInfo;
     }
-    public User RegisterUser(UserRegisterDTO userRegisterDTO){
+
+    @Transactional(rollbackOn = Exception.class)
+    public User RegisterUser(UserRegisterDTO userRegisterDTO) {
+        logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
-            logger.info("Registering user: {}", userRegisterDTO.getUsername());
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
             UUID uuid = UUID.randomUUID();
             String uuId = uuid.toString();
             Instant instant = Instant.now();
-            logger.info("Setting up users :{}");
+            logger.info("Setting up User :{}");
             User user = new User();
             user.setUserId(uuId);
             user.setUsername(userRegisterDTO.getUsername());
@@ -55,7 +59,7 @@ public class UserRegistrationService {
             user.setCreatedAt(instant);
             user.setModifiedAt(instant);
             usersAuthService.SetUsersAuth(userRegisterDTO, uuId, instant);
-            usersInfoService.SetUsersInfo(userRegisterDTO, uuId, instant);
+            usersInfoService.SetUserInfo(userRegisterDTO, uuId, instant);
             usersPostsSettingService.SaveSetting(userRegisterDTO, uuId, instant);
             return usersRepository.save(user);
         } catch (Exception e) {

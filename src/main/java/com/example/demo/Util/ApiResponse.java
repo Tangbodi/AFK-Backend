@@ -1,5 +1,6 @@
 package com.example.demo.Util;
 
+import com.example.demo.Enum.ReturnCode;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -10,20 +11,27 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private String error;
+    private long timestamp;
+
+    public ApiResponse() {
+        this.timestamp = System.currentTimeMillis();
+    }
 
     public static <T> ApiResponse<T> success(T data) {
         ApiResponse<T> response = new ApiResponse<>();
-        response.setCode(200);
-        response.setMessage("Success");
+        response.setCode(ReturnCode.RC200.getCode());
+        response.setMessage(ReturnCode.RC200.getMessage());
         response.setData(data);
+        response.setTimestamp(System.currentTimeMillis());
         return response;
     }
 
-    public static <T> ApiResponse<T> error(int code, String message, String error) {
+    public static <T> ApiResponse<T> error(int code, String message) {
         ApiResponse<T> response = new ApiResponse<>();
         response.setCode(code);
         response.setMessage(message);
-        response.setError(error);
+        response.setTimestamp(System.currentTimeMillis());
         return response;
     }
+
 }
