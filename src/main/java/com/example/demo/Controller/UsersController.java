@@ -120,17 +120,4 @@ public class UsersController {
             }
         }
     }
-
-    @PutMapping("/user/{userId}/update-email")
-    public ResponseEntity UpdateUserInfo(@PathVariable String userId, @Validated @RequestBody UserEmailDTO userEmailDTO) {
-        if (userRegistrationService.CheckEmailExists(userEmailDTO.getEmail()) != null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        } else {
-            usersInfoService.UpdateUserEmail(userId, userEmailDTO.getEmail());
-            usersVerificationService.UpdateUserEmail(userId, userEmailDTO.getEmail());
-            ApiResponse apiResponse = ApiResponse.success("User email successfully updated!!!");
-            return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-        }
-    }
 }

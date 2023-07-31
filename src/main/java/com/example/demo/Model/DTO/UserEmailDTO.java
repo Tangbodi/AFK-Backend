@@ -12,4 +12,5 @@ public class UserEmailDTO {
     @Length(max = 60, message = "Email address length not eligible")
     @Email(message = "Email is invalid")
     private String email;
+
 }

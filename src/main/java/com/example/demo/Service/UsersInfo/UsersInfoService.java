@@ -4,11 +4,15 @@ import com.example.demo.Mapper.Repository.UsersInfoRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.VO.UserInfoVO;
+import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
 
@@ -17,7 +21,11 @@ public class UsersInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoService.class);
     @Autowired
     private UsersInfoRepository usersInfoRepository;
-
+    @Autowired
+    private RedisService redisService;
+    @Lazy
+    @Autowired
+    private UsersVerificationService usersVerificationService;
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
         try {
@@ -47,7 +55,7 @@ public class UsersInfoService {
         logger.info("Setting up UsersInfo: {}");
         try {
             UsersInfo usersInfo = new UsersInfo();
-            usersInfo.setUserId(uuId);
+            usersInfo.setId(uuId);
             usersInfo.setUsername(userRegisterDTO.getUsername());
             usersInfo.setEmail(userRegisterDTO.getEmail());
             usersInfo.setCreatedAt(instant);
@@ -64,10 +72,9 @@ public class UsersInfoService {
             UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
             logger.info("UsersInfo: {}" + usersInfo);
             UserInfoVO userInfoVO = new UserInfoVO();
-            userInfoVO.setUserId(usersInfo.getUserId());
+            userInfoVO.setUserId(usersInfo.getId());
             userInfoVO.setUsername(usersInfo.getUsername());
             userInfoVO.setEmail(usersInfo.getEmail());
-            userInfoVO.setPhone(usersInfo.getPhone());
             userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
             userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
             userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
@@ -77,7 +84,15 @@ public class UsersInfoService {
         }
         return null;
     }
-
+    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request){
+        logger.info("Creating redis cache for update email: {}" + newEmail);
+        try{
+            String token = redisService.SetUpdateEmailCache(newEmail);
+            usersVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
+        }catch (Exception e){
+            logger.error("Failed to create redis cache for update email", e);
+        }
+    }
     @Transactional
     public boolean UpdateUserEmail(String userId, String email) {
         logger.info("Updating email: {}" + userId + "::::::" + email);
@@ -95,5 +110,4 @@ public class UsersInfoService {
         }
         return false;
     }
-
 }

@@ -10,7 +10,6 @@ public class UserInfoVO {
     private String userId;
     private String username;
     private String email;
-    private String phone;
     private String avatar_url;
     private Instant createdAt;
     private Instant modifiedAt;

@@ -20,6 +20,7 @@ import java.util.UUID;
 @Service
 public class UsersVerificationService {
     private static final Logger logger = LoggerFactory.getLogger(UsersVerificationService.class);
+    @Lazy
     @Autowired
     private UsersInfoService usersInfoService;
     @Autowired
@@ -30,6 +31,7 @@ public class UsersVerificationService {
     @Lazy
     @Autowired
     private UsersAuthService usersAuthService;
+
 
     @Transactional
     public boolean SetUserRegistrationVerificationToken(String token, String userId, UserRegisterDTO userRegisterDTO) {
@@ -121,5 +123,19 @@ public class UsersVerificationService {
             logger.error("Failed to update email", e);
         }
         return false;
+    }
+    @Transactional
+    public void UpdateTokenForUpdateEmail(String token, String userId, HttpServletRequest request){
+        logger.info("Updating token for update email: {}" + "token:::", token, "userId:::", userId);
+        try{
+            UsersVerificationToken usersVerificationToken = usersVerificationRepository.findById(userId).orElse(null);
+            usersVerificationToken.setToken(token);
+            usersVerificationToken.setModifiedAt(Instant.now());
+            usersVerificationRepository.save(usersVerificationToken);
+            logger.info("Updated token for update email successfully: {}");
+            processEmailService.ProcessUpdateEmailValidation(request, token, usersVerificationToken.getEmail());
+        }catch (Exception e){
+            logger.error("Failed to update token for update email", e);
+        }
     }
 }

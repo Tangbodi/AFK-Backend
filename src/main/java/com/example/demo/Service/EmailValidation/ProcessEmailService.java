@@ -60,4 +60,19 @@ public class ProcessEmailService {
             throw new RuntimeException(e);
         }
     }
+    public void ProcessUpdateEmailValidation(HttpServletRequest request, String token, String newEmail){
+        logger.info("Processing update email validation: {}");
+        try {
+            String recipientEmail = newEmail;
+            String siteURL = request.getRequestURL().toString();
+            siteURL.replace(request.getServletPath(), "");
+            String emailValidationLink = siteURL + "/email-validation?token=" + token;
+            sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
+            logger.info("sent emailValidationLink: {}" + emailValidationLink);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
