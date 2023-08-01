@@ -20,7 +20,7 @@ public class GameController {
     private GameIconService gameIconService;
     @Autowired
     private RedisService redisService;
-    @GetMapping("/all-game")
+    @GetMapping("/all-games")
     public ResponseEntity GetAllGame() {
         if(redisService.CheckAllGameIconsCache()){
             List<GameIconVO> gameIconVOList = redisService.GetAllGameIconsCache();
@@ -28,6 +28,7 @@ public class GameController {
             return ResponseEntity.ok(apiResponse);
         } else{
             List<GameIconVO> gameIconVOList = gameIconService.GetAllGameIcon();
+            redisService.SetAllGameIconsCache(gameIconVOList);
             ApiResponse<List<GameIconVO>> apiResponse = ApiResponse.success(gameIconVOList);
             return ResponseEntity.ok(apiResponse);
         }

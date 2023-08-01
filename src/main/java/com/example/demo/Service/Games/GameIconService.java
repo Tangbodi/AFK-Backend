@@ -27,9 +27,9 @@ public class GameIconService {
                 GameIconVO gameIconVO = new GameIconVO();
                 gameIconVO.setGameId(gameIcon.getId());
                 gameIconVO.setGameName(gameIcon.getGameName());
+                gameIconVO.setGameSlogan(gameIcon.getGameSlogan());
                 gameIconVO.setIconUrl(gameIcon.getIconUrl());
                 gameIconVOList.add(gameIconVO);
-                gameIconList.add(gameIcon);
             }
             return gameIconVOList;
         }catch (Exception e){
