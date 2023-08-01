@@ -116,10 +116,10 @@ public class UsersVerificationService {
                 logger.info("Old email: {}" + usersVerificationToken.getEmail());
                 usersVerificationToken.setEmail(email);
                 logger.info("New email: {}" + email);
+                usersVerificationToken.setToken(null);
                 usersVerificationToken.setModifiedAt(Instant.now());
                 usersVerificationRepository.save(usersVerificationToken);
                 logger.info("Updated email successfully: {}");
-
             } else {
                 logger.info("User not found: {}");
 

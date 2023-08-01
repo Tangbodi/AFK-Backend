@@ -85,7 +85,7 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
-    @GetMapping("/user/login")
+    @PostMapping("/user/login")
     public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) throws IllegalAccessException {
         if (!UsernameValidation.ValidUsername(userLoginDTO.getUsername()) || !UsernameValidation.UsernameLength(userLoginDTO.getUsername())) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");

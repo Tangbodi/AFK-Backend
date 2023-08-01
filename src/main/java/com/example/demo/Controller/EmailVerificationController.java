@@ -1,12 +1,14 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.UsersInfo.UsersInfoService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +23,8 @@ public class EmailVerificationController {
     private UsersVerificationService usersVerificationService;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private UsersInfoService usersInfoService;
 
     @GetMapping("/user/register/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
@@ -61,9 +65,29 @@ public class EmailVerificationController {
             response.sendRedirect(redirectURL);
         }
     }
-    @GetMapping("/user/update-email/email-validation")
-    public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response){
-        if(redisService.)
+    @GetMapping("/user/{userId}/update-email/email-validation")
+    public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request, @PathVariable String userId, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+        boolean isRedirected = true;
+        HttpSession session = request.getSession();
+        session.setAttribute("isRedirected",isRedirected);
+        String redirectURL;
+        if(redisService.CheckUpdateEmailCache(token)) {
+            logger.info("Update email cache exists: {}" + token);
+            String newEmail = redisService.GetEmailByToken(token);
+            usersVerificationService.UpdateUserEmail(userId,newEmail);
+            usersInfoService.UpdateUserEmail(userId,newEmail);
+            redisService.DeleteEmailByToken(token);
+            redirectURL = "https://www.nybing.com/email-verified";
+        }else{
+            redirectURL = "https://www.nybing.com/link-expired";
+        }
+        isRedirected = (boolean) session.getAttribute("isRedirected");//true
+        if(isRedirected){
+            isRedirected = false;
+            logger.info("isRedirected:::"+isRedirected);
+            session.setAttribute("isRedirected",isRedirected);//false
+            response.sendRedirect(redirectURL);
+        }
     }
 
 }
