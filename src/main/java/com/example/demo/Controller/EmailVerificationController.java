@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ public class EmailVerificationController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
     @Autowired
     private UsersVerificationService usersVerificationService;
+    @Autowired
+    private RedisService redisService;
 
     @GetMapping("/user/register/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
@@ -58,4 +61,9 @@ public class EmailVerificationController {
             response.sendRedirect(redirectURL);
         }
     }
+    @GetMapping("/user/update-email/email-validation")
+    public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response){
+        if(redisService.)
+    }
+
 }

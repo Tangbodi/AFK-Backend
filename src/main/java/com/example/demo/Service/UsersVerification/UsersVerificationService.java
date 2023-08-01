@@ -108,33 +108,43 @@ public class UsersVerificationService {
     }
 
     @Transactional
-    public boolean UpdateUserEmail(String userId, String email) {
+    public void UpdateUserEmail(String userId, String email) {
         logger.info("Updating Email: {}" + userId + "::::::" + email);
         try {
             UsersVerificationToken usersVerificationToken = usersVerificationRepository.findById(userId).orElse(null);
-            logger.info("Old email: {}" + usersVerificationToken.getEmail());
-            usersVerificationToken.setEmail(email);
-            logger.info("New email: {}" + email);
-            usersVerificationToken.setModifiedAt(Instant.now());
-            usersVerificationRepository.save(usersVerificationToken);
-            logger.info("Updated email successfully: {}");
-            return true;
+            if (usersVerificationToken != null) {
+                logger.info("Old email: {}" + usersVerificationToken.getEmail());
+                usersVerificationToken.setEmail(email);
+                logger.info("New email: {}" + email);
+                usersVerificationToken.setModifiedAt(Instant.now());
+                usersVerificationRepository.save(usersVerificationToken);
+                logger.info("Updated email successfully: {}");
+
+            } else {
+                logger.info("User not found: {}");
+
+            }
         } catch (Exception e) {
             logger.error("Failed to update email", e);
         }
-        return false;
+
     }
+
     @Transactional
-    public void UpdateTokenForUpdateEmail(String token, String userId, HttpServletRequest request){
+    public void UpdateTokenForUpdateEmail(String token, String userId, HttpServletRequest request) {
         logger.info("Updating token for update email: {}" + "token:::", token, "userId:::", userId);
-        try{
+        try {
             UsersVerificationToken usersVerificationToken = usersVerificationRepository.findById(userId).orElse(null);
-            usersVerificationToken.setToken(token);
-            usersVerificationToken.setModifiedAt(Instant.now());
-            usersVerificationRepository.save(usersVerificationToken);
-            logger.info("Updated token for update email successfully: {}");
-            processEmailService.ProcessUpdateEmailValidation(request, token, usersVerificationToken.getEmail());
-        }catch (Exception e){
+            if (usersVerificationToken != null) {
+                usersVerificationToken.setToken(token);
+                usersVerificationToken.setModifiedAt(Instant.now());
+                usersVerificationRepository.save(usersVerificationToken);
+                logger.info("Updated token for update email successfully: {}");
+                processEmailService.ProcessUpdateEmailValidation(request, token, usersVerificationToken.getEmail());
+            } else {
+                logger.info("User not found: {}");
+            }
+        } catch (Exception e) {
             logger.error("Failed to update token for update email", e);
         }
     }

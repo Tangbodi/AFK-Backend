@@ -53,7 +53,6 @@ public class ProcessEmailService {
             siteURL.replace(request.getServletPath(), "");
             String emailValidationLink = siteURL + "/email-validation?token=" + token;
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-            logger.info("sent emailValidationLink: {}" + emailValidationLink);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         } catch (UnsupportedEncodingException e) {
@@ -68,7 +67,6 @@ public class ProcessEmailService {
             siteURL.replace(request.getServletPath(), "");
             String emailValidationLink = siteURL + "/email-validation?token=" + token;
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-            logger.info("sent emailValidationLink: {}" + emailValidationLink);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         } catch (UnsupportedEncodingException e) {
