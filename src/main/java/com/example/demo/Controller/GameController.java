@@ -2,6 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Service.Games.GameIconService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,18 @@ public class GameController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
     @Autowired
     private GameIconService gameIconService;
+    @Autowired
+    private RedisService redisService;
     @GetMapping("/all-game")
     public ResponseEntity GetAllGame() {
-        List<GameIconVO> gameIconVOList = gameIconService.GetAllGameIcon();
-        ApiResponse apiResponse = ApiResponse.success(gameIconVOList);
-        return ResponseEntity.ok(apiResponse);
+        if(redisService.CheckAllGameIconsCache()){
+            List<GameIconVO> gameIconVOList = redisService.GetAllGameIconsCache();
+            ApiResponse<List<GameIconVO>> apiResponse = ApiResponse.success(gameIconVOList);
+            return ResponseEntity.ok(apiResponse);
+        } else{
+            List<GameIconVO> gameIconVOList = gameIconService.GetAllGameIcon();
+            ApiResponse<List<GameIconVO>> apiResponse = ApiResponse.success(gameIconVOList);
+            return ResponseEntity.ok(apiResponse);
+        }
     }
 }

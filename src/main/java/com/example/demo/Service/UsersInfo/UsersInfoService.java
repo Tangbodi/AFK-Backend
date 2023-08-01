@@ -42,8 +42,13 @@ public class UsersInfoService {
         logger.info("Checking if email exists: {}", email);
         try {
             UsersInfo usersInfo = usersInfoRepository.findByEmail(email).orElse(null);
-            logger.info("UsersInfo: {}" + usersInfo.getEmail());
-            return usersInfo;
+            if(usersInfo != null){
+                logger.info("UsersInfo: {}" + usersInfo.getEmail());
+                return usersInfo;
+            } else{
+                logger.info("UsersInfo: {}" + usersInfo);
+                return null;
+            }
         } catch (Exception e) {
             logger.error("Failed to check email", e);
         }
