@@ -64,7 +64,7 @@ public class UserRegistrationService {
             return usersRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user", e);
-            throw new RuntimeException("Failed to register user", e);
         }
+        return null;
     }
 }

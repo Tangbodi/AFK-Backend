@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GameIconService {
@@ -34,6 +35,15 @@ public class GameIconService {
             return gameIconVOList;
         }catch (Exception e){
             logger.error("Failed to get all game icon",e);
+        }
+        return null;
+    }
+    public List<Map<Short, Object>> GetGameIconUnderOneGenre(Short genreId){
+        logger.info("Getting game icon under one genre");
+        try{
+            return gameIconRepository.findAllGameIconUnderOneGenre(genreId);
+        }catch (Exception e){
+            logger.error("Failed to get game icon under one genre",e);
         }
         return null;
     }

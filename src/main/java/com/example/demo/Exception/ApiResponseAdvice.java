@@ -1,5 +1,6 @@
 package com.example.demo.Exception;
 
+import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Util.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -33,6 +34,6 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         if (object instanceof ApiResponse) {
             return object;
         }
-        return ApiResponse.success(object);
+        return ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
     }
 }

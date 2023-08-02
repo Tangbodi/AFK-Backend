@@ -22,6 +22,10 @@ public class UserRegisterDTO {
     @Length(min =8, max = 30, message = "Password length not eligible")
     @ValidPassword
     private String password;
+    @NotBlank(message = "Password is required")
+    @Length(min =8, max = 30, message = "Password length not eligible")
+    @ValidPassword
+    private String confirmPassword;
     @java.lang.Override
     public java.lang.String toString() {
         return "UserRegisterDTO{" +

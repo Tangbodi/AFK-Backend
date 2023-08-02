@@ -17,7 +17,7 @@ public class UsersPostsSettingService {
     @Autowired
     private UsersPostsSettingRepository usersPostsSettingRepository;
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public void SaveSetting(UserRegisterDTO userRegisterDTO, String uuId, Instant instant) {
         logger.info("Setting up UsersPostsSetting: {}");
         try {

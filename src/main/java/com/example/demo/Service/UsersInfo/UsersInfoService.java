@@ -4,7 +4,7 @@ import com.example.demo.Mapper.Repository.UsersInfoRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.VO.UserInfoVO;
-import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +22,21 @@ public class UsersInfoService {
     @Autowired
     private UsersInfoRepository usersInfoRepository;
     @Autowired
-    private RedisService redisService;
+    private RedisEmailService redisEmailService;
     @Lazy
     @Autowired
     private UsersVerificationService usersVerificationService;
+
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
         try {
             UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
-            logger.info("UsersInfo: {}" + usersInfo.getUsername());
-            return usersInfo;
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                return usersInfo;
+            } else {
+                logger.info("UsersInfo: {}" + usersInfo);
+            }
         } catch (Exception e) {
             logger.error("Failed to check username", e);
         }
@@ -42,12 +47,11 @@ public class UsersInfoService {
         logger.info("Checking if email exists: {}", email);
         try {
             UsersInfo usersInfo = usersInfoRepository.findByEmail(email).orElse(null);
-            if(usersInfo != null){
+            if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getEmail());
                 return usersInfo;
-            } else{
+            } else {
                 logger.info("UsersInfo: {}" + usersInfo);
-                return null;
             }
         } catch (Exception e) {
             logger.error("Failed to check email", e);
@@ -55,7 +59,7 @@ public class UsersInfoService {
         return null;
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public void SetUserInfo(UserRegisterDTO userRegisterDTO, String uuId, Instant instant) {
         logger.info("Setting up UsersInfo: {}");
         try {
@@ -71,45 +75,58 @@ public class UsersInfoService {
         }
     }
 
-    public UserInfoVO GetUserInfo(String username) {
-        logger.info("Getting UsersInfo: {}" + username);
+    public UserInfoVO GetUserInfo(String userId) {
+        logger.info("Getting UsersInfo: {}" + userId);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
-            logger.info("UsersInfo: {}" + usersInfo);
-            UserInfoVO userInfoVO = new UserInfoVO();
-            userInfoVO.setUserId(usersInfo.getId());
-            userInfoVO.setUsername(usersInfo.getUsername());
-            userInfoVO.setEmail(usersInfo.getEmail());
-            userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
-            userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
-            userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
-            return userInfoVO;
+            UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                UserInfoVO userInfoVO = new UserInfoVO();
+                userInfoVO.setUserId(usersInfo.getId());
+                userInfoVO.setUsername(usersInfo.getUsername());
+                userInfoVO.setEmail(usersInfo.getEmail());
+                userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
+                userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
+                userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
+                return userInfoVO;
+            } else {
+                logger.info("UsersInfo: {}" + usersInfo);
+                return null;
+            }
+
         } catch (Exception e) {
             logger.error("Failed to get UsersInfo", e);
         }
         return null;
     }
-    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request){
+
+    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
         logger.info("Creating redis cache for update email: {}" + newEmail);
-        try{
-            String token = redisService.SetUpdateEmailCache(newEmail);
+        try {
+            String token = redisEmailService.SetUpdateEmailCache(newEmail);
             usersVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to create redis cache for update email", e);
         }
     }
+
     @Transactional
     public boolean UpdateUserEmail(String userId, String email) {
         logger.info("Updating email: {}" + userId + "::::::" + email);
         try {
             UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
-            logger.info("Old email: {}" + usersInfo.getEmail());
-            usersInfo.setEmail(email);
-            logger.info("New email: {}" + email);
-            usersInfo.setModifiedAt(Instant.now());
-            usersInfoRepository.save(usersInfo);
-            logger.info("Updated email successfully: {}");
-            return true;
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                logger.info("Old email: {}" + usersInfo.getEmail());
+                usersInfo.setEmail(email);
+                logger.info("New email: {}" + email);
+                usersInfo.setModifiedAt(Instant.now());
+                usersInfoRepository.save(usersInfo);
+                logger.info("Updated email successfully: {}");
+                return true;
+            } else {
+                logger.info("UsersInfo: {}" + usersInfo);
+            }
         } catch (Exception e) {
             logger.error("Failed to update UsersInfo", e);
         }

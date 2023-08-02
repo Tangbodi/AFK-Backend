@@ -74,8 +74,8 @@ public class UsersVerificationService {
 
     public boolean GetByToken(String token) {
         logger.info("Getting UsersVerificationToken: {}" + token);
-        UsersVerificationToken usersVerificationToken = new UsersVerificationToken();
         try {
+            UsersVerificationToken usersVerificationToken = new UsersVerificationToken();
             usersVerificationToken = usersVerificationRepository.findByToken(token).orElse(null);
             if (usersVerificationToken != null) {
                 logger.info("Found UsersVerificationToken: {}" + usersVerificationToken.getToken() + "::::::userId::::::" + usersVerificationToken.getUserId());

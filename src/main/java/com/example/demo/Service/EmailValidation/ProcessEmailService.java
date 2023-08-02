@@ -36,6 +36,8 @@ public class ProcessEmailService {
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
                 logger.info("sent emailValidationLink: {}" + emailValidationLink);
                 return true;
+            } else {
+                logger.info("Failed to set user registration verification token");
             }
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -59,7 +61,8 @@ public class ProcessEmailService {
             throw new RuntimeException(e);
         }
     }
-    public void ProcessUpdateEmailValidation(HttpServletRequest request, String token, String newEmail){
+
+    public void ProcessUpdateEmailValidation(HttpServletRequest request, String token, String newEmail) {
         logger.info("Processing update email validation: {}");
         try {
             String recipientEmail = newEmail;

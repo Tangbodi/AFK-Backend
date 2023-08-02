@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.Redis.RedisEmailService;
+import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UsersInfo.UsersInfoService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class EmailVerificationController {
     @Autowired
     private UsersVerificationService usersVerificationService;
     @Autowired
-    private RedisService redisService;
+    private RedisEmailService redisEmailService;
     @Autowired
     private UsersInfoService usersInfoService;
 
@@ -71,12 +72,11 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
-        if(redisService.CheckUpdateEmailCache(token)) {
-            logger.info("Update email cache exists: {}" + token);
-            String newEmail = redisService.GetEmailByToken(token);
+        if(redisEmailService.CheckUpdateEmailCache(token)) {
+            String newEmail = redisEmailService.GetEmailByToken(token);
             usersVerificationService.UpdateUserEmail(userId,newEmail);
             usersInfoService.UpdateUserEmail(userId,newEmail);
-            redisService.DeleteEmailByToken(token);
+            redisEmailService.DeleteEmailByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
         }else{
             redirectURL = "https://www.nybing.com/link-expired";

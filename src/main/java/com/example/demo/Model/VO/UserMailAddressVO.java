@@ -1,12 +1,9 @@
-package com.example.demo.Model.DTO;
+package com.example.demo.Model.VO;
 
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
-public class UserMailDTO implements Serializable {
-    private String userId;
+public class UserMailAddressVO {
     private String country;
     private String state;
     private String address;
