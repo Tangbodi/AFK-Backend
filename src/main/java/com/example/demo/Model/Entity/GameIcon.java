@@ -38,9 +38,9 @@ public class GameIcon {
     @Column(name = "icon_path", nullable = false, length = 69)
     private String iconPath;
 
-    @Size(max = 16)
+    @Size(max = 63)
     @NotNull
-    @Column(name = "icon_url", nullable = false, length = 16)
+    @Column(name = "icon_url", nullable = false, length = 63)
     private String iconUrl;
 
     @Size(max = 31)
