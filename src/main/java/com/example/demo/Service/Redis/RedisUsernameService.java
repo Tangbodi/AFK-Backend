@@ -15,31 +15,31 @@ public class RedisUsernameService {
 
 
     public void SetUsernameExistsCache(String username) {
-        logger.info("Setting up username exists cache");
+        logger.info("Setting up username exists cache: {}");
         Jedis jedis = new Jedis("localhost");
         try {
             jedis.set(username, "true");
             jedis.expire(username, 30);
         } catch (Exception e) {
-            logger.error("Failed to set username exists cache", e);
+            logger.error("Failed to set username exists cache: {}", e.getMessage(),e);
         } finally {
             logger.info("Closing the jedis connection:::");
             jedis.close();
         }
     }
     public boolean CheckUsernameExistsCache(String username){
-        logger.info("Checking username exists cache");
+        logger.info("Checking username exists cache: {}");
         Jedis jedis = new Jedis("localhost");
         try{
             if (jedis.exists(username)) {
-                logger.info("Username cache exists");
+                logger.info("Username cache exists: {}");
                 return true;
             } else {
-                logger.info("Username cache doesn't exist");
+                logger.info("Username cache doesn't exist: {}");
                 return false;
             }
         }catch (Exception e) {
-            logger.error("Failed to check username exists cache", e);
+            logger.error("Failed to check username exists cache: {}", e.getMessage(),e);
         } finally {
             logger.info("Closing the jedis connection:::");
             jedis.close();

@@ -12,7 +12,7 @@ public class RedisEmailService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUsernameService.class);
 
     private String GenerateEmailToken() {
-        logger.info("Generating email token");
+        logger.info("Generating email token: {}");
         String token = UUID.randomUUID().toString();
         logger.info("Email token generated: {}" + token);
         return UUID.randomUUID().toString();
@@ -28,7 +28,7 @@ public class RedisEmailService {
             logger.info("Redis cache for email update set up successfully: {}" + newEmail);
             return token;
         } catch (Exception e) {
-            logger.error("Failed to set up redis cache for email update", e);
+            logger.error("Failed to set up redis cache for email update: {}", e.getMessage(),e);
         } finally {
             logger.info("Closing the jedis connection:::");
             jedis.close();
@@ -48,7 +48,7 @@ public class RedisEmailService {
                 return false;
             }
         } catch (Exception e) {
-            logger.error("Failed to check update email cache", e);
+            logger.error("Failed to check update email cache: {}", e.getMessage(),e);
         } finally {
             logger.info("Closing the jedis connection:::");
             jedis.close();
@@ -62,6 +62,7 @@ public class RedisEmailService {
         try {
             return jedis.get(token);
         } catch (Exception e) {
+            logger.error("Failed to get email by token", e.getMessage(),e);
             // Handle exceptions
         } finally {
             logger.info("Closing the jedis connection:::");
@@ -77,6 +78,7 @@ public class RedisEmailService {
             jedis.del(token); // Delete the token-email pair from Redis
             logger.info("Email deleted by token: {}" + token);
         } catch (Exception e) {
+            logger.error("Failed to delete email by token: {}", e.getMessage(),e);
             // Handle exceptions
         } finally {
             logger.info("Closing the jedis connection:::");

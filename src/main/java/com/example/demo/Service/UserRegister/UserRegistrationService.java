@@ -6,6 +6,7 @@ import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Service.UsersAuth.UsersAuthService;
+import com.example.demo.Service.UsersInfo.UsersMailAddressService;
 import com.example.demo.Service.UsersInfo.UsersInfoService;
 import com.example.demo.Service.UsersPostsSetting.UsersPostsSettingService;
 import org.mindrot.jbcrypt.BCrypt;
@@ -31,6 +32,8 @@ public class UserRegistrationService {
     private UsersAuthService usersAuthService;
     @Autowired
     private UsersPostsSettingService usersPostsSettingService;
+    @Autowired
+    private UsersMailAddressService usersMailAddressService;
 
     public UsersInfo CheckUsernameExists(String username) {
         UsersInfo usersInfo = usersInfoService.CheckUsernameExists(username);
@@ -47,23 +50,25 @@ public class UserRegistrationService {
         logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
-            UUID uuid = UUID.randomUUID();
-            String uuId = uuid.toString();
-            Instant instant = Instant.now();
+            String uuid = UUID.randomUUID().toString();
+            Instant createdAt = Instant.now();
+            userRegisterDTO.setUserId(uuid);
+            userRegisterDTO.setCreatedAt(createdAt);
             logger.info("Setting up User :{}");
             User user = new User();
-            user.setUserId(uuId);
+            user.setUserId(uuid);
             user.setUsername(userRegisterDTO.getUsername());
             String encodedPassword = BCrypt.hashpw(userRegisterDTO.getPassword(), BCrypt.gensalt());
             user.setPassword(encodedPassword);
-            user.setCreatedAt(instant);
-            user.setModifiedAt(instant);
-            usersAuthService.SetUsersAuth(userRegisterDTO, uuId, instant);
-            usersInfoService.SetUserInfo(userRegisterDTO, uuId, instant);
-            usersPostsSettingService.SaveSetting(userRegisterDTO, uuId, instant);
+            user.setCreatedAt(createdAt);
+            user.setModifiedAt(createdAt);
+            usersAuthService.SetUsersAuth(userRegisterDTO);
+            usersInfoService.SetUserInfo(userRegisterDTO);
+            usersMailAddressService.SetUserMailAddress(userRegisterDTO);
+            usersPostsSettingService.SaveSetting(userRegisterDTO);
             return usersRepository.save(user);
         } catch (Exception e) {
-            logger.error("Failed to register user", e);
+            logger.error("Failed to register user: {}", e.getMessage(),e);
         }
         return null;
     }

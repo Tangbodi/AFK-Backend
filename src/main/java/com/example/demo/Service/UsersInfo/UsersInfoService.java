@@ -32,13 +32,13 @@ public class UsersInfoService {
         try {
             UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
             if (usersInfo != null) {
-                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                logger.info("Username: {}" + usersInfo.getUsername());
                 return usersInfo;
             } else {
-                logger.info("UsersInfo: {}" + usersInfo);
+                logger.info("Username does not exist: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to check username", e);
+            logger.error("Failed to check username: {}", e.getMessage(),e);
         }
         return null;
     }
@@ -48,30 +48,30 @@ public class UsersInfoService {
         try {
             UsersInfo usersInfo = usersInfoRepository.findByEmail(email).orElse(null);
             if (usersInfo != null) {
-                logger.info("UsersInfo: {}" + usersInfo.getEmail());
+                logger.info("Email: {}" + usersInfo.getEmail());
                 return usersInfo;
             } else {
-                logger.info("UsersInfo: {}" + usersInfo);
+                logger.info("Email does not exist: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to check email", e);
+            logger.error("Failed to check email: {}", e.getMessage(),e);
         }
         return null;
     }
 
     @Transactional
-    public void SetUserInfo(UserRegisterDTO userRegisterDTO, String uuId, Instant instant) {
+    public void SetUserInfo(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting up UsersInfo: {}");
         try {
             UsersInfo usersInfo = new UsersInfo();
-            usersInfo.setId(uuId);
+            usersInfo.setId(userRegisterDTO.getUserId());
             usersInfo.setUsername(userRegisterDTO.getUsername());
             usersInfo.setEmail(userRegisterDTO.getEmail());
-            usersInfo.setCreatedAt(instant);
-            usersInfo.setModifiedAt(instant);
+            usersInfo.setCreatedAt(userRegisterDTO.getCreatedAt());
+            usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
             usersInfoRepository.save(usersInfo);
         } catch (Exception e) {
-            logger.error("Failed to set UsersInfo", e);
+            logger.error("Failed to set UsersInfo: {}", e.getMessage(),e);
         }
     }
 
@@ -90,12 +90,11 @@ public class UsersInfoService {
                 userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
                 return userInfoVO;
             } else {
-                logger.info("UsersInfo: {}" + usersInfo);
-                return null;
+                logger.info("UserInfo does not exist: {}" );
             }
 
         } catch (Exception e) {
-            logger.error("Failed to get UsersInfo", e);
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
         }
         return null;
     }
@@ -106,7 +105,7 @@ public class UsersInfoService {
             String token = redisEmailService.SetUpdateEmailCache(newEmail);
             usersVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
         } catch (Exception e) {
-            logger.error("Failed to create redis cache for update email", e);
+            logger.error("Failed to create redis cache for update email: {}", e.getMessage(),e);
         }
     }
 
@@ -125,10 +124,10 @@ public class UsersInfoService {
                 logger.info("Updated email successfully: {}");
                 return true;
             } else {
-                logger.info("UsersInfo: {}" + usersInfo);
+                logger.info("Failed to update email: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to update UsersInfo", e);
+            logger.error("Failed to update UsersInfo: {}", e.getMessage(),e);
         }
         return false;
     }

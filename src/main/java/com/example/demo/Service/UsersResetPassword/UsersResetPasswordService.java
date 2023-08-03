@@ -33,7 +33,7 @@ public class UsersResetPasswordService {
             logger.info("Saved UserResetPasswordToken successfully: {}");
             return true;
         } catch (Exception e) {
-            logger.error("Failed to set token", e);
+            logger.error("Failed to set token: {}", e.getMessage(),e);
         }
         return false;
     }
@@ -51,7 +51,7 @@ public class UsersResetPasswordService {
             logger.info("Updated email successfully: {}");
             return true;
         } catch (Exception e) {
-            logger.error("Failed to update email", e);
+            logger.error("Failed to update email: {}", e.getMessage(),e);
         }
         return false;
     }

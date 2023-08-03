@@ -18,17 +18,17 @@ public class UsersPostsSettingService {
     private UsersPostsSettingRepository usersPostsSettingRepository;
 
     @Transactional
-    public void SaveSetting(UserRegisterDTO userRegisterDTO, String uuId, Instant instant) {
+    public void SaveSetting(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting up UsersPostsSetting: {}");
         try {
             UsersPostsSetting usersPostsSetting = new UsersPostsSetting();
-            usersPostsSetting.setUserId(uuId);
+            usersPostsSetting.setUserId(userRegisterDTO.getUserId());
             usersPostsSetting.setMentionOn(true);
-            usersPostsSetting.setCreatedAt(instant);
-            usersPostsSetting.setModifiedAt(instant);
+            usersPostsSetting.setCreatedAt(userRegisterDTO.getCreatedAt());
+            usersPostsSetting.setModifiedAt(userRegisterDTO.getCreatedAt());
             usersPostsSettingRepository.save(usersPostsSetting);
         } catch (Exception e) {
-            logger.error("Failed to set UsersPostsSetting", e);
+            logger.error("Failed to set UsersPostsSetting: {}", e.getMessage(),e);
         }
     }
 

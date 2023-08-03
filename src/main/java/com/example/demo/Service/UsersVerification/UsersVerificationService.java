@@ -48,7 +48,7 @@ public class UsersVerificationService {
             logger.info("Saved UserRegistrationVerificationToken successfully: {}");
             return true;
         } catch (Exception e) {
-            logger.error("Failed to set token", e);
+            logger.error("Failed to set token", e.getMessage(),e);
         }
         return false;
     }
@@ -68,7 +68,7 @@ public class UsersVerificationService {
             processEmailService.ProcessLoginEmailValidation(request, usersVerificationToken.getEmail(), token);
 
         } catch (Exception e) {
-            logger.error("Failed to set token", e);
+            logger.error("Failed to set token: {}", e.getMessage(),e);
         }
     }
 
@@ -87,7 +87,7 @@ public class UsersVerificationService {
                 return false;
             }
         } catch (Exception e) {
-            logger.error("Failed to get UsersVerificationToken", e);
+            logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(),e);
         }
         return false;
     }
@@ -102,7 +102,7 @@ public class UsersVerificationService {
             logger.info("Removed token successfully: {}");
             return true;
         } catch (Exception e) {
-            logger.error("Failed to remove token", e);
+            logger.error("Failed to remove token: {}", e.getMessage(),e);
         }
         return false;
     }
@@ -125,7 +125,7 @@ public class UsersVerificationService {
 
             }
         } catch (Exception e) {
-            logger.error("Failed to update email", e);
+            logger.error("Failed to update email: {}", e.getMessage(),e);
         }
 
     }
@@ -145,7 +145,7 @@ public class UsersVerificationService {
                 logger.info("User not found: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to update token for update email", e);
+            logger.error("Failed to update token for update email: {}", e.getMessage(),e);
         }
     }
 }

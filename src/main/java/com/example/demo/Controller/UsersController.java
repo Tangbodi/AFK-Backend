@@ -14,7 +14,7 @@ import com.example.demo.Service.UsersResetPassword.UsersResetPasswordService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.PasswordValidator;
-import com.example.demo.Util.UsernameValidation;
+import com.example.demo.Util.UsernameValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 @RestController
 @Validated
@@ -49,13 +50,13 @@ public class UsersController {
     private RedisUsernameService redisService;
 
     @PostMapping("/user/registration")
-    public ResponseEntity<ApiResponse<String>> UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException {
+    public ResponseEntity<ApiResponse<String>> UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
         // Encode email for avoiding email scraping and spam bots
         String encodedEmail = HtmlUtils.htmlEscape(userRegisterDTO.getEmail());
         logger.info("Encoded email: {}", encodedEmail);
         userRegisterDTO.setEmail(encodedEmail);
         // Check if username is valid
-        if (!UsernameValidation.ValidUsername(userRegisterDTO.getUsername())) {
+        if (!UsernameValidator.ValidUsername(userRegisterDTO.getUsername())) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Username can't contain special characters");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         } else if (!PasswordValidator.isValidPassword(userRegisterDTO.getPassword())) {
@@ -80,11 +81,10 @@ public class UsersController {
             User user = userRegistrationService.RegisterUser(userRegisterDTO);
             logger.info("User: {}", user);
             if (user != null) {
-                logger.info("User successfully registered: {}");
+                logger.info("User registered successfully : {}");
                 //Setup email validation
                 if (processEmailService.ProcessRegistrationEmailValidation(request, user.getUserId(), userRegisterDTO)) {
-                    ;
-                    ApiResponse apiResponse = ApiResponse.success("User successfully registered");
+                    ApiResponse apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
                     return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
                 }
             } else {
@@ -97,8 +97,8 @@ public class UsersController {
     }
 
     @PostMapping("/user/login")
-    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) throws IllegalAccessException {
-        if (!UsernameValidation.ValidUsername(userLoginDTO.getUsername()) || !UsernameValidation.UsernameLength(userLoginDTO.getUsername())) {
+    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        if (!UsernameValidator.ValidUsername(userLoginDTO.getUsername()) || !UsernameValidator.UsernameLength(userLoginDTO.getUsername())) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         } else if (!PasswordValidator.isValidPassword(userLoginDTO.getPassword()) || !PasswordValidator.PasswordLength(userLoginDTO.getPassword())) {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
@@ -34,7 +35,6 @@ public class ProcessEmailService {
                 siteURL.replace(request.getServletPath(), "");
                 String emailValidationLink = siteURL + "/email-validation?token=" + token;
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-                logger.info("sent emailValidationLink: {}" + emailValidationLink);
                 return true;
             } else {
                 logger.info("Failed to set user registration verification token");
@@ -42,6 +42,8 @@ public class ProcessEmailService {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return false;

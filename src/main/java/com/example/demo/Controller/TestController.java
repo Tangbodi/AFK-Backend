@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
     private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+
     @GetMapping("/getData")
-    public ResponseEntity getData(){
+    public ResponseEntity getData() {
         ApiResponse apiResponse = ApiResponse.success("Hello World");
         return ResponseEntity.ok(apiResponse);
     }

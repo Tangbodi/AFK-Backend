@@ -7,6 +7,7 @@ import java.time.Instant;
 
 @Data
 public class UserInfoVO {
+
     private String userId;
     private String username;
     private String email;

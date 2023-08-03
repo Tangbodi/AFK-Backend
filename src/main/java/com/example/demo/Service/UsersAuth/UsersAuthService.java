@@ -27,19 +27,19 @@ public class UsersAuthService {
     private UsersInfoService usersInfoService;
 
     @Transactional
-    public void SetUsersAuth(UserRegisterDTO userRegisterDTO, String uuId, Instant instant) {
+    public void SetUsersAuth(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting up UsersAuth :{}");
         try {
             UsersAuth usersAuth = new UsersAuth();
-            usersAuth.setUserId(uuId);
+            usersAuth.setUserId(userRegisterDTO.getUserId());
             usersAuth.setUsername(userRegisterDTO.getUsername());
             usersAuth.setIsVerified(false);
             usersAuth.setIsBlocked(false);
-            usersAuth.setCreatedAt(instant);
-            usersAuth.setModifiedAt(instant);
+            usersAuth.setCreatedAt(userRegisterDTO.getCreatedAt());
+            usersAuth.setModifiedAt(userRegisterDTO.getCreatedAt());
             usersAuthRepository.save(usersAuth);
         } catch (Exception e) {
-            logger.error("Failed to set UsersAuth", e);
+            logger.error("Failed to set UsersAuth: {}", e.getMessage(),e);
         }
     }
 
@@ -66,7 +66,7 @@ public class UsersAuthService {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to check if username exists", e);
+            logger.error("Failed to check if username exists: {}", e.getMessage(),e);
         }
         return -2;
     }
@@ -82,7 +82,7 @@ public class UsersAuthService {
             logger.info("Updated user's verification status: {}", userId);
             return true;
         } catch (Exception e) {
-            logger.error("Failed to update user's verification status via UserAuth", e);
+            logger.error("Failed to update user's verification status via UserAuth: {}", e.getMessage(),e);
         }
         return false;
     }

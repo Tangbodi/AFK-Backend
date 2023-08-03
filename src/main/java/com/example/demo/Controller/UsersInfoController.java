@@ -6,11 +6,11 @@ import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Model.VO.UserMailAddressVO;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
-import com.example.demo.Service.UsersInfo.UserMailAddressService;
+import com.example.demo.Service.UsersInfo.UsersMailAddressService;
 import com.example.demo.Service.UsersInfo.UsersInfoService;
 import com.example.demo.Service.UsersVerification.UsersVerificationService;
 import com.example.demo.Util.ApiResponse;
-import com.example.demo.Util.UserIdValidation;
+import com.example.demo.Util.UserIdValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 @RestController
 @Validated
@@ -33,16 +34,16 @@ public class UsersInfoController {
     @Autowired
     private UsersVerificationService usersVerificationService;
     @Autowired
-    private UserMailAddressService userMailAddressService;
+    private UsersMailAddressService usersMailAddressService;
 
     @GetMapping("/user/{userId}/user-info")
-    public ResponseEntity GetUserInfo(@PathVariable String userId) {
-        if(UserIdValidation.CheckUserId(userId) == false){
+    public ResponseEntity GetUserInfo(@PathVariable String userId) throws IOException {
+        if (UserIdValidator.CheckUserId(userId) == false) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
         UserInfoVO userInfoVO = usersInfoService.GetUserInfo(userId);
-        if(userInfoVO == null){
+        if (userInfoVO == null) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         } else {
@@ -50,9 +51,10 @@ public class UsersInfoController {
             return ResponseEntity.ok(apiResponse);
         }
     }
+
     @PutMapping("/user/{userId}/update-email")
     public ResponseEntity UpdateUserInfo(@PathVariable String userId, @Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request) {
-        if(UserIdValidation.CheckUserId(userId) == false){
+        if (UserIdValidator.CheckUserId(userId) == false) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
@@ -74,29 +76,26 @@ public class UsersInfoController {
     }
 
     @PutMapping("/user/{userId}/update-mail-address")
-    public ResponseEntity UpdateUserMailAddress(@PathVariable String userId, @RequestBody UserMailDTO userMailDTO) {
-        if(UserIdValidation.CheckUserId(userId) == false){
+    public ResponseEntity UpdateUserMailAddress(@PathVariable String userId, @RequestBody UserMailDTO userMailDTO) throws IOException {
+        if (UserIdValidator.CheckUserId(userId) == false || usersInfoService.GetUserInfo(userId) == null) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
         userMailDTO.setUserId(userId);
-        userMailAddressService.UpdateUserMailAddress(userMailDTO);
+        usersMailAddressService.UpdateUserMailAddress(userMailDTO);
         ApiResponse apiResponse = ApiResponse.success(null);
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
+
     @GetMapping("/user/{userId}/mail-address")
     public ResponseEntity GetMailAddress(@PathVariable String userId) {
-        if(UserIdValidation.CheckUserId(userId) == false){
+        if (UserIdValidator.CheckUserId(userId) == false || usersInfoService.GetUserInfo(userId) == null) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        UserMailAddressVO userMailAddressVO = userMailAddressService.getUserMailAddress(userId);
-        if(userMailAddressVO != null){
-            ApiResponse apiResponse = ApiResponse.success(userMailAddressVO);
-            return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-        } else{
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
+        UserMailAddressVO userMailAddressVO = usersMailAddressService.GetUserMailAddress(userId);
+        ApiResponse apiResponse = ApiResponse.success(userMailAddressVO);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+
     }
 }

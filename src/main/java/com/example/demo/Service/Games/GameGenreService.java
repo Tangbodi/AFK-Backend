@@ -1,6 +1,6 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Mapper.Repository.GameGenreRepository;
+import com.example.demo.Mapper.Repository.GameGenresRepository;
 import com.example.demo.Model.Entity.GameGenre;
 import com.example.demo.Model.VO.GameGenreVO;
 import org.slf4j.Logger;
@@ -15,23 +15,38 @@ import java.util.List;
 public class GameGenreService {
     private static final Logger logger = LoggerFactory.getLogger(GameGenreService.class);
     @Autowired
-    private GameGenreRepository gameGenreRepository;
-    public List<GameGenreVO> GetAllGameGenres(){
-        logger.info("Getting all game genres");
-        try{
-            List<GameGenre> gameGenreList = gameGenreRepository.findAll();
+    private GameGenresRepository gameGenresRepository;
+
+    public List<GameGenreVO> GetAllGameGenres() {
+        logger.info("Getting all game genres: {}");
+        try {
+            List<GameGenre> gameGenreList = gameGenresRepository.findAll();
             List<GameGenreVO> gameGenreVOList = new ArrayList<>();
-            for(GameGenre gameGenre : gameGenreList){
+            for (GameGenre gameGenre : gameGenreList) {
                 GameGenreVO gameGenreVO = new GameGenreVO();
                 gameGenreVO.setId(gameGenre.getId());
                 gameGenreVO.setGenreName(gameGenre.getGenreName());
                 gameGenreVOList.add(gameGenreVO);
             }
             return gameGenreVOList;
-        }catch (Exception e){
-            logger.error("Failed to get all game genres",e);
+        } catch (Exception e) {
+            logger.error("Failed to get all game genres: {}", e.getMessage(), e);
         }
         return null;
     }
 
+    public boolean isGameGenreExist(Byte genreId) {
+        logger.info("Checking if game genre exists:::genreId:::" + genreId);
+        try {
+            GameGenre gameGenre = gameGenresRepository.findById(genreId).orElse(null);
+            if (gameGenre != null) {
+                return true;
+            } else {
+//                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to check if game genre exists: {}", e.getMessage(), e);
+        }
+        return false;
+    }
 }

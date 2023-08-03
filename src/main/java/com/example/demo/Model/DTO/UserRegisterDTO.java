@@ -7,10 +7,12 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.Instant;
 
 
 @Data
 public class UserRegisterDTO {
+    private String userId;
     @NotBlank(message = "Username is required")
     @Length(min = 1, max = 30, message = "Username length not eligible")
     private String username;
@@ -22,16 +24,20 @@ public class UserRegisterDTO {
     @Length(min =8, max = 30, message = "Password length not eligible")
     @ValidPassword
     private String password;
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Confirm password is required")
     @Length(min =8, max = 30, message = "Password length not eligible")
     @ValidPassword
     private String confirmPassword;
+    private Instant createdAt;
     @java.lang.Override
     public java.lang.String toString() {
         return "UserRegisterDTO{" +
+                " userId='" + getUserId() + "'" +
                 " username='" + getUsername() + "'" +
                 " email='" + getEmail() + "'" +
                 " password='" + getPassword() + "'" +
+                " confirmPassword='" + getConfirmPassword() + "'" +
+                " createdAt='" + getCreatedAt() + "'" +
                 "}";
     }
 }
