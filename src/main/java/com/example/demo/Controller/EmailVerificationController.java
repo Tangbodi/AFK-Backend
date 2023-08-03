@@ -1,9 +1,8 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Service.Redis.RedisEmailService;
-import com.example.demo.Service.Redis.RedisUsernameService;
-import com.example.demo.Service.UsersInfo.UsersInfoService;
-import com.example.demo.Service.UsersVerification.UsersVerificationService;
+import com.example.demo.Service.UsersInfo.UserInfoService;
+import com.example.demo.Service.UsersVerification.UserVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +20,11 @@ import java.io.IOException;
 public class EmailVerificationController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
     @Autowired
-    private UsersVerificationService usersVerificationService;
+    private UserVerificationService userVerificationService;
     @Autowired
     private RedisEmailService redisEmailService;
     @Autowired
-    private UsersInfoService usersInfoService;
+    private UserInfoService userInfoService;
 
     @GetMapping("/user/register/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
@@ -33,7 +32,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if (usersVerificationService.GetByToken(token)) {
+        if (userVerificationService.GetByToken(token)) {
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
@@ -53,7 +52,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if (usersVerificationService.GetByToken(token)) {
+        if (userVerificationService.GetByToken(token)) {
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
@@ -74,8 +73,8 @@ public class EmailVerificationController {
         String redirectURL;
         if(redisEmailService.CheckUpdateEmailCache(token)) {
             String newEmail = redisEmailService.GetEmailByToken(token);
-            usersVerificationService.UpdateUserEmail(userId,newEmail);
-            usersInfoService.UpdateUserEmail(userId,newEmail);
+            userVerificationService.UpdateUserEmail(userId,newEmail);
+            userInfoService.UpdateUserEmail(userId,newEmail);
             redisEmailService.DeleteEmailByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
         }else{

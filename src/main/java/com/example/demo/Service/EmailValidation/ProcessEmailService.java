@@ -1,7 +1,7 @@
 package com.example.demo.Service.EmailValidation;
 
 import com.example.demo.Model.DTO.UserRegisterDTO;
-import com.example.demo.Service.UsersVerification.UsersVerificationService;
+import com.example.demo.Service.UsersVerification.UserVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class ProcessEmailService {
     private static final Logger logger = LoggerFactory.getLogger(ProcessEmailService.class);
     @Lazy
     @Autowired
-    private UsersVerificationService usersVerificationService;
+    private UserVerificationService userVerificationService;
     @Autowired
     private SendEmailService sendEmailService;
 
@@ -29,7 +29,7 @@ public class ProcessEmailService {
             UUID uuid = UUID.randomUUID();
             String token = uuid.toString();
 //            siteURL = siteURL.replace("http://", "https://");
-            if (usersVerificationService.SetUserRegistrationVerificationToken(token, userId, userRegisterDTO)) {
+            if (userVerificationService.SetUserRegistrationVerificationToken(token, userId, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();
                 String siteURL = request.getRequestURL().toString();
                 siteURL.replace(request.getServletPath(), "");

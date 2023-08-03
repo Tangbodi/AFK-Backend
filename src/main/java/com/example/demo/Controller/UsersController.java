@@ -8,10 +8,10 @@ import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
-import com.example.demo.Service.UsersAuth.UsersAuthService;
-import com.example.demo.Service.UsersInfo.UsersInfoService;
-import com.example.demo.Service.UsersResetPassword.UsersResetPasswordService;
-import com.example.demo.Service.UsersVerification.UsersVerificationService;
+import com.example.demo.Service.UsersAuth.UserAuthService;
+import com.example.demo.Service.UsersInfo.UserInfoService;
+import com.example.demo.Service.UsersResetPassword.UserResetPasswordService;
+import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.PasswordValidator;
 import com.example.demo.Util.UsernameValidator;
@@ -39,13 +39,13 @@ public class UsersController {
     @Autowired
     private ProcessEmailService processEmailService;
     @Autowired
-    private UsersAuthService usersAuthService;
+    private UserAuthService userAuthService;
     @Autowired
-    private UsersInfoService usersInfoService;
+    private UserInfoService userInfoService;
     @Autowired
-    private UsersVerificationService usersVerificationService;
+    private UserVerificationService userVerificationService;
     @Autowired
-    private UsersResetPasswordService usersResetPasswordService;
+    private UserResetPasswordService userResetPasswordService;
     @Autowired
     private RedisUsernameService redisService;
 
@@ -111,7 +111,7 @@ public class UsersController {
             //0 --- User found but not verified
             //1 --- User found and verified
             //2 --- User found but blocked
-            int res = usersAuthService.CheckUserExistsAndAuth(userLoginDTO.getUsername(), request);
+            int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO.getUsername(), request);
             if (res == -2) {
                 ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -125,7 +125,7 @@ public class UsersController {
                 ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             } else {
-                UserInfoVO userInfoVO = usersInfoService.GetUserInfo(userLoginDTO.getUsername());
+                UserInfoVO userInfoVO = userInfoService.GetUserInfo(userLoginDTO.getUsername());
                 ApiResponse<UserInfoVO> apiResponse = ApiResponse.success(userInfoVO);
                 return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
             }

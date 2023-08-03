@@ -1,0 +1,134 @@
+package com.example.demo.Service.UsersInfo;
+
+import com.example.demo.Mapper.Repository.UsersInfoRepository;
+import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.Entity.UsersInfo;
+import com.example.demo.Model.VO.UserInfoVO;
+import com.example.demo.Service.Redis.RedisEmailService;
+import com.example.demo.Service.UsersVerification.UserVerificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import java.time.Instant;
+
+@Service
+public class UserInfoService {
+    private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
+    @Autowired
+    private UsersInfoRepository usersInfoRepository;
+    @Autowired
+    private RedisEmailService redisEmailService;
+    @Lazy
+    @Autowired
+    private UserVerificationService userVerificationService;
+
+    public UsersInfo CheckUsernameExists(String username) {
+        logger.info("Checking if username exists: {}", username);
+        try {
+            UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
+            if (usersInfo != null) {
+                logger.info("Username: {}" + usersInfo.getUsername());
+                return usersInfo;
+            } else {
+                logger.info("Username does not exist: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to check username: {}", e.getMessage(),e);
+        }
+        return null;
+    }
+
+    public UsersInfo CheckEmailExists(String email) {
+        logger.info("Checking if email exists: {}", email);
+        try {
+            UsersInfo usersInfo = usersInfoRepository.findByEmail(email).orElse(null);
+            if (usersInfo != null) {
+                logger.info("Email: {}" + usersInfo.getEmail());
+                return usersInfo;
+            } else {
+                logger.info("Email does not exist: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to check email: {}", e.getMessage(),e);
+        }
+        return null;
+    }
+
+    @Transactional
+    public void SetUserInfo(UserRegisterDTO userRegisterDTO) {
+        logger.info("Setting up UsersInfo: {}");
+        try {
+            UsersInfo usersInfo = new UsersInfo();
+            usersInfo.setId(userRegisterDTO.getUserId());
+            usersInfo.setUsername(userRegisterDTO.getUsername());
+            usersInfo.setEmail(userRegisterDTO.getEmail());
+            usersInfo.setCreatedAt(userRegisterDTO.getCreatedAt());
+            usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
+            usersInfoRepository.save(usersInfo);
+        } catch (Exception e) {
+            logger.error("Failed to set UsersInfo: {}", e.getMessage(),e);
+        }
+    }
+
+    public UserInfoVO GetUserInfo(String userId) {
+        logger.info("Getting UsersInfo: {}" + userId);
+        try {
+            UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                UserInfoVO userInfoVO = new UserInfoVO();
+                userInfoVO.setUserId(usersInfo.getId());
+                userInfoVO.setUsername(usersInfo.getUsername());
+                userInfoVO.setEmail(usersInfo.getEmail());
+                userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
+                userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
+                userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
+                return userInfoVO;
+            } else {
+                logger.info("UserInfo does not exist: {}" );
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
+        }
+        return null;
+    }
+
+    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
+        logger.info("Creating redis cache for update email: {}" + newEmail);
+        try {
+            String token = redisEmailService.SetUpdateEmailCache(newEmail);
+            userVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
+        } catch (Exception e) {
+            logger.error("Failed to create redis cache for update email: {}", e.getMessage(),e);
+        }
+    }
+
+    @Transactional
+    public boolean UpdateUserEmail(String userId, String email) {
+        logger.info("Updating email: {}" + userId + "::::::" + email);
+        try {
+            UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                logger.info("Old email: {}" + usersInfo.getEmail());
+                usersInfo.setEmail(email);
+                logger.info("New email: {}" + email);
+                usersInfo.setModifiedAt(Instant.now());
+                usersInfoRepository.save(usersInfo);
+                logger.info("Updated email successfully: {}");
+                return true;
+            } else {
+                logger.info("Failed to update email: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update UsersInfo: {}", e.getMessage(),e);
+        }
+        return false;
+    }
+}

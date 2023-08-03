@@ -41,9 +41,9 @@ public class PostService {
             Post post = new Post();
             post.setId(uuid);
             post.setTitle(postDTO.getTitle());
-//            int start = textHTML.indexOf("<body>") + 6;
-//            int end = textHTML.indexOf("</body>");
-//            textHTML = textHTML.substring(start, end);
+            int start = textHTML.indexOf("<body>") + 6;
+            int end = textHTML.indexOf("</body>");
+            textHTML = textHTML.substring(start, end);
             logger.info("Removed body tag from textHTML: {}"+textHTML);
             post.setTextRender(textHTML);
             post.setIpvFour(postDTO.getIpvFour());
@@ -129,5 +129,20 @@ public class PostService {
         } catch (Exception e) {
             logger.error("Failed to set post genre map: {}", e.getMessage(),e);
         }
+    }
+    public boolean GetPost(String postId){
+        logger.info("Getting post: {}");
+        try{
+            Post post = postsRepository.findById(postId).orElse(null);
+            if(post != null){
+                logger.info("Post found: {}");
+                return true;
+            }else{
+                logger.info("Post not found: {}");
+            }
+        }catch (Exception e){
+            logger.error("Failed to get post: {}", e.getMessage(),e);
+        }
+        return false;
     }
 }

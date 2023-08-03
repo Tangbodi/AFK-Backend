@@ -1,112 +1,58 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "post_comments")
 public class PostComment {
     @Id
+    @Size(max = 36)
     @Column(name = "comment_id", nullable = false, length = 36)
     private String id;
 
+    @Size(max = 36)
+    @NotNull
     @Column(name = "post_id", nullable = false, length = 36)
     private String postId;
 
-    @Column(name = "tag_id", nullable = false)
-    private Byte tagId;
+    @NotNull
+    @Column(name = "genre_id", nullable = false)
+    private Byte genreId;
 
+    @Size(max = 4095)
+    @NotNull
     @Column(name = "content", nullable = false, length = 4095)
     private String content;
 
+    @Size(max = 36)
+    @NotNull
     @Column(name = "from_uid", nullable = false, length = 36)
     private String fromUid;
 
     @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")
     private Long ipvFour;
 
+    @Size(max = 16)
     @Column(name = "ipv_six", length = 16)
     private String ipvSix;
 
+    @NotNull
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @NotNull
     @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
-
-    public String getCommentId() {
-        return id;
-    }
-
-    public void setCommentId(String commentId) {
-        this.id = commentId;
-    }
-
-    public String getPostId() {
-        return postId;
-    }
-
-    public void setPostId(String postId) {
-        this.postId = postId;
-    }
-
-    public Byte getTagId() {
-        return tagId;
-    }
-
-    public void setTagId(Byte tagId) {
-        this.tagId = tagId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getFromUid() {
-        return fromUid;
-    }
-
-    public void setFromUid(String fromUid) {
-        this.fromUid = fromUid;
-    }
-
-    public Long getIpvFour() {
-        return ipvFour;
-    }
-
-    public void setIpvFour(Long ipvFour) {
-        this.ipvFour = ipvFour;
-    }
-
-    public String getIpvSix() {
-        return ipvSix;
-    }
-
-    public void setIpvSix(String ipvSix) {
-        this.ipvSix = ipvSix;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getModifiedAt() {
-        return modifiedAt;
-    }
-
-    public void setModifiedAt(Instant modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
 
 }

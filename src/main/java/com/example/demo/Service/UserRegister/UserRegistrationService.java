@@ -5,10 +5,10 @@ import com.example.demo.Mapper.Repository.UsersRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
-import com.example.demo.Service.UsersAuth.UsersAuthService;
-import com.example.demo.Service.UsersInfo.UsersMailAddressService;
-import com.example.demo.Service.UsersInfo.UsersInfoService;
-import com.example.demo.Service.UsersPostsSetting.UsersPostsSettingService;
+import com.example.demo.Service.UsersAuth.UserAuthService;
+import com.example.demo.Service.UsersInfo.UserMailAddressService;
+import com.example.demo.Service.UsersInfo.UserInfoService;
+import com.example.demo.Service.UsersPostsSetting.UserPostSettingService;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,21 +27,21 @@ public class UserRegistrationService {
     @Autowired
     private UsersInfoRepository usersInfoRepository;
     @Autowired
-    private UsersInfoService usersInfoService;
+    private UserInfoService userInfoService;
     @Autowired
-    private UsersAuthService usersAuthService;
+    private UserAuthService userAuthService;
     @Autowired
-    private UsersPostsSettingService usersPostsSettingService;
+    private UserPostSettingService userPostSettingService;
     @Autowired
-    private UsersMailAddressService usersMailAddressService;
+    private UserMailAddressService userMailAddressService;
 
     public UsersInfo CheckUsernameExists(String username) {
-        UsersInfo usersInfo = usersInfoService.CheckUsernameExists(username);
+        UsersInfo usersInfo = userInfoService.CheckUsernameExists(username);
         return usersInfo;
     }
 
     public UsersInfo CheckEmailExists(String email) {
-        UsersInfo usersInfo = usersInfoService.CheckEmailExists(email);
+        UsersInfo usersInfo = userInfoService.CheckEmailExists(email);
         return usersInfo;
     }
 
@@ -62,10 +62,10 @@ public class UserRegistrationService {
             user.setPassword(encodedPassword);
             user.setCreatedAt(createdAt);
             user.setModifiedAt(createdAt);
-            usersAuthService.SetUsersAuth(userRegisterDTO);
-            usersInfoService.SetUserInfo(userRegisterDTO);
-            usersMailAddressService.SetUserMailAddress(userRegisterDTO);
-            usersPostsSettingService.SaveSetting(userRegisterDTO);
+            userAuthService.SetUsersAuth(userRegisterDTO);
+            userInfoService.SetUserInfo(userRegisterDTO);
+            userMailAddressService.SetUserMailAddress(userRegisterDTO);
+            userPostSettingService.SaveSetting(userRegisterDTO);
             return usersRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);
