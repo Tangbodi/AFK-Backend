@@ -1,6 +1,7 @@
 package com.example.demo.Service.UsersInfo;
 
 import com.example.demo.Mapper.Repository.UsersInfoRepository;
+import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.VO.UserInfoVO;
@@ -75,20 +76,50 @@ public class UserInfoService {
         }
     }
 
-    public UserInfoVO GetUserInfo(String userId) {
+    public UserInfoDTO GetUserInfoByUsername(String username) {
+        logger.info("Getting UsersInfo: {}" + username);
+        try {
+            UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                userInfoDTO.setUserId(usersInfo.getId());
+                userInfoDTO.setUsername(usersInfo.getUsername());
+                userInfoDTO.setEmail(usersInfo.getEmail());
+                userInfoDTO.setAvatarUrl(usersInfo.getAvatarUrl());
+                userInfoDTO.setCreatedAt(usersInfo.getCreatedAt());
+                userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
+                return userInfoDTO;
+            } else {
+                logger.info("UserInfo does not exist: {}" );
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
+        }
+        return null;
+    }
+    public UserInfoDTO GetUserInfoByUserId(String userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
             UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
-                UserInfoVO userInfoVO = new UserInfoVO();
-                userInfoVO.setUserId(usersInfo.getId());
-                userInfoVO.setUsername(usersInfo.getUsername());
-                userInfoVO.setEmail(usersInfo.getEmail());
-                userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
-                userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
-                userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
-                return userInfoVO;
+//                UserInfoVO userInfoVO = new UserInfoVO();
+//                userInfoVO.setUsername(usersInfo.getUsername());
+//                userInfoVO.setEmail(usersInfo.getEmail());
+//                userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
+//                userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
+//                userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
+//                return userInfoVO;
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                userInfoDTO.setUserId(usersInfo.getId());
+                userInfoDTO.setUsername(usersInfo.getUsername());
+                userInfoDTO.setEmail(usersInfo.getEmail());
+                userInfoDTO.setAvatarUrl(usersInfo.getAvatarUrl());
+                userInfoDTO.setCreatedAt(usersInfo.getCreatedAt());
+                userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
+                return userInfoDTO;
             } else {
                 logger.info("UserInfo does not exist: {}" );
             }
@@ -130,5 +161,14 @@ public class UserInfoService {
             logger.error("Failed to update UsersInfo: {}", e.getMessage(),e);
         }
         return false;
+    }
+    public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO){
+        UserInfoVO userInfoVO = new UserInfoVO();
+        userInfoVO.setUsername(userInfoDTO.getUsername());
+        userInfoVO.setEmail(userInfoDTO.getEmail());
+        userInfoVO.setAvatar_url(userInfoDTO.getAvatarUrl());
+        userInfoVO.setCreatedAt(userInfoDTO.getCreatedAt());
+        userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
+        return userInfoVO;
     }
 }

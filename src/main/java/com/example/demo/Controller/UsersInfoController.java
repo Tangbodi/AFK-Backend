@@ -2,25 +2,29 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserEmailDTO;
+import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Model.VO.UserMailAddressVO;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
-import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
+import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
-import com.example.demo.Util.UserIdValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @RestController
@@ -36,27 +40,28 @@ public class UsersInfoController {
     @Autowired
     private UserMailAddressService userMailAddressService;
 
-    @GetMapping("/user/{userId}/user-info")
-    public ResponseEntity GetUserInfo(@PathVariable String userId) throws IOException {
-        if (UserIdValidator.CheckUserId(userId) == false) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
-        UserInfoVO userInfoVO = userInfoService.GetUserInfo(userId);
-        if (userInfoVO == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @GetMapping("/user/login/user-info/username")
+    public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
+        logger.info("GetUserInfo:::session:::" + session);
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         } else {
-            ApiResponse apiResponse = ApiResponse.success(userInfoVO);
-            return ResponseEntity.ok(apiResponse);
+            //do nothing
         }
+        UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
+        UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
+        ApiResponse apiResponse = ApiResponse.success(userInfoVO);
+        return ResponseEntity.ok(apiResponse);
     }
 
-    @PutMapping("/user/{userId}/update-email")
-    public ResponseEntity UpdateUserInfo(@PathVariable String userId, @Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request) {
-        if (UserIdValidator.CheckUserId(userId) == false) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @PutMapping("/user/login/user-info/username/update-email")
+    public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
         String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
         logger.info("Encoded email: {}", encodedEmail);
@@ -75,11 +80,12 @@ public class UsersInfoController {
         }
     }
 
-    @PutMapping("/user/{userId}/update-mail-address")
-    public ResponseEntity UpdateUserMailAddress(@PathVariable String userId, @RequestBody UserMailDTO userMailDTO) throws IOException {
-        if (UserIdValidator.CheckUserId(userId) == false || userInfoService.GetUserInfo(userId) == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @PutMapping("/user/login/user-info/username/update-mail-address")
+    public ResponseEntity UpdateUserMailAddress(@RequestBody UserMailDTO userMailDTO, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
         userMailDTO.setUserId(userId);
         userMailAddressService.UpdateUserMailAddress(userMailDTO);
@@ -87,11 +93,12 @@ public class UsersInfoController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
-    @GetMapping("/user/{userId}/mail-address")
-    public ResponseEntity GetMailAddress(@PathVariable String userId) {
-        if (UserIdValidator.CheckUserId(userId) == false || userInfoService.GetUserInfo(userId) == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @GetMapping("/user/login/user-info/username/mail-address")
+    public ResponseEntity GetMailAddress(HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
         UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
         ApiResponse apiResponse = ApiResponse.success(userMailAddressVO);

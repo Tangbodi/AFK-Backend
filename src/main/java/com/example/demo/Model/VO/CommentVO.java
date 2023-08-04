@@ -5,7 +5,8 @@ import lombok.Data;
 import java.time.Instant;
 
 @Data
-public class PostVO {
+public class CommentVO {
+    private String commentId;
     private String postId;
     private Instant createdAt;
 }

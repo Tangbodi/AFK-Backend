@@ -13,13 +13,13 @@ public class PostReply {
     @Column(name = "reply_id", nullable = false, length = 36)
     private String id;
 
-    @Column(name = "comment_id", nullable = false, length = 36)
+    @Column(name = "comment_id", length = 36)
     private String commentId;
 
-    @Column(name = "parent_reply_id", nullable = false, length = 36)
+    @Column(name = "parent_reply_id", length = 36)
     private String parentReplyId;
 
-    @Column(name = "reply_type", nullable = false)
+    @Column(name = "reply_type")
     private Boolean replyType = false;
 
     @Column(name = "content", nullable = false, length = 4095)

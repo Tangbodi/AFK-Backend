@@ -1,11 +1,14 @@
 package com.example.demo.Service.Posts;
 
+import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Mapper.Repository.PostsGenresRepository;
 import com.example.demo.Mapper.Repository.PostsInfoRepository;
-import com.example.demo.Mapper.Repository.PostsRepository;
 import com.example.demo.Mapper.Repository.PostsUsersMapRepository;
 import com.example.demo.Model.DTO.PostDTO;
-import com.example.demo.Model.Entity.*;
+import com.example.demo.Model.Entity.Post;
+import com.example.demo.Model.Entity.PostsInfo;
+import com.example.demo.Model.Entity.PostsUsersMap;
+import com.example.demo.Model.Entity.PostsUsersMapId;
 import com.example.demo.Model.VO.PostVO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,7 +25,7 @@ public class PostService {
     private static final Logger logger = LoggerFactory.getLogger(PostService.class);
 
     @Autowired
-    private PostsRepository postsRepository;
+    private PostRepository postRepository;
     @Autowired
     private PostsInfoRepository postsInfoRepository;
     @Autowired
@@ -44,25 +47,21 @@ public class PostService {
             int start = textHTML.indexOf("<body>") + 6;
             int end = textHTML.indexOf("</body>");
             textHTML = textHTML.substring(start, end);
-            logger.info("Removed body tag from textHTML: {}"+textHTML);
+            logger.info("Removed body tag from textHTML: {}" + textHTML);
             post.setTextRender(textHTML);
             post.setIpvFour(postDTO.getIpvFour());
             post.setIpvSix(postDTO.getIpvSix());
             post.setCreatedAt(postDTO.getCreatedAt());
             post.setModifiedAt(postDTO.getCreatedAt());
-            if (postsRepository.save(post) != null) {
+            if (postRepository.save(post) != null) {
                 logger.info("Post saved successfully: {}");
                 SetPostInfo(postDTO);
                 SetPostUserMap(postDTO);
-                SetPostGenreMap(postDTO);
+//                SetPostGenreMap(postDTO);
             } else {
                 logger.info("Failed to save post: {}");
             }
-            PostVO postVO = new PostVO();
-            postVO.setUserId(postDTO.getUserId());
-            postVO.setPostId(postDTO.getPostId());
-            postVO.setGenreId(postDTO.getGenreId());
-            postVO.setCreatedAt(postDTO.getCreatedAt());
+            PostVO postVO = TransferToVO(postDTO);
             return postVO;
         } catch (Exception e) {
             logger.error("Failed to set post: {}", e);
@@ -86,7 +85,7 @@ public class PostService {
                 logger.info("Failed to save post info: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to set post info: {}", e.getMessage(),e);
+            logger.error("Failed to set post info: {}", e.getMessage(), e);
         }
     }
 
@@ -107,41 +106,48 @@ public class PostService {
                 logger.info("Failed to save post info: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to set post info: {}", e.getMessage(),e);
+            logger.error("Failed to set post info: {}", e.getMessage(), e);
         }
     }
-    @Transactional
-    public void SetPostGenreMap(PostDTO postDTO) {
-        logger.info("Setting post genre map: {}");
-        try {
-            PostsGenresMapId postsGenresMapId = new PostsGenresMapId();
-            PostsGenresMap postsGenresMap = new PostsGenresMap();
-            postsGenresMapId.setPostId(postDTO.getPostId());
-            postsGenresMapId.setGenreId(postDTO.getGenreId());
-            postsGenresMap.setId(postsGenresMapId);
-            postsGenresMap.setCreatedAt(postDTO.getCreatedAt());
-            postsGenresMap.setModifiedAt(postDTO.getCreatedAt());
-            if(postsGenresRepository.save(postsGenresMap)!=null){
-                logger.info("Post genre map saved successfully: {}");
-            }else{
-                logger.info("Failed to save post genre map: {}");
-            }
-        } catch (Exception e) {
-            logger.error("Failed to set post genre map: {}", e.getMessage(),e);
-        }
+
+    public PostVO TransferToVO(PostDTO postDTO) {
+        PostVO postVO = new PostVO();
+        postVO.setPostId(postDTO.getPostId());
+        postVO.setCreatedAt(postDTO.getCreatedAt());
+        return postVO;
     }
-    public boolean GetPost(String postId){
+
+    //    @Transactional
+//    public void SetPostGenreMap(PostDTO postDTO) {
+//        logger.info("Setting post genre map: {}");
+//        try {
+//            PostsGenresMapId postsGenresMapId = new PostsGenresMapId();
+//            PostsGenresMap postsGenresMap = new PostsGenresMap();
+//            postsGenresMapId.setPostId(postDTO.getPostId());
+//            postsGenresMap.setId(postsGenresMapId);
+//            postsGenresMap.setCreatedAt(postDTO.getCreatedAt());
+//            postsGenresMap.setModifiedAt(postDTO.getCreatedAt());
+//            if(postsGenresRepository.save(postsGenresMap)!=null){
+//                logger.info("Post genre map saved successfully: {}");
+//            }else{
+//                logger.info("Failed to save post genre map: {}");
+//            }
+//        } catch (Exception e) {
+//            logger.error("Failed to set post genre map: {}", e.getMessage(),e);
+//        }
+//    }
+    public boolean GetPost(String postId) {
         logger.info("Getting post: {}");
-        try{
-            Post post = postsRepository.findById(postId).orElse(null);
-            if(post != null){
+        try {
+            Post post = postRepository.findById(postId).orElse(null);
+            if (post != null) {
                 logger.info("Post found: {}");
                 return true;
-            }else{
+            } else {
                 logger.info("Post not found: {}");
             }
-        }catch (Exception e){
-            logger.error("Failed to get post: {}", e.getMessage(),e);
+        } catch (Exception e) {
+            logger.error("Failed to get post: {}", e.getMessage(), e);
         }
         return false;
     }

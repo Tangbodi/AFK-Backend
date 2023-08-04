@@ -10,7 +10,6 @@ import java.time.Instant;
 public class PostDTO {
     private String userId;
     private String postId;
-    private Byte genreId;
     private String username;
     @NotBlank(message = "Title is required")
     @Length(max = 255, message = "Title length not eligible")

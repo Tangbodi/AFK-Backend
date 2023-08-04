@@ -26,10 +26,6 @@ public class PostComment {
     @Column(name = "post_id", nullable = false, length = 36)
     private String postId;
 
-    @NotNull
-    @Column(name = "genre_id", nullable = false)
-    private Byte genreId;
-
     @Size(max = 4095)
     @NotNull
     @Column(name = "content", nullable = false, length = 4095)

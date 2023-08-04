@@ -1,7 +1,7 @@
 package com.example.demo.Service.UserRegister;
 
 import com.example.demo.Mapper.Repository.UsersInfoRepository;
-import com.example.demo.Mapper.Repository.UsersRepository;
+import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class UserRegistrationService {
     private static final Logger logger = LoggerFactory.getLogger(UserRegistrationService.class);
     @Autowired
-    private UsersRepository usersRepository;
+    private UserRepository userRepository;
     @Autowired
     private UsersInfoRepository usersInfoRepository;
     @Autowired
@@ -66,7 +66,7 @@ public class UserRegistrationService {
             userInfoService.SetUserInfo(userRegisterDTO);
             userMailAddressService.SetUserMailAddress(userRegisterDTO);
             userPostSettingService.SaveSetting(userRegisterDTO);
-            return usersRepository.save(user);
+            return userRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);
         }

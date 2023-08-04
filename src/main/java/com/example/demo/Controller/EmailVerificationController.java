@@ -26,7 +26,7 @@ public class EmailVerificationController {
     @Autowired
     private UserInfoService userInfoService;
 
-    @GetMapping("/user/register/email-validation")
+    @GetMapping("/user/registration/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();

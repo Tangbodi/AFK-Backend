@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class GamesController {
+public class GameController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
     @Autowired
     private GameIconService gameIconService;
@@ -42,14 +42,14 @@ public class GamesController {
         }
     }
 
-    @GetMapping("/all-game-genres")
+    @GetMapping("/all-games-genres")
     public ResponseEntity GetAllGameGenres() {
         List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();
         ApiResponse apiResponse = ApiResponse.success(gameGenreVOList);
         return ResponseEntity.ok(apiResponse);
     }
 
-    @GetMapping("/game-genre/{genreId}")
+    @GetMapping("/all-games-genres/{genreId}")
     public ResponseEntity GetGameUnderOneGenre(@PathVariable Byte genreId) {
         if(!GenreValidator.CheckGenreId(genreId)){
             ApiResponse errorResponse = ApiResponse.error(404, "Genre not found");
