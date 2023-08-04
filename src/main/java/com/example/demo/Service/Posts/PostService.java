@@ -1,15 +1,13 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.PostRepository;
-import com.example.demo.Mapper.Repository.PostsGenresRepository;
-import com.example.demo.Mapper.Repository.PostsInfoRepository;
-import com.example.demo.Mapper.Repository.PostsUsersMapRepository;
+import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.Post;
 import com.example.demo.Model.Entity.PostsInfo;
 import com.example.demo.Model.Entity.PostsUsersMap;
 import com.example.demo.Model.Entity.PostsUsersMapId;
-import com.example.demo.Model.VO.PostVO;
+import com.example.demo.Model.VO.PostSavedVO;
+import com.example.demo.Model.VO.ShowPostVO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -32,9 +30,10 @@ public class PostService {
     private PostsUsersMapRepository postsUsersMapRepository;
     @Autowired
     private PostsGenresRepository postsGenresRepository;
-
+    @Autowired
+    private UsersInfoRepository usersInfoRepository;
     @Transactional
-    public PostVO EditPost(PostDTO postDTO) {
+    public PostSavedVO EditPost(PostDTO postDTO) {
         logger.info("Setting post for userId: {}" + postDTO.getUserId());
         try {
             Document document = Jsoup.parse(postDTO.getTextRender());
@@ -61,8 +60,8 @@ public class PostService {
             } else {
                 logger.info("Failed to save post: {}");
             }
-            PostVO postVO = TransferToVO(postDTO);
-            return postVO;
+            PostSavedVO postSavedVO = TransferToPostSavedVO(postDTO);
+            return postSavedVO;
         } catch (Exception e) {
             logger.error("Failed to set post: {}", e);
         }
@@ -110,45 +109,52 @@ public class PostService {
         }
     }
 
-    public PostVO TransferToVO(PostDTO postDTO) {
-        PostVO postVO = new PostVO();
-        postVO.setPostId(postDTO.getPostId());
-        postVO.setCreatedAt(postDTO.getCreatedAt());
-        return postVO;
+    public PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
+        PostSavedVO postSavedVO = new PostSavedVO();
+        postSavedVO.setPostId(postDTO.getPostId());
+        postSavedVO.setCreatedAt(postDTO.getCreatedAt());
+        return postSavedVO;
     }
 
-    //    @Transactional
-//    public void SetPostGenreMap(PostDTO postDTO) {
-//        logger.info("Setting post genre map: {}");
-//        try {
-//            PostsGenresMapId postsGenresMapId = new PostsGenresMapId();
-//            PostsGenresMap postsGenresMap = new PostsGenresMap();
-//            postsGenresMapId.setPostId(postDTO.getPostId());
-//            postsGenresMap.setId(postsGenresMapId);
-//            postsGenresMap.setCreatedAt(postDTO.getCreatedAt());
-//            postsGenresMap.setModifiedAt(postDTO.getCreatedAt());
-//            if(postsGenresRepository.save(postsGenresMap)!=null){
-//                logger.info("Post genre map saved successfully: {}");
-//            }else{
-//                logger.info("Failed to save post genre map: {}");
-//            }
-//        } catch (Exception e) {
-//            logger.error("Failed to set post genre map: {}", e.getMessage(),e);
-//        }
-//    }
-    public boolean GetPost(String postId) {
+
+    public ShowPostVO GetPost(String postId) {
         logger.info("Getting post: {}");
         try {
             Post post = postRepository.findById(postId).orElse(null);
             if (post != null) {
                 logger.info("Post found: {}");
-                return true;
+                ShowPostVO showPostVO = TransferToShowPostVO(post);
+                return showPostVO;
             } else {
                 logger.info("Post not found: {}");
             }
         } catch (Exception e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
         }
-        return false;
+        return null;
+    }
+    public ShowPostVO TransferToShowPostVO(Post post) {
+        logger.info("Transferring post to VO: {}");
+        try{
+            ShowPostVO showPostVO = new ShowPostVO();
+            String postId = post.getId();
+            PostsUsersMap postsUsersMap = postsUsersMapRepository.findByPostId(postId).orElse(null);
+            if(postsUsersMap!=null){
+                String userId = postsUsersMap.getId().getUserId();
+                String username = usersInfoRepository.findById(userId).orElse(null).getUsername();
+                showPostVO.setUserName(username);
+                showPostVO.setTitle(post.getTitle());
+                showPostVO.setTextRender(post.getTextRender());
+                showPostVO.setCreatedAt(post.getCreatedAt());
+//            showPostVO.setImageURL();
+                return showPostVO;
+            } else {
+                logger.info("Post not found: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
+        }
+
+        return null;
     }
 }

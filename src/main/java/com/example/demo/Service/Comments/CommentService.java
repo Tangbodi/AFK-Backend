@@ -4,7 +4,6 @@ import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentVO;
-import com.example.demo.Model.VO.PostVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

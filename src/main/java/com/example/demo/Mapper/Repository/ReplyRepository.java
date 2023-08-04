@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public interface ReplyRepository extends JpaRepository<PostReply, String> {
     @Query(value = "SELECT \n" +
-            "r.comment_id, r.content,  fm.username as from_username, tm.username as to_username, r.created_at\n" +
+            "r.comment_id, r.content, r.reply_id, fm.username as from_username, tm.username as to_username, r.created_at\n" +
             "FROM afk.post_replies r\n" +
             "JOIN afk.post_comments c ON r.comment_id = c.comment_id\n" +
             "left join vw_userid_username_mapping fm\n" +
