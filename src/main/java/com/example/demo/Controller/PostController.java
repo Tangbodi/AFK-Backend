@@ -93,6 +93,7 @@ public class PostController {
             System.out.println("-------------------------");
         }
         System.out.println("commentIds: " + commentIds);
+        List<Map<Map<Short, Object>,Map<Short,Object>>> replyList;
         ApiResponse apiResponse = ApiResponse.success(commentList);
         return ResponseEntity.ok(apiResponse);
     }
