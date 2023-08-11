@@ -1,5 +1,6 @@
 package com.example.demo.Model.DTO;
 import com.example.demo.Annotation.ValidPassword;
+import com.example.demo.Annotation.ValidUsername;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -15,17 +16,16 @@ public class UserRegisterDTO {
     private String userId;
     @NotBlank(message = "Username is required")
     @Length(min = 1, max = 30, message = "Username length not eligible")
+    @ValidUsername
     private String username;
     @NotBlank(message = "Email is required")
     @Length(max = 60, message = "Email address length not eligible")
-    @Email(message = "Email is invalid")
+    @Email(message = "Invalid email address")
     private String email;
     @NotBlank(message = "Password is required")
-    @Length(min =8, max = 30, message = "Password length not eligible")
     @ValidPassword
     private String password;
     @NotBlank(message = "Confirm password is required")
-    @Length(min =8, max = 30, message = "Password length not eligible")
     @ValidPassword
     private String confirmPassword;
     private Instant createdAt;

@@ -8,6 +8,7 @@ import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Redis.RedisUsernameService;
+import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,8 +35,8 @@ import java.io.IOException;
 
 @RestController
 @Validated
-public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+public class UsersController {
+    private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     @Autowired
     private UserRegistrationService userRegistrationService;
@@ -50,6 +52,8 @@ public class UserController {
     private UserResetPasswordService userResetPasswordService;
     @Autowired
     private RedisUsernameService redisService;
+    @Autowired
+    private UserLoginService userLoginService;
 
     @PostMapping("/user/registration")
     public ResponseEntity<ApiResponse<String>> UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
@@ -58,13 +62,14 @@ public class UserController {
         logger.info("Encoded email: {}", encodedEmail);
         userRegisterDTO.setEmail(encodedEmail);
         // Check if username is valid
-        if (!UsernameValidator.ValidUsername(userRegisterDTO.getUsername())) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Username can't contain special characters");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        } else if (!PasswordValidator.isValidPassword(userRegisterDTO.getPassword())) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number and one special character");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        } else if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
+//        if (!UsernameValidator.ValidUsername(userRegisterDTO.getUsername())) {
+//            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Username can't contain special characters");
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+//        } else if (!PasswordValidator.isValidPassword(userRegisterDTO.getPassword())) {
+//            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number and one special character");
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+//        }
+        if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password and confirm password must be the same");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         } else if (redisService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
@@ -95,21 +100,28 @@ public class UserController {
     }
 
     @PostMapping("/user/login")
-    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request, HttpSession session) {
-        if (!UsernameValidator.ValidUsername(userLoginDTO.getUsername()) || !UsernameValidator.UsernameLength(userLoginDTO.getUsername())) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        } else if (!PasswordValidator.isValidPassword(userLoginDTO.getPassword()) || !PasswordValidator.PasswordLength(userLoginDTO.getPassword())) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Username or password is incorrect");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        } else {
+    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request, HttpSession session, BindingResult bindingResult) {
+
+//        if (!UsernameValidator.ValidUsername(userLoginDTO.getUsername()) || !UsernameValidator.UsernameLength(userLoginDTO.getUsername())) {
+//            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+//        } else if (!PasswordValidator.isValidPassword(userLoginDTO.getPassword()) || !PasswordValidator.PasswordLength(userLoginDTO.getPassword())) {
+//            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Username or password is incorrect");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+//        if(bindingResult.hasErrors()){
+//            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Username or password is incorrect");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+
+
             // If all checks are passed, check if user exists and user's auth via UsersAuth
             //-2 --- Internal Server Error
             //-1 --- User not found
             //0 --- User found but not verified
             //1 --- User found and verified
             //2 --- User found but blocked
-            int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO.getUsername(), request);
+            int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO, request);
             if (res == -2) {
                 ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -123,16 +135,21 @@ public class UserController {
                 ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             } else {
-                UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
-                UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
-                logger.info("Set session attribute: {}"+ "userId, "+ userInfoDTO.getUserId());
-                session.setAttribute("userId", userInfoDTO.getUserId());
-                logger.info("User logged in successfully : {}");
-                ApiResponse<UserInfoVO> apiResponse = ApiResponse.success(userInfoVO);
-                return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+                if(userLoginService.CheckPassword(userLoginDTO)){
+                    UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
+                    UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
+                    logger.info("Set session attribute: {}"+ "userId, "+ userInfoDTO.getUserId());
+                    session.setAttribute("userId", userInfoDTO.getUserId());
+                    logger.info("User logged in successfully : {}");
+                    ApiResponse<UserInfoVO> apiResponse = ApiResponse.success(userInfoVO);
+                    return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+                } else {
+                    ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but password is incorrect");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+                }
             }
         }
-    }
+
     @PostMapping("/user/logout")
     public ResponseEntity UserLogout(HttpServletRequest request)
     {

@@ -1,13 +1,17 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Mapper.Repository.PostsGamesMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.PostDTO;
+import com.example.demo.Model.VO.LatestPostVO;
+import com.example.demo.Model.VO.PopularPostVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.ShowPostVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.ApiResponse;
@@ -29,8 +33,8 @@ import java.util.*;
 
 @RestController
 @Validated
-public class PostController {
-    private static final Logger logger = LoggerFactory.getLogger(PostController.class);
+public class PostsController {
+    private static final Logger logger = LoggerFactory.getLogger(PostsController.class);
     @Autowired
     private PostService postService;
     @Autowired
@@ -43,6 +47,10 @@ public class PostController {
     private CommentService commentService;
     @Autowired
     private ReplyRepository replyRepository;
+    @Autowired
+    private PostsGamesMapRepository postsGamesMapRepository;
+    @Autowired
+    private PostInfoService postInfoService;
 
     @PostMapping(value = "/user/login/username/all-games-genres/genre/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
     public ResponseEntity EditPost(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
@@ -82,7 +90,7 @@ public class PostController {
         if (!PostIdValidator.CheckPostId(postId)) {
             ApiResponse errorResponse = ApiResponse.error(404, "Post not found");
             return ResponseEntity.status(404).body(errorResponse);
-        } else if(postService.GetPost(postId)==null){
+        } else if (postService.GetPost(postId) == null) {
             ApiResponse errorResponse = ApiResponse.error(404, "Post not found");
             return ResponseEntity.status(404).body(errorResponse);
         }
@@ -127,7 +135,7 @@ public class PostController {
         return ResponseEntity.ok(apiResponse);
     }
 
-//    @GetMapping("/user/login/username/all-games-genres/genre/post/get-reply")
+    //    @GetMapping("/user/login/username/all-games-genres/genre/post/get-reply")
 //    public ResponseEntity GetAllReplyByCommentId() {
 //        List<String> commentIds = new ArrayList<>();
 //        commentIds.add("3aa8121c-8b6e-4773-8cc3-6cefd1c32275");
@@ -138,20 +146,34 @@ public class PostController {
 //        return ResponseEntity.ok(apiResponse);
 //    }
     @GetMapping("/user/login/username/all-games-genres/genre/post/{postId}")
-    public ResponseEntity ShowPostContent(@PathVariable("postId") String postId){
-        if(!PostIdValidator.CheckPostId(postId)){
+    public ResponseEntity ShowPostContent(@PathVariable("postId") String postId) {
+        if (!PostIdValidator.CheckPostId(postId)) {
             ApiResponse errorResponse = ApiResponse.error(404, "Post not found");
             return ResponseEntity.status(404).body(errorResponse);
         } else {
             ShowPostVO showPostVO = postService.GetPost(postId);
-            if(showPostVO==null){
+            if (showPostVO == null) {
                 ApiResponse errorResponse = ApiResponse.error(404, "Post not found");
                 return ResponseEntity.status(404).body(errorResponse);
             } else {
-              //
+                //
             }
             ApiResponse apiResponse = ApiResponse.success(showPostVO);
             return ResponseEntity.ok(apiResponse);
         }
+    }
+
+    @GetMapping("/user/login/username/all-games-genres/genre/latest-posts")
+    public ResponseEntity ShowLatestPosts() {
+        List<LatestPostVO> latestPosts = postService.ShowLatestPosts();
+        ApiResponse apiResponse = ApiResponse.success(latestPosts);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/user/login/username/all-games-genres/genre/popular-posts")
+    public ResponseEntity ShowPopularPosts() {
+        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
+        ApiResponse apiResponse = ApiResponse.success(popularPosts);
+        return ResponseEntity.ok(apiResponse);
     }
 }

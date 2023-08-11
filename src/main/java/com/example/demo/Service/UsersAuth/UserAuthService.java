@@ -1,10 +1,13 @@
 package com.example.demo.Service.UsersAuth;
 
 import com.example.demo.Mapper.Repository.UsersAuthRepository;
+import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersAuth;
+import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,24 +46,26 @@ public class UserAuthService {
         }
     }
 
-    public int CheckUserExistsAndAuth(String username, HttpServletRequest request) {
-        logger.info("Checking if username exists: {}", username);
+    public int CheckUserExistsAndAuth(UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        logger.info("Checking if username exists: {}", userLoginDTO.getUsername());
         try {
-            UsersAuth usersAuth = usersAuthRepository.findByUsername(username).orElse(null);
+            UsersAuth usersAuth = usersAuthRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
             if (usersAuth == null) {
-                logger.info("Username does not exists: {}", username);
+                logger.info("Username does not exists: {}", userLoginDTO.getUsername());
                 return -1;
             } else {
-                logger.info("Checking user's verification status: {}", username);
+                logger.info("Checking user's verification status: {}", userLoginDTO.getUsername());
                 if (usersAuth.getIsVerified() && !usersAuth.getIsBlocked()) {
-                    logger.info("Username exists and verified: {}", username);
+                    logger.info("Username exists and verified: {}", userLoginDTO.getUsername());
+                    //check password
+
                     //return UsersInfo
                     return 1;
                 } else if (usersAuth.getIsBlocked()) {
-                    logger.info("Username exists but blocked: {}", username);
+                    logger.info("Username exists but blocked: {}", userLoginDTO.getUsername());
                     return 2;
                 } else {
-                    logger.info("Username exists but not verified: {}", username);
+                    logger.info("Username exists but not verified: {}", userLoginDTO.getUsername());
                     userVerificationService.SetUserLoginVerificationToken(usersAuth.getUserId(), request);
                     return 0;
                 }
