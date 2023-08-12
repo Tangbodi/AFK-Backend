@@ -11,18 +11,13 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class GameIconService {
     private static final Logger logger = LoggerFactory.getLogger(GameIconService.class);
-
-    private final GameIconsRepository gameIconsRepository;
-
     @Autowired
-    public GameIconService(GameIconsRepository gameIconsRepository) {
-        this.gameIconsRepository = gameIconsRepository;
-    }
+    private GameIconsRepository gameIconsRepository;
+
 
     public List<GameIconVO> GetAllGameIcons() {
         logger.info("Getting all game icons");
@@ -35,15 +30,15 @@ public class GameIconService {
         }
     }
 
-    public List<Map<Short, Object>> GetGameIconsUnderOneGenre(Byte genreId) {
-        logger.info("Getting game icons under one genre: genreId = {}", genreId);
-        try {
-            return gameIconsRepository.findAllGameIconUnderOneGenre(genreId);
-        } catch (Exception e) {
-            logger.error("Failed to get game icons under one genre: {}", e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
+//    public List<Map<Short, Object>> GetGameIconsUnderOneGenre(Byte genreId) {
+//        logger.info("Getting game icons under one genre: genreId = {}", genreId);
+//        try {
+//            return gameIconsRepository.findAllGameIconUnderOneGenre(genreId);
+//        } catch (Exception e) {
+//            logger.error("Failed to get game icons under one genre: {}", e.getMessage(), e);
+//            return Collections.emptyList();
+//        }
+//    }
 
     private List<GameIconVO> MapGameIconsToVOList(List<GameIcon> gameIconList) {
         List<GameIconVO> gameIconVOList = new ArrayList<>();

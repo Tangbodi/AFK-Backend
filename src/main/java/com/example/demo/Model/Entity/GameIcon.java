@@ -24,10 +24,6 @@ public class GameIcon {
     @Column(name = "genre_id", nullable = false)
     private Byte genreId;
 
-    @NotNull
-    @Column(name = "game_id", nullable = false)
-    private Short gameId;
-
     @Size(max = 127)
     @NotNull
     @Column(name = "game_name", nullable = false, length = 127)
@@ -38,9 +34,9 @@ public class GameIcon {
     @Column(name = "icon_path", nullable = false, length = 69)
     private String iconPath;
 
-    @Size(max = 16)
+    @Size(max = 63)
     @NotNull
-    @Column(name = "icon_url", nullable = false, length = 16)
+    @Column(name = "icon_url", nullable = false, length = 63)
     private String iconUrl;
 
     @NotNull

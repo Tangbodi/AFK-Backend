@@ -65,17 +65,17 @@ public class GamesController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/{genreId}")
-    public ResponseEntity GetGameUnderOneGenre(@PathVariable Byte genreId) {
-        ApiResponse apiResponse;
-        if (!GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Genre not found");
-        } else {
-            List<Map<Short, Object>> gameIconUnderOneGenre = gameIconService.GetGameIconsUnderOneGenre(genreId);
-            apiResponse = ApiResponse.success(gameIconUnderOneGenre);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
+//    @GetMapping("/all-games-genres/{genreId}")
+//    public ResponseEntity GetGameUnderOneGenre(@PathVariable Byte genreId) {
+//        ApiResponse apiResponse;
+//        if (!GenreIdValidator.CheckGenreId(genreId)) {
+//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Genre not found");
+//        } else {
+//            List<Map<Short, Object>> gameIconUnderOneGenre = gameIconService.GetGameIconsUnderOneGenre(genreId);
+//            apiResponse = ApiResponse.success(gameIconUnderOneGenre);
+//        }
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
 
     @PostMapping("/all-games/{gameId}/save-forums")
     public ResponseEntity SaveForums(@PathVariable("gameId") Short gameId, HttpSession session) {
