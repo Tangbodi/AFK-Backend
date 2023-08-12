@@ -15,12 +15,16 @@ import java.util.UUID;
 @Service
 public class ReplyService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyService.class);
-    @Autowired
-    private ReplyRepository replyRepository;
 
+    private final ReplyRepository replyRepository;
+
+    @Autowired
+    public ReplyService(ReplyRepository replyRepository) {
+        this.replyRepository = replyRepository;
+    }
 
     public ReplyVO SetReply(ReplyDTO replyDTO) {
-        logger.info("Setting reply: {}");
+        logger.info("Setting reply");
         try {
             String uuid = UUID.randomUUID().toString();
             replyDTO.setReplyId(uuid);
@@ -36,18 +40,20 @@ public class ReplyService {
             postReply.setIpvSix(replyDTO.getIpvSix());
             postReply.setCreatedAt(replyDTO.getCreatedAt());
             postReply.setModifiedAt(replyDTO.getCreatedAt());
-            if (replyRepository.save(postReply) != null) {
-                logger.info("Reply saved successfully: {}");
-                ReplyVO replyVO = TransferToVO(replyDTO);
-                return replyVO;
+
+            PostReply savedReply = replyRepository.save(postReply);
+            if (savedReply != null) {
+                logger.info("Reply saved successfully");
+                return TransferToVO(replyDTO);
             } else {
-                logger.info("Failed to save reply: {}");
+                logger.info("Failed to save reply");
             }
         } catch (Exception e) {
-            logger.error("Failed to set reply: {}", e.getMessage(), e);
+            logger.error("Failed to set reply", e);
         }
         return null;
     }
+
     public ReplyVO TransferToVO(ReplyDTO replyDTO) {
         ReplyVO replyVO = new ReplyVO();
         replyVO.setReplyId(replyDTO.getReplyId());
@@ -56,6 +62,6 @@ public class ReplyService {
         replyVO.setToUid(replyDTO.getToUid());
         replyVO.setCreatedAt(replyDTO.getCreatedAt());
         return replyVO;
-
     }
 }
+

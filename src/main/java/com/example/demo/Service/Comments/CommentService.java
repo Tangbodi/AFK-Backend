@@ -17,36 +17,37 @@ import java.util.UUID;
 @Service
 public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
+    private final CommentRepository commentRepository;
+
     @Autowired
-    private CommentRepository commentRepository;
+    public CommentService(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
 
     @Transactional
     public CommentVO SetComment(CommentDTO commentDTO) {
-        logger.info("Setting comment: {}");
+        logger.info("Setting comment: {}", commentDTO);
         try {
             PostComment postComment = new PostComment();
             String uuid = UUID.randomUUID().toString();
             commentDTO.setCommentId(uuid);
             postComment.setId(uuid);
-            postComment.setPostId(commentDTO.getPostId());
-            postComment.setContent(commentDTO.getContent());
-            postComment.setFromUid(commentDTO.getFromUid());
-            postComment.setIpvFour(commentDTO.getIpvFour());
-            postComment.setIpvSix(commentDTO.getIpvSix());
-            postComment.setCreatedAt(commentDTO.getCreatedAt());
-            postComment.setModifiedAt(commentDTO.getCreatedAt());
-            if(commentRepository.save(postComment) != null) {
-                logger.info("Comment saved successfully: {}");
-                CommentVO commentVO = TransferToVO(commentDTO);
-                return commentVO;
+            MapCommentDTOtoPostComment(commentDTO, postComment);
+
+            PostComment savedComment = commentRepository.save(postComment);
+            if (savedComment != null) {
+                logger.info("Comment saved successfully: {}", savedComment);
+                return TransferToVO(commentDTO);
             } else {
-                //do nothing
+                logger.warn("Comment not saved: {}", commentDTO);
             }
         } catch (Exception e) {
             logger.error("Failed to set comment: {}", e.getMessage(), e);
         }
         return null;
     }
+
     public CommentVO TransferToVO(CommentDTO commentDTO) {
         CommentVO commentVO = new CommentVO();
         commentVO.setCommentId(commentDTO.getCommentId());
@@ -54,7 +55,19 @@ public class CommentService {
         commentVO.setCreatedAt(commentDTO.getCreatedAt());
         return commentVO;
     }
-    public List<Map<Short, Object>> GetAllCommentsByPostId(String postId){
+
+    public List<Map<Short, Object>> GetAllCommentsByPostId(String postId) {
         return commentRepository.findByPostId(postId);
     }
+
+    private void MapCommentDTOtoPostComment(CommentDTO commentDTO, PostComment postComment) {
+        postComment.setPostId(commentDTO.getPostId());
+        postComment.setContent(commentDTO.getContent());
+        postComment.setFromUid(commentDTO.getFromUid());
+        postComment.setIpvFour(commentDTO.getIpvFour());
+        postComment.setIpvSix(commentDTO.getIpvSix());
+        postComment.setCreatedAt(commentDTO.getCreatedAt());
+        postComment.setModifiedAt(commentDTO.getCreatedAt());
+    }
 }
+

@@ -1,9 +1,11 @@
 package com.example.demo.Service.Posts;
 
+import com.example.demo.Exception.PostNotFoundException;
+import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Mapper.Repository.*;
+import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.*;
-import com.example.demo.Model.VO.LatestPostVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.SearchPostVO;
 import com.example.demo.Model.VO.ShowPostVO;
@@ -16,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -59,6 +61,7 @@ public class PostService {
                 logger.info("Post saved successfully: {}");
                 SetPostInfo(postDTO);
                 SetPostUserMap(postDTO);
+                SetPostGameMap(postDTO);
 //                SetPostGenreMap(postDTO);
             } else {
                 logger.info("Failed to save post: {}");
@@ -112,49 +115,90 @@ public class PostService {
         }
     }
 
-    public PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
-        PostSavedVO postSavedVO = new PostSavedVO();
-        postSavedVO.setPostId(postDTO.getPostId());
-        postSavedVO.setCreatedAt(postDTO.getCreatedAt());
-        return postSavedVO;
-    }
-
-
-    public ShowPostVO GetPost(String postId) {
-        logger.info("Getting post: {}");
+    private PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
+        logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
         try {
-            Post post = postRepository.findById(postId).orElse(null);
-            if (post != null) {
-                logger.info("Post found: {}");
-                ShowPostVO showPostVO = TransferToShowPostVO(post);
-                return showPostVO;
-            } else {
-                logger.info("Post not found: {}");
-            }
+            PostSavedVO postSavedVO = new PostSavedVO();
+            postSavedVO.setPostId(postDTO.getPostId());
+            postSavedVO.setCreatedAt(postDTO.getCreatedAt());
+            return postSavedVO;
         } catch (Exception e) {
-            logger.error("Failed to get post: {}", e.getMessage(), e);
+            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
         }
         return null;
     }
 
-    public ShowPostVO TransferToShowPostVO(Post post) {
-        logger.info("Transferring post to VO: {}");
+    @Transactional
+    public void SetPostGameMap(PostDTO postDTO) {
+        logger.info("Setting post game map: {}");
+        try {
+            PostsGamesMap postsGamesMap = new PostsGamesMap();
+            postsGamesMap.setId(postDTO.getPostId());
+            postsGamesMap.setGameId(postDTO.getGameId());
+            postsGamesMap.setGenreId(postDTO.getGenreId());
+            postsGamesMap.setCreatedAt(postDTO.getCreatedAt());
+            postsGamesMap.setModifiedAt(postDTO.getCreatedAt());
+            if (postsGamesMapRepository.save(postsGamesMap) != null) {
+                logger.info("Post game map saved successfully: {}");
+            } else {
+                logger.info("Failed to save post game map: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to set post game map: {}", e.getMessage(), e);
+        }
+    }
+
+
+    public ShowPostVO GetPost(GetPostDTO getPostDTO) {
+        logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
+
+        try {
+            PostsGamesMap postsGamesMap = postsGamesMapRepository.findById(getPostDTO.getPostId()).orElse(null);
+
+            Post post = postRepository.findById(getPostDTO.getPostId()).orElse(null);
+            if (postsGamesMap == null || post == null) {
+                logger.info("Post not found: " + getPostDTO.getPostId());
+                return null;
+            } else if (postsGamesMap.getId().equals(getPostDTO.getPostId()) &&
+                    postsGamesMap.getGameId().equals(getPostDTO.getGameId()) &&
+                    postsGamesMap.getGenreId().equals(getPostDTO.getGenreId())) {
+                return TransferToShowPostVO(post);
+            } else {
+                logger.info("PostId, GenreId, and GameId doesn't match with ID: " + getPostDTO.getPostId());
+                return null;
+            }
+        } catch (PostNotFoundException e) {
+            logger.error("Failed to get post: {}", e.getMessage(), e);
+            throw e; // Re-throw the custom exception to be handled at the controller level
+        } catch (Exception e) {
+            logger.error("Failed to get post: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private ShowPostVO TransferToShowPostVO(Post post) {
+        logger.info("Transferring post to VO for post ID: {}", post.getId());
+
         try {
             ShowPostVO showPostVO = new ShowPostVO();
             String postId = post.getId();
-            PostsUsersMap postsUsersMap = postsUsersMapRepository.findByPostId(postId).orElse(null);
-            if (postsUsersMap != null) {
-                String userId = postsUsersMap.getId().getUserId();
-                String username = usersInfoRepository.findById(userId).orElse(null).getUsername();
-                showPostVO.setUserName(username);
-                showPostVO.setTitle(post.getTitle());
-                showPostVO.setTextRender(post.getTextRender());
-                showPostVO.setCreatedAt(post.getCreatedAt());
-//            showPostVO.setImageURL();
-                return showPostVO;
-            } else {
-                logger.info("Post not found: {}");
-            }
+            PostsUsersMap postsUsersMap = postsUsersMapRepository.findByPostId(postId)
+                    .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
+
+            String userId = postsUsersMap.getId().getUserId();
+            UsersInfo userInfo = usersInfoRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+            showPostVO.setUserName(userInfo.getUsername());
+            showPostVO.setTitle(post.getTitle());
+            showPostVO.setTextRender(post.getTextRender());
+            showPostVO.setCreatedAt(post.getCreatedAt());
+
+            logger.info("Transferred post to VO successfully for post ID: {}", post.getId());
+            return showPostVO;
+        } catch (PostNotFoundException | UserNotFoundException e) {
+            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
+            throw e; // Re-throw the custom exceptions to be handled at the controller level
         } catch (Exception e) {
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
         }
@@ -162,12 +206,13 @@ public class PostService {
         return null;
     }
 
+
     public List<SearchPostVO> SearchByKeyword(String keyword) {
-        logger.info("Searching by keyword: {}" + keyword);
+        logger.info("Searching by keyword: {}", keyword);
         try {
             List<Post> postList = postRepository.findByKeyword(keyword);
             if (!postList.isEmpty()) {
-                logger.info("Content found related to keyword: {}");
+                logger.info("Content found related to keyword: {}", keyword);
                 List<SearchPostVO> searchPostVOList = new ArrayList<>();
                 for (Post post : postList) {
                     SearchPostVO searchPostVO = new SearchPostVO();
@@ -178,45 +223,13 @@ public class PostService {
                 }
                 return searchPostVOList;
             } else {
-                logger.info("No content related to keyword: {}");
+                logger.info("No content related to keyword: {}", keyword);
+                return Collections.emptyList(); // Return an empty list instead of null
             }
         } catch (Exception e) {
             logger.error("Failed to search by keyword: {}", e.getMessage(), e);
+            return Collections.emptyList(); // Return an empty list instead of null
         }
-        return null;
     }
 
-    public List<LatestPostVO> ShowLatestPosts() {
-        logger.info("Showing latest posts: {}");
-        try {
-            List<Map<Short, Object>> postsGamesMaps = postsGamesMapRepository.findLatestPostsGamesMap();
-            if(!postsGamesMaps.isEmpty()){
-                logger.info("Latest posts found: {}");
-                List<LatestPostVO> latestPostVOList = TransferToLatestPostVO(postsGamesMaps);
-                return latestPostVOList;
-            } else {
-                logger.info("No latest posts found: {}");
-            }
-        } catch (Exception e) {
-            logger.error("Failed to show latest posts: {}", e.getMessage(), e);
-        }
-        return null;
-    }
-    public List<LatestPostVO> TransferToLatestPostVO(List<Map<Short, Object>> postsGamesMaps){
-        logger.info("Transferring to latest post VO: {}");
-        try{
-            List<LatestPostVO> latestPostVOList = new ArrayList<>();
-            for(Map<Short, Object> map : postsGamesMaps){
-                LatestPostVO latestPostVO = new LatestPostVO();
-                latestPostVO.setPostId((String) map.get(("post_id")));
-                latestPostVO.setTitle((String) map.get(("title")));
-                latestPostVO.setGameName((String) map.get(("game_name")));
-                latestPostVOList.add(latestPostVO);
-            }
-            return latestPostVOList;
-        }catch (Exception e){
-            logger.error("Failed to transfer to latest post VO: {}", e.getMessage(), e);
-        }
-        return null;
-    }
 }

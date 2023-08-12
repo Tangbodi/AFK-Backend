@@ -12,26 +12,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserLoginService {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginService.class);
-    @Autowired
-    private UserRepository userRepository;
 
-    public boolean CheckPassword(UserLoginDTO userLoginDTO){
-        logger.info("Checking if password correct: {}", userLoginDTO.getUsername());
-        try{
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserLoginService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public boolean CheckPassword(UserLoginDTO userLoginDTO) {
+        logger.info("Checking if password is correct for user: {}", userLoginDTO.getUsername());
+        try {
             User user = userRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
-            if(user != null){
-                logger.info("User exists: {}");
-                logger.info("Checking password: {}");
-                if(BCrypt.checkpw(userLoginDTO.getPassword(), user.getPassword())){
+            if (user != null) {
+                logger.info("User exists: {}", user.getUsername());
+                logger.info("Checking password");
+                if (BCrypt.checkpw(userLoginDTO.getPassword(), user.getPassword())) {
+                    logger.info("Password is correct for user: {}", user.getUsername());
                     return true;
-                } else{
+                } else {
+                    logger.info("Password is incorrect for user: {}", user.getUsername());
                     return false;
                 }
             } else {
-                logger.info("User does not exist: {}");
+                logger.info("User does not exist: {}", userLoginDTO.getUsername());
             }
-        }catch (Exception e){
-            logger.error("Failed to check password: {}", e.getMessage(),e);
+        } catch (Exception e) {
+            logger.error("Failed to check password: {}", e.getMessage(), e);
         }
         return false;
     }

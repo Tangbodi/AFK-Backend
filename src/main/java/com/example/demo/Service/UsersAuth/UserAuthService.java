@@ -4,10 +4,8 @@ import com.example.demo.Mapper.Repository.UsersAuthRepository;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersAuth;
-import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
-import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,7 @@ public class UserAuthService {
             usersAuth.setModifiedAt(userRegisterDTO.getCreatedAt());
             usersAuthRepository.save(usersAuth);
         } catch (Exception e) {
-            logger.error("Failed to set UsersAuth: {}", e.getMessage(),e);
+            logger.error("Failed to set UsersAuth: {}", e.getMessage(), e);
         }
     }
 
@@ -71,7 +69,7 @@ public class UserAuthService {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to check if username exists: {}", e.getMessage(),e);
+            logger.error("Failed to check if username exists: {}", e.getMessage(), e);
         }
         return -2;
     }
@@ -81,13 +79,18 @@ public class UserAuthService {
         logger.info("Updating user's verification status: {}", userId);
         try {
             UsersAuth usersAuth = usersAuthRepository.findById(userId).orElse(null);
-            usersAuth.setIsVerified(true);
-            usersAuth.setModifiedAt(Instant.now());
-            usersAuthRepository.save(usersAuth);
-            logger.info("Updated user's verification status: {}", userId);
-            return true;
+            if (usersAuth == null) {
+                logger.info("User not found with id: {}", userId);
+                return false;
+            } else {
+                usersAuth.setIsVerified(true);
+                usersAuth.setModifiedAt(Instant.now());
+                usersAuthRepository.save(usersAuth);
+                logger.info("Updated user's verification status: {}", userId);
+                return true;
+            }
         } catch (Exception e) {
-            logger.error("Failed to update user's verification status via UserAuth: {}", e.getMessage(),e);
+            logger.error("Failed to update user's verification status via UserAuth: {}", e.getMessage(), e);
         }
         return false;
     }

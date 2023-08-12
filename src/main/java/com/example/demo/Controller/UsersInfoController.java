@@ -44,30 +44,32 @@ public class UsersInfoController {
     public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
         logger.info("GetUserInfo:::session:::" + session);
         String userId = (String) session.getAttribute("userId");
+        ApiResponse apiResponse;
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else {
             //do nothing
         }
         UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
         UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
-        ApiResponse apiResponse = ApiResponse.success(userInfoVO);
+        apiResponse = ApiResponse.success(userInfoVO);
         return ResponseEntity.ok(apiResponse);
     }
 
     @PutMapping("/user/login/user-info/username/update-email")
     public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
+        ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         }
         String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
         logger.info("Encoded email: {}", encodedEmail);
         if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
         } else {
             userEmailDTO.setEmail(encodedEmail);
             //if email doesn't exist, create a token store token and email in redis(600s) and store token in mysql database
@@ -75,33 +77,35 @@ public class UsersInfoController {
             //find token and email in redis once user click on verification link
             //if token and email match, update user's email in mysql database(users verification table, users_info table)
             userInfoService.CreateRedisCacheForUpdateEmail(userEmailDTO.getEmail(), userId, request);
-            ApiResponse apiResponse = ApiResponse.success(null);
+            apiResponse = ApiResponse.success(null);
             return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
         }
     }
 
     @PutMapping("/user/login/user-info/username/update-mail-address")
     public ResponseEntity UpdateUserMailAddress(@RequestBody UserMailDTO userMailDTO, HttpSession session) {
+        ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         }
         userMailDTO.setUserId(userId);
         userMailAddressService.UpdateUserMailAddress(userMailDTO);
-        ApiResponse apiResponse = ApiResponse.success(null);
+        apiResponse = ApiResponse.success(null);
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @GetMapping("/user/login/user-info/username/mail-address")
     public ResponseEntity GetMailAddress(HttpSession session) {
+        ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         }
         UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
-        ApiResponse apiResponse = ApiResponse.success(userMailAddressVO);
+        apiResponse = ApiResponse.success(userMailAddressVO);
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
 
     }

@@ -2,9 +2,14 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentDTO;
+import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.VO.CommentVO;
+import com.example.demo.Model.VO.NewestCommentVO;
+import com.example.demo.Model.VO.ShowPostVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.Posts.PostCommentService;
+import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
@@ -18,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 public class CommentsController {
@@ -27,15 +33,33 @@ public class CommentsController {
     private CommentService commentService;
     @Autowired
     private IpService ipService;
-
-    @PostMapping("/user/login/username/all-games-genres/genre/post/{postId}/edit-comment")
-    public ResponseEntity EditComment(HttpServletRequest request, @PathVariable("postId") String postId, @RequestBody CommentDTO commentDTO, HttpSession session) {
+    @Autowired
+    private PostCommentService postCommentService;
+    @Autowired
+    private PostService postService;
+    @PostMapping("/all-games-genres/{genreId}/{gameId}/{postId}/edit-comment")
+    public ResponseEntity EditComment(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId, @RequestBody CommentDTO commentDTO, HttpSession session) {
         logger.info("EditComment:::");
         String userId = (String) session.getAttribute("userId");
+        ApiResponse apiResponse;
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         }
+        else {
+            GetPostDTO getPostDTO = new GetPostDTO();
+            getPostDTO.setPostId(postId);
+            getPostDTO.setGameId(gameId);
+            getPostDTO.setGenreId(genreId);
+            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
+            if (showPostVO == null) {
+                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            } else {
+                //
+            }
+        }
+
         String ipAddress = HttpUtils.getRequestIP(request);
         logger.info("EditPost:::ipAddress:::" + ipAddress);
         if (ipService.isValidInet4Address(ipAddress)) {
@@ -51,14 +75,26 @@ public class CommentsController {
             logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
             commentDTO.setIpvSix(ip.toString());
         } else {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
-            return ResponseEntity.badRequest().body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+            return ResponseEntity.badRequest().body(apiResponse);
         }
         commentDTO.setPostId(postId);
         commentDTO.setFromUid(userId);
         commentDTO.setCreatedAt(Instant.now());
         CommentVO commentVO = commentService.SetComment(commentDTO);
-        ApiResponse apiResponse = ApiResponse.success(commentVO);
+        apiResponse = ApiResponse.success(commentVO);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/all-games-genres/genre/newest-comment")
+    public ResponseEntity ShowNewestComment() {
+        ApiResponse apiResponse;
+        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
+        if (!newestCommentVOList.isEmpty()) {
+            apiResponse = ApiResponse.success(newestCommentVOList);
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

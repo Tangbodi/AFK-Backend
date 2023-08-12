@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -17,40 +18,45 @@ import java.util.Map;
 public class PostInfoService {
     private static final Logger logger = LoggerFactory.getLogger(PostInfoService.class);
 
+    private final PostsInfoRepository postsInfoRepository;
+
     @Autowired
-    private PostsInfoRepository postsInfoRepository;
+    public PostInfoService(PostsInfoRepository postsInfoRepository) {
+        this.postsInfoRepository = postsInfoRepository;
+    }
+
     public List<PopularPostVO> GetMostPopularPosts() {
-        logger.info("Getting most popular posts: {}");
+        logger.info("Getting most popular posts");
         try {
             List<Map<Short, Object>> popularPosts = postsInfoRepository.findMostPopularPosts();
-            if (popularPosts != null) {
-                logger.info("Got most popular posts: {}");
-                List<PopularPostVO> popularPostVOList = TransferToPopularPostVO(popularPosts);
-                return popularPostVOList;
+            if (!popularPosts.isEmpty()) {
+                logger.info("Got most popular posts");
+                return TransferToPopularPostVO(popularPosts);
             } else {
-                logger.info("No popular posts found: {}");
-                return null;
+                logger.info("No popular posts found");
+                return Collections.emptyList();
             }
         } catch (Exception e) {
-            logger.error("Failed to get most popular posts: {}", e.getMessage(), e);
+            logger.error("Failed to get most popular posts", e);
+            return Collections.emptyList();
         }
-        return null;
     }
-        public List<PopularPostVO> TransferToPopularPostVO(List<Map<Short, Object>> popularPosts) {
-        logger.info("Transferring popular posts to VO: {}");
-        try{
-            List<PopularPostVO> popularPostVOList = new ArrayList<>();
-            for(Map<Short, Object> popularPost : popularPosts){
+
+    private List<PopularPostVO> TransferToPopularPostVO(List<Map<Short, Object>> popularPosts) {
+        logger.info("Transferring popular posts to VO");
+        List<PopularPostVO> popularPostVOList = new ArrayList<>();
+        for (Map<Short, Object> popularPost : popularPosts) {
+            try {
                 PopularPostVO popularPostVO = new PopularPostVO();
                 popularPostVO.setPostId((String) popularPost.get("post_id"));
                 popularPostVO.setTitle((String) popularPost.get("title"));
                 popularPostVO.setGameName((String) popularPost.get("game_name"));
                 popularPostVOList.add(popularPostVO);
+            } catch (Exception e) {
+                logger.error("Failed to transfer popular posts to VO", e);
             }
-            return popularPostVOList;
-        }catch (Exception e){
-            logger.error("Failed to transfer popular posts to VO: {}",e.getMessage(),e);
         }
-        return null;
+        return popularPostVOList;
     }
 }
+

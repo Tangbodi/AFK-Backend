@@ -23,16 +23,16 @@ public class ForumsSearchController {
     @Autowired
     private PostService postService;
 
-    @PostMapping("/search/forums")
+    @PostMapping("/search-forums")
     public ResponseEntity searchForumsByKeyword(@Validated @RequestBody ForumSearchDTO forumSearchDTO) {
+        ApiResponse apiResponse;
         List<SearchPostVO> searchPostVOList = postService.SearchByKeyword(forumSearchDTO.getKeyword());
         if (!searchPostVOList.isEmpty()) {
-            ApiResponse apiResponse = ApiResponse.success(searchPostVOList);
-            return ResponseEntity.ok(apiResponse);
+            apiResponse = ApiResponse.success(searchPostVOList);
         } else {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC404.getCode() , "No search results found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode() , "No search results found");
         }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
 //    @PostMapping("/search/store")

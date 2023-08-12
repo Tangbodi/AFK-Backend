@@ -9,44 +9,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class GameGenreService {
     private static final Logger logger = LoggerFactory.getLogger(GameGenreService.class);
+
+    private final GameGenresRepository gameGenresRepository;
+
     @Autowired
-    private GameGenresRepository gameGenresRepository;
+    public GameGenreService(GameGenresRepository gameGenresRepository) {
+        this.gameGenresRepository = gameGenresRepository;
+    }
 
     public List<GameGenreVO> GetAllGameGenres() {
-        logger.info("Getting all game genres: {}");
+        logger.info("Getting all game genres");
         try {
             List<GameGenre> gameGenreList = gameGenresRepository.findAll();
-            List<GameGenreVO> gameGenreVOList = new ArrayList<>();
-            for (GameGenre gameGenre : gameGenreList) {
-                GameGenreVO gameGenreVO = new GameGenreVO();
-                gameGenreVO.setId(gameGenre.getId());
-                gameGenreVO.setGenreName(gameGenre.getGenreName());
-                gameGenreVOList.add(gameGenreVO);
-            }
-            return gameGenreVOList;
+            return MapGameGenresToVOList(gameGenreList);
         } catch (Exception e) {
             logger.error("Failed to get all game genres: {}", e.getMessage(), e);
+            return Collections.emptyList();
         }
-        return null;
     }
 
     public boolean isGameGenreExist(Byte genreId) {
-        logger.info("Checking if game genre exists:::genreId:::" + genreId);
+        logger.info("Checking if game genre exists: genreId = {}", genreId);
         try {
-            GameGenre gameGenre = gameGenresRepository.findById(genreId).orElse(null);
-            if (gameGenre != null) {
-                return true;
-            } else {
-//                return false;
-            }
+            return gameGenresRepository.existsById(genreId);
         } catch (Exception e) {
             logger.error("Failed to check if game genre exists: {}", e.getMessage(), e);
+            return false;
         }
-        return false;
+    }
+
+    private List<GameGenreVO> MapGameGenresToVOList(List<GameGenre> gameGenreList) {
+        List<GameGenreVO> gameGenreVOList = new ArrayList<>();
+        for (GameGenre gameGenre : gameGenreList) {
+            GameGenreVO gameGenreVO = new GameGenreVO();
+            gameGenreVO.setId(gameGenre.getId());
+            gameGenreVO.setGenreName(gameGenre.getGenreName());
+            gameGenreVOList.add(gameGenreVO);
+        }
+        return gameGenreVOList;
     }
 }
+

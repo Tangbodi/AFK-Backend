@@ -8,6 +8,8 @@ import java.time.Instant;
 
 @Data
 public class PostDTO {
+    private Byte genreId;
+    private Short gameId;
     private String userId;
     private String postId;
     private String username;

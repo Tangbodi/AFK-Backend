@@ -1,9 +1,13 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.ReplyDTO;
 import com.example.demo.Model.VO.ReplyVO;
+import com.example.demo.Model.VO.ShowPostVO;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.Posts.PostCommentService;
+import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.HttpUtils;
@@ -26,14 +30,32 @@ public class RepliesController {
     @Autowired
     private ReplyService replyService;
     @Autowired
+    private PostCommentService postCommentService;
+    @Autowired
     private IpService ipService;
-    @PostMapping("/user/login/username/all-games-genres/genre/post/{postId}/edit-reply")
-    public ResponseEntity EditReply(HttpServletRequest request, @PathVariable("postId") String postId, @RequestBody ReplyDTO replyDTO, HttpSession session) {
+    @Autowired
+    private PostService postService;
+
+    @PostMapping("/all-games-genres/{genreId}/{gameId}/{postId}/edit-reply")
+    public ResponseEntity EditReply(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId, @RequestBody ReplyDTO replyDTO, HttpSession session) {
+        ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         logger.info("EditReply:::replyDTO:::" + replyDTO);
         if (userId == null) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } else {
+            GetPostDTO getPostDTO = new GetPostDTO();
+            getPostDTO.setPostId(postId);
+            getPostDTO.setGameId(gameId);
+            getPostDTO.setGenreId(genreId);
+            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
+            if (showPostVO == null) {
+                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            } else {
+                //
+            }
         }
         String ipAddress = HttpUtils.getRequestIP(request);
         logger.info("EditPost:::ipAddress:::" + ipAddress);
@@ -50,18 +72,13 @@ public class RepliesController {
             logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
             replyDTO.setIpvSix(ip.toString());
         } else {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
-            return ResponseEntity.badRequest().body(errorResponse);
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+            return ResponseEntity.badRequest().body(apiResponse);
         }
         replyDTO.setFromUid(userId);
         replyDTO.setCreatedAt(Instant.now());
         ReplyVO replyVO = replyService.SetReply(replyDTO);
-        ApiResponse apiResponse = ApiResponse.success(replyVO);
-        return ResponseEntity.ok(apiResponse);
-    }
-    @GetMapping("/user/login/username/all-games-genres/genre/newest-replies")
-    public ResponseEntity ShowNewestReplies() {
-        ApiResponse apiResponse = ApiResponse.success(replyService.GetNewestReplies());
+        apiResponse = ApiResponse.success(replyVO);
         return ResponseEntity.ok(apiResponse);
     }
 }
