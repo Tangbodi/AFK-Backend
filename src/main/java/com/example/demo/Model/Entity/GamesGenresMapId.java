@@ -14,7 +14,7 @@ public class GamesGenresMapId implements Serializable {
     private Byte genreId;
 
     @Column(name = "game_id", nullable = false)
-    private Integer gameId;
+    private Short gameId;
 
     public Byte getGenreId() {
         return genreId;
@@ -24,11 +24,11 @@ public class GamesGenresMapId implements Serializable {
         this.genreId = genreId;
     }
 
-    public Integer getGameId() {
+    public Short getGameId() {
         return gameId;
     }
 
-    public void setGameId(Integer gameId) {
+    public void setGameId(Short gameId) {
         this.gameId = gameId;
     }
 

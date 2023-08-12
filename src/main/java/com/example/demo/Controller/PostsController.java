@@ -2,6 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Mapper.Repository.ReplyRepository;
+import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.VO.LatestPostVO;
@@ -9,6 +10,7 @@ import com.example.demo.Model.VO.PopularPostVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.ShowPostVO;
 import com.example.demo.Service.Comments.CommentService;
+import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Posts.PostGameMapService;
@@ -50,7 +52,8 @@ public class PostsController {
     private PostGameMapService postGameMapService;
     @Autowired
     private PostInfoService postInfoService;
-
+    @Autowired
+    private GameGenreMapService gameGenreMapService;
 
     @GetMapping("/all-games-genres/{genreId}/{gameId}/{postId}")
     public ResponseEntity ShowPostContent(@PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId) {
@@ -137,7 +140,10 @@ public class PostsController {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else {
-            if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
+            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
+            gameGenreMapIdDTO.setGameId(gameId);
+            gameGenreMapIdDTO.setGenreId(genreId);
+            if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId) || gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
             }
