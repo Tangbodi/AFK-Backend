@@ -52,8 +52,8 @@ public class PostsController {
     @Autowired
     private GameGenreMapService gameGenreMapService;
 
-    @GetMapping("/all-games-genres/{genreId}/{gameId}/posts")
-    public ResponseEntity ShowAllPostInfoWithOneGame(@PathVariable("genreId") Byte genreId, @PathVariable("gameId") Short gameId){
+    @GetMapping("/all-games-genres/genre/game/posts")
+    public ResponseEntity ShowAllPostInfoWithOneGame(@RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -69,8 +69,8 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/{genreId}/{gameId}/{postId}")
-    public ResponseEntity ShowPostContent(@PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId) {
+    @GetMapping("/all-games-genres/genre/game/post")
+    public ResponseEntity ShowPostContent(HttpServletRequest request, @RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -95,8 +95,8 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/{genreId}/{gameId}/{postId}/comments-replies")
-    public ResponseEntity ShowAllCommentsAndReplies(@PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId) {
+    @GetMapping("/all-games-genres/genre/game/post/comments-replies")
+    public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
