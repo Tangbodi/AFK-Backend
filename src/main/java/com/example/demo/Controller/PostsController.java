@@ -69,7 +69,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/genre/game/post")
+    @GetMapping("/all-games-genres/post")
     public ResponseEntity ShowPostContent(HttpServletRequest request, @RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
@@ -95,7 +95,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/genre/game/post/comments-replies")
+    @GetMapping("/all-games-genres/comments-replies")
     public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
