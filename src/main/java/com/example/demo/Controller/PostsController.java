@@ -52,8 +52,8 @@ public class PostsController {
     @Autowired
     private GameGenreMapService gameGenreMapService;
 
-    @GetMapping("/all-games-genres/genre/game/posts")
-    public ResponseEntity ShowAllPostInfoWithOneGame(@RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId) {
+    @GetMapping("/all-games-genres/posts")
+    public ResponseEntity ShowAllPostInfoWithOneGame(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -69,8 +69,8 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/post")
-    public ResponseEntity ShowPostContent(HttpServletRequest request, @RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
+    @GetMapping("/all-games-genres/post-body")
+    public ResponseEntity ShowPostContent(HttpServletRequest request, @RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -96,7 +96,7 @@ public class PostsController {
     }
 
     @GetMapping("/all-games-genres/comments-replies")
-    public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "gameId") Short gameId, @RequestParam(value = "genreId") Byte genreId, @RequestParam(value = "postId") String postId) {
+    public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
