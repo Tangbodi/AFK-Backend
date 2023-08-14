@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,22 +37,14 @@ public class RepliesController {
     @Autowired
     private PostService postService;
 
-    @PostMapping("/all-games-genres/{genreId}/{gameId}/{postId}/edit-reply")
-    public ResponseEntity EditReply(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId, @RequestBody ReplyDTO replyDTO, HttpSession session) {
+    @PostMapping("/all-games-genres/edit-reply")
+    public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody ReplyDTO replyDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         logger.info("EditReply:::replyDTO:::" + replyDTO);
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            GetPostDTO getPostDTO = new GetPostDTO();
-            getPostDTO.setPostId(postId);
-            getPostDTO.setGameId(gameId);
-            getPostDTO.setGenreId(genreId);
-            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
-            if (showPostVO == null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-            } else {
                 String ipAddress = HttpUtils.getRequestIP(request);
                 logger.info("EditPost:::ipAddress:::" + ipAddress);
                 if (ipService.isValidInet4Address(ipAddress)) {
@@ -75,7 +68,6 @@ public class RepliesController {
                 ReplyVO replyVO = replyService.SetReply(replyDTO);
                 apiResponse = ApiResponse.success(replyVO);
             }
-        }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

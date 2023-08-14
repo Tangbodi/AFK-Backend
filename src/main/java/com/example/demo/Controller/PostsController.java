@@ -149,19 +149,13 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping(value = "/all-games-genres/{genreId}/{gameId}/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public ResponseEntity EditPost(HttpServletRequest request, @PathVariable("genreId") Byte genreId, @PathVariable("gameId") Short gameId, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
+    @PostMapping(value = "/all-games-genres/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
+    public ResponseEntity EditPost(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        } else {
-            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
-            gameGenreMapIdDTO.setGameId(gameId);
-            gameGenreMapIdDTO.setGenreId(genreId);
-            if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId) || gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-            } else {
+        }  else {
                 logger.info("EditPost:::userId:::" + userId);
                 String ipAddress = HttpUtils.getRequestIP(request);
                 logger.info("EditPost:::ipAddress:::" + ipAddress);
@@ -181,14 +175,11 @@ public class PostsController {
                     apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
                     return ResponseEntity.badRequest().body(apiResponse);
                 }
-                postDTO.setGenreId(genreId);
-                postDTO.setGameId(gameId);
                 postDTO.setUserId(userId);
                 postDTO.setCreatedAt(Instant.now());
                 PostSavedVO postSavedVO = postService.EditPost(postDTO);
                 apiResponse = ApiResponse.success(postSavedVO);
             }
-        }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 

@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.VO.GameGenreVO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
@@ -10,14 +11,14 @@ import com.example.demo.Service.Games.GameService;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
-import com.example.demo.Util.GameIdValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
 
@@ -78,19 +79,15 @@ public class GamesController {
 //        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
 //    }
 
-    @PostMapping("/all-games/{gameId}/save-forums")
-    public ResponseEntity SaveForums(@PathVariable("gameId") Short gameId, HttpSession session) {
+    @PostMapping("/all-games/save-forums")
+    public ResponseEntity SaveForums(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            if (!GameIdValidator.CheckGameId(gameId) || gameService.GetGameById(gameId) == null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
-            } else {
-                userFavoriteGameService.SetUserFavoriteGame(userId, gameId);
-                apiResponse = ApiResponse.success(null);
-            }
+            userFavoriteGameService.SetUserFavoriteGame(userId, gameGenreMapIdDTO.getGameId());
+            apiResponse = ApiResponse.success(null);
         }
         return ResponseEntity.ok(apiResponse);
     }

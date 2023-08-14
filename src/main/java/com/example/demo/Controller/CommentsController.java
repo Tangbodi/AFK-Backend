@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,52 +38,39 @@ public class CommentsController {
     private PostCommentService postCommentService;
     @Autowired
     private PostService postService;
-    @PostMapping("/all-games-genres/{genreId}/{gameId}/{postId}/edit-comment")
-    public ResponseEntity EditComment(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("gameId") Short gameId, @PathVariable("genreId") Byte genreId, @RequestBody CommentDTO commentDTO, HttpSession session) {
+    @PostMapping("/all-games-genres/edit-comment")
+    public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentDTO commentDTO, HttpSession session) {
         logger.info("EditComment:::");
         String userId = (String) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         }
         else {
-            GetPostDTO getPostDTO = new GetPostDTO();
-            getPostDTO.setPostId(postId);
-            getPostDTO.setGameId(gameId);
-            getPostDTO.setGenreId(genreId);
-            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
-            if (showPostVO == null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
-            } else {
-                //
-            }
-        }
 
-        String ipAddress = HttpUtils.getRequestIP(request);
-        logger.info("EditPost:::ipAddress:::" + ipAddress);
-        if (ipService.isValidInet4Address(ipAddress)) {
-            logger.info("EditPost:::ipAddress is valid");
-            String[] ip = ipAddress.split("\\.");
-            logger.info("EditPost:::ipAddress split:::" + ip);
-            Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-            logger.info("EditPost:::ipvF:::" + ipvF);
-            commentDTO.setIpvFour(ipvF);
-        } else if (ipService.isValidInet6Address(ipAddress)) {
-            logger.info("EditPost:::ipAddress is valid");
-            String[] ip = ipAddress.split(":");
-            logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
-            commentDTO.setIpvSix(ip.toString());
-        } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
-            return ResponseEntity.badRequest().body(apiResponse);
+            String ipAddress = HttpUtils.getRequestIP(request);
+            logger.info("EditPost:::ipAddress:::" + ipAddress);
+            if (ipService.isValidInet4Address(ipAddress)) {
+                logger.info("EditPost:::ipAddress is valid");
+                String[] ip = ipAddress.split("\\.");
+                logger.info("EditPost:::ipAddress split:::" + ip);
+                Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
+                logger.info("EditPost:::ipvF:::" + ipvF);
+                commentDTO.setIpvFour(ipvF);
+            } else if (ipService.isValidInet6Address(ipAddress)) {
+                logger.info("EditPost:::ipAddress is valid");
+                String[] ip = ipAddress.split(":");
+                logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
+                commentDTO.setIpvSix(ip.toString());
+            } else {
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+                return ResponseEntity.badRequest().body(apiResponse);
+            }
+            commentDTO.setFromUid(userId);
+            commentDTO.setCreatedAt(Instant.now());
+            CommentVO commentVO = commentService.SetComment(commentDTO);
+            apiResponse = ApiResponse.success(commentVO);
         }
-        commentDTO.setPostId(postId);
-        commentDTO.setFromUid(userId);
-        commentDTO.setCreatedAt(Instant.now());
-        CommentVO commentVO = commentService.SetComment(commentDTO);
-        apiResponse = ApiResponse.success(commentVO);
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
