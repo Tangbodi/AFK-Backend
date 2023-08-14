@@ -4,6 +4,7 @@ import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.VO.GameGenreVO;
 import com.example.demo.Model.VO.GameIconVO;
+import com.example.demo.Model.VO.HomeGameImageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
@@ -11,6 +12,7 @@ import com.example.demo.Service.Games.GameService;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +44,9 @@ public class GamesController {
     @Autowired
     private GameService gameService;
 
+
     @GetMapping("/all-games")
-    public ResponseEntity GetAllGames() {
+    public ResponseEntity GetAllGames() throws JsonProcessingException {
         ApiResponse apiResponse;
         List<GameIconVO> gameIconVOList;
         Jedis jedis = new Jedis("localhost");
@@ -104,6 +107,13 @@ public class GamesController {
             userFavoriteGameVOList = userFavoriteGameService.GetUserFavoriteGames(userId);
         }
         apiResponse = ApiResponse.success(userFavoriteGameVOList);
+        return ResponseEntity.ok(apiResponse);
+    }
+    @GetMapping("/all-games/home-game-images")
+    public ResponseEntity GetHomeGameImages() {
+        ApiResponse apiResponse;
+        List<HomeGameImageVO> homeGameImages = gameIconService.GetHomeGameImages();
+        apiResponse = ApiResponse.success(homeGameImages);
         return ResponseEntity.ok(apiResponse);
     }
 }

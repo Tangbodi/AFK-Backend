@@ -1,8 +1,10 @@
 package com.example.demo.Service.Games;
 
 import com.example.demo.Mapper.Repository.GameIconsRepository;
+import com.example.demo.Mapper.Repository.HomeGameImageRepository;
 import com.example.demo.Model.Entity.GameIcon;
 import com.example.demo.Model.VO.GameIconVO;
+import com.example.demo.Model.VO.HomeGameImageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,18 +13,20 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GameIconService {
     private static final Logger logger = LoggerFactory.getLogger(GameIconService.class);
     @Autowired
     private GameIconsRepository gameIconsRepository;
-
+    @Autowired
+    private HomeGameImageRepository homeGameImageRepository;
 
     public List<GameIconVO> GetAllGameIcons() {
         logger.info("Getting all game icons");
         try {
-            List<GameIcon> gameIconList = gameIconsRepository.findAll();
+            List<Map<Short, Object>> gameIconList = gameIconsRepository.findAllGameIcons();
             return MapGameIconsToVOList(gameIconList);
         } catch (Exception e) {
             logger.error("Failed to get all game icons: {}", e.getMessage(), e);
@@ -40,17 +44,49 @@ public class GameIconService {
 //        }
 //    }
 
-    private static List<GameIconVO> MapGameIconsToVOList(List<GameIcon> gameIconList) {
+    private static List<GameIconVO> MapGameIconsToVOList(List<Map<Short, Object>> gameIconList) {
+        logger.info("Transferring game icons to VO");
         List<GameIconVO> gameIconVOList = new ArrayList<>();
-        for (GameIcon gameIcon : gameIconList) {
-            GameIconVO gameIconVO = new GameIconVO();
-            gameIconVO.setGameId(gameIcon.getId());
-            gameIconVO.setGameName(gameIcon.getGameName());
-            gameIconVO.setGenreId(gameIcon.getGenreId());
-            gameIconVO.setIconUrl(gameIcon.getIconUrl());
-            gameIconVOList.add(gameIconVO);
+        try{
+            for (Map<Short, Object> gameIcon : gameIconList) {
+                GameIconVO gameIconVO = new GameIconVO();
+                gameIconVO.setGenreId((Byte) gameIcon.get("genre_id"));
+                gameIconVO.setGameId((Short) gameIcon.get("game_id"));
+                gameIconVO.setGameName((String) gameIcon.get("game_name"));
+                gameIconVO.setIconUrl((String) gameIcon.get("icon_url"));
+                gameIconVOList.add(gameIconVO);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to transfer game icons to VO: {}", e.getMessage(), e);
+            return Collections.emptyList();
         }
         return gameIconVOList;
+    }
+    public List<HomeGameImageVO> GetHomeGameImages() {
+        logger.info("Getting home game images");
+        try {
+            List<Map<Short, Object>> homeGameImageList = homeGameImageRepository.findHomeGameImage();
+            return MapHomeGameImagesToVOList(homeGameImageList);
+        } catch (Exception e) {
+            logger.error("Failed to get home game images: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+    private static List<HomeGameImageVO> MapHomeGameImagesToVOList(List<Map<Short, Object>> homeGameImageList){
+        logger.info("Transferring home game images to VO");
+        List<HomeGameImageVO> homeGameImageVOList = new ArrayList<>();
+        try{
+            for (Map<Short, Object> homeGameImage : homeGameImageList) {
+                HomeGameImageVO homeGameImageVO = new HomeGameImageVO();
+                homeGameImageVO.setImageId((Short) homeGameImage.get("image_id"));
+                homeGameImageVO.setImageUrl((String) homeGameImage.get("image_url"));
+                homeGameImageVOList.add(homeGameImageVO);
+            }
+        }catch (Exception e){
+            logger.error("Failed to transfer home game images to VO: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+        return homeGameImageVOList;
     }
 }
 

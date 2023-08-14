@@ -17,6 +17,10 @@ public interface GameIconsRepository extends JpaRepository<GameIcon, Short>{
             "WHERE afk.games_genres_map.genre_id =:genreId", nativeQuery = true)
     List<Map<Short, Object>> findAllGameIconUnderOneGenre(@Param("genreId") Byte genreId);
 
-//    @Query(value = "SELECT * FROM afk.game_icons", nativeQuery = true)
-//    List<GameIcon> findAllGameIcon();
+    @Query(value = "SELECT ggm.genre_id, g.game_id, g.game_name, gi.icon_url \n" +
+            "FROM afk.game_icons gi \n" +
+            "JOIN afk.games g ON g.game_id = gi.icon_id\n" +
+            "JOIN afk.games_genres_map ggm ON ggm.game_id = g.game_id", nativeQuery = true)
+    List<Map<Short, Object>> findAllGameIcons();
+
 }

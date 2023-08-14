@@ -2,8 +2,9 @@ package com.example.demo.Controller;
 
 import com.example.demo.Model.VO.NewsVO;
 import com.example.demo.Service.News.NewsService;
+import com.example.demo.Service.Redis.RedisNewsService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Util.ApiResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import redis.clients.jedis.Jedis;
 
 import java.util.List;
 
@@ -22,23 +22,19 @@ public class NewsController {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private NewsService newsService;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private RedisNewsService redisNewsService;
 
     @GetMapping("/get-news")
-    public ResponseEntity GetNews() throws JsonProcessingException {
+    public ResponseEntity GetNews() {
         ApiResponse apiResponse;
-        Jedis jedis = new Jedis("localhost");
-        boolean existsInCache = jedis.exists(NEWS_CACHE_KEY);
         List<NewsVO> newsVOList;
-        if (existsInCache) {
-            logger.info("NEWS_CACHE exists in Redis cache");
-            logger.info("Get NEWS from Redis cache");
-            String json = jedis.get(NEWS_CACHE_KEY);
-            newsVOList = objectMapper.readValue(json, List.class);
+        if (redisService.CacheExists(NEWS_CACHE_KEY)) {
+            newsVOList = redisNewsService.GetNewsCache();
         } else {
-            logger.info("NEWS_CACHE doesn't exist in Redis cache");
-            logger.info("Catching News from rssFeedURL");
             newsService.ProxyXML();
-            logger.info("Get NEWS from MySQL");
             newsVOList = newsService.GetNews();
         }
         apiResponse = ApiResponse.success(newsVOList);
