@@ -47,14 +47,13 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else {
-            //do nothing
+            UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
+            UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
+            apiResponse = ApiResponse.success(userInfoVO);
         }
-        UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
-        UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
-        apiResponse = ApiResponse.success(userInfoVO);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+
     }
 
     @PutMapping("/user/login/user-info/username/update-email")
@@ -63,23 +62,22 @@ public class UsersInfoController {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } else{
+            String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
+            logger.info("Encoded email: {}", encodedEmail);
+            if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
+                apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
+            } else {
+                userEmailDTO.setEmail(encodedEmail);
+                //if email doesn't exist, create a token store token and email in redis(600s) and store token in mysql database
+                //send a verification email to user's new email address
+                //find token and email in redis once user click on verification link
+                //if token and email match, update user's email in mysql database(users verification table, users_info table)
+                userInfoService.CreateRedisCacheForUpdateEmail(userEmailDTO.getEmail(), userId, request);
+                apiResponse = ApiResponse.success(null);
+            }
         }
-        String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
-        logger.info("Encoded email: {}", encodedEmail);
-        if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
-        } else {
-            userEmailDTO.setEmail(encodedEmail);
-            //if email doesn't exist, create a token store token and email in redis(600s) and store token in mysql database
-            //send a verification email to user's new email address
-            //find token and email in redis once user click on verification link
-            //if token and email match, update user's email in mysql database(users verification table, users_info table)
-            userInfoService.CreateRedisCacheForUpdateEmail(userEmailDTO.getEmail(), userId, request);
-            apiResponse = ApiResponse.success(null);
-            return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @PutMapping("/user/login/user-info/username/update-mail-address")
@@ -88,12 +86,12 @@ public class UsersInfoController {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } else {
+            userMailDTO.setUserId(userId);
+            userMailAddressService.UpdateUserMailAddress(userMailDTO);
+            apiResponse = ApiResponse.success(null);
         }
-        userMailDTO.setUserId(userId);
-        userMailAddressService.UpdateUserMailAddress(userMailDTO);
-        apiResponse = ApiResponse.success(null);
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @GetMapping("/user/login/user-info/username/mail-address")
@@ -102,11 +100,10 @@ public class UsersInfoController {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } else {
+            UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
+            apiResponse = ApiResponse.success(userMailAddressVO);
         }
-        UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
-        apiResponse = ApiResponse.success(userMailAddressVO);
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

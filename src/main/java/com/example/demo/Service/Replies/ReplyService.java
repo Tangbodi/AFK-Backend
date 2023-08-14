@@ -15,13 +15,9 @@ import java.util.UUID;
 @Service
 public class ReplyService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyService.class);
-
-    private final ReplyRepository replyRepository;
-
     @Autowired
-    public ReplyService(ReplyRepository replyRepository) {
-        this.replyRepository = replyRepository;
-    }
+    private ReplyRepository replyRepository;
+
 
     public ReplyVO SetReply(ReplyDTO replyDTO) {
         logger.info("Setting reply");
@@ -54,7 +50,7 @@ public class ReplyService {
         return null;
     }
 
-    public ReplyVO TransferToVO(ReplyDTO replyDTO) {
+    private static ReplyVO TransferToVO(ReplyDTO replyDTO) {
         ReplyVO replyVO = new ReplyVO();
         replyVO.setReplyId(replyDTO.getReplyId());
         replyVO.setCommentId(replyDTO.getCommentId());

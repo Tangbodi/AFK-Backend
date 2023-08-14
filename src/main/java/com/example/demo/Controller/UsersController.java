@@ -54,40 +54,37 @@ public class UsersController {
     private UserLoginService userLoginService;
 
     @PostMapping("/user/registration")
-    public ResponseEntity<ApiResponse<String>> UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
+    public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
         // Encode email for avoiding email scraping and spam bots
+        ApiResponse apiResponse;
         String encodedEmail = HtmlUtils.htmlEscape(userRegisterDTO.getEmail());
         logger.info("Encoded email: {}", encodedEmail);
         userRegisterDTO.setEmail(encodedEmail);
-        ApiResponse apiResponse;
         if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             apiResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password and confirm password must be the same");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(apiResponse);
         } else if (redisService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Username already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
         } else if (userRegistrationService.CheckEmailExists(userRegisterDTO.getEmail()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
         } else {
             // If all checks are passed, register user
-            logger.info("User doesn't exist: {}");
+            logger.info("User doesn't exist");
             User user = userRegistrationService.RegisterUser(userRegisterDTO);
-            logger.info("User: {}", user);
             if (user != null) {
-                logger.info("User registered successfully : {}");
+                logger.info("User registered successfully");
                 //Setup email validation
                 if (processEmailService.ProcessRegistrationEmailValidation(request, user.getUserId(), userRegisterDTO)) {
                     apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
-                    return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
                 }
             } else {
+                logger.info("Failed to register user : {}");
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
             }
         }
-        apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @PostMapping("/user/login")
@@ -102,16 +99,12 @@ public class UsersController {
         int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO, request);
         if (res == -2) {
             apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         } else if (res == -1) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         } else if (res == 0) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but not verified, verification email has been sent out, please check your email");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else if (res == 2) {
-            ApiResponse errorResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            apiResponse= ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
@@ -120,12 +113,11 @@ public class UsersController {
                 session.setAttribute("userId", userInfoDTO.getUserId());
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
-                return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but password is incorrect");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
             }
         }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @PostMapping("/user/logout")

@@ -1,36 +1,27 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Embeddable
 public class GamesGenresMapId implements Serializable {
-    private static final long serialVersionUID = 7562654912679141910L;
+    private static final long serialVersionUID = 6017423013749967015L;
+    @NotNull
     @Column(name = "genre_id", nullable = false)
     private Byte genreId;
 
+    @NotNull
     @Column(name = "game_id", nullable = false)
     private Short gameId;
-
-    public Byte getGenreId() {
-        return genreId;
-    }
-
-    public void setGenreId(Byte genreId) {
-        this.genreId = genreId;
-    }
-
-    public Short getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Short gameId) {
-        this.gameId = gameId;
-    }
 
     @Override
     public boolean equals(Object o) {

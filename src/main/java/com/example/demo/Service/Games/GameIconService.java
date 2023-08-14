@@ -40,7 +40,7 @@ public class GameIconService {
 //        }
 //    }
 
-    private List<GameIconVO> MapGameIconsToVOList(List<GameIcon> gameIconList) {
+    private static List<GameIconVO> MapGameIconsToVOList(List<GameIcon> gameIconList) {
         List<GameIconVO> gameIconVOList = new ArrayList<>();
         for (GameIcon gameIcon : gameIconList) {
             GameIconVO gameIconVO = new GameIconVO();

@@ -39,7 +39,7 @@ public class PostCommentService {
         return Collections.emptyList();
     }
 
-    private List<NewestCommentVO> TransferToNewestCommentVO(List<Map<Short, Object>> newestCommentsList) {
+    private static List<NewestCommentVO> TransferToNewestCommentVO(List<Map<Short, Object>> newestCommentsList) {
         logger.info("Transferring to newest comment VO");
         List<NewestCommentVO> newestCommentVOList = new ArrayList<>();
         for (Map<Short, Object> map : newestCommentsList) {

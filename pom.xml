@@ -101,11 +101,11 @@
 			<artifactId>commons-validator</artifactId>
 			<version>1.7</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
+		<!-- parse xml-->
 		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka-clients</artifactId>
-			<version>2.7.0</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.4</version>
 		</dependency>
 	</dependencies>
 

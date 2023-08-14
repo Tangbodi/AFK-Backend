@@ -72,16 +72,17 @@ public class UserFavoriteGameService {
 
         } catch (Exception e) {
             logger.error("Error getting user favorite games: {}", e.getMessage(), e);
-            throw e; // Re-throw the exception to be handled at the controller level
+            return Collections.emptyList();
         }
     }
-    private List<UserFavoriteGameVO> TransferToUserFavoriteGameVO(List<Map<Short, Object>> userFavoriteGames){
+    private static List<UserFavoriteGameVO> TransferToUserFavoriteGameVO(List<Map<Short, Object>> userFavoriteGames){
         logger.info("Transferring user favorite games to VO");
         try{
             List<UserFavoriteGameVO> userFavoriteGameVOList = new ArrayList<>();
             for(Map<Short, Object> map : userFavoriteGames){
                 UserFavoriteGameVO userFavoriteGameVO = new UserFavoriteGameVO();
                 userFavoriteGameVO.setGameId((Short) map.get("icon_id"));
+                userFavoriteGameVO.setGenreId((Byte) map.get("genre_id"));
                 userFavoriteGameVO.setGameName((String) map.get("game_name"));
                 userFavoriteGameVO.setIconUrl((String) map.get("icon_url"));
                 userFavoriteGameVOList.add(userFavoriteGameVO);

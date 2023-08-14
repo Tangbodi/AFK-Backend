@@ -13,7 +13,7 @@ import java.util.List;
 public class RedisGameIconService {
     private static final Logger logger = LoggerFactory.getLogger(RedisGameIconService.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String ALL_GAME_ICON_KEY = "ALL_GAME_ICON";
+    private static final String ALL_GAME_ICON_KEY = "ALL_GAME_ICONS";
     public void SetAllGameIconsCache(List<GameIconVO> gameIconVOList) {
         logger.info("Setting up all game icons cache: {}");
         Jedis jedis = new Jedis("localhost");
@@ -26,26 +26,6 @@ public class RedisGameIconService {
             logger.info("Closing the jedis connection:::");
             jedis.close();
         }
-    }
-
-    public boolean CheckAllGameIconsCache() {
-        logger.info("Checking all game icons cache: {}");
-        Jedis jedis = new Jedis("localhost");
-        try {
-            if (jedis.exists(ALL_GAME_ICON_KEY)) {
-                logger.info("All game icons cache exists: {}");
-                return true;
-            } else {
-                logger.info("All game icons cache doesn't exist: {}");
-                return false;
-            }
-        } catch (Exception e) {
-            logger.error("Failed to check all game icons cache: {}", e.getMessage(),e);
-        } finally {
-            logger.info("Closing the jedis connection:::");
-            jedis.close();
-        }
-        return false;
     }
 
     public List<GameIconVO> GetAllGameIconsCache() {

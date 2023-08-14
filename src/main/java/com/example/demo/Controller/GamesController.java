@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
-import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Model.VO.GameGenreVO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
@@ -12,26 +11,25 @@ import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.GameIdValidator;
-import com.example.demo.Util.GenreIdValidator;
-import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class GamesController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
+    private static final String ALL_GAME_ICON_KEY = "ALL_GAME_ICONS";
+
     @Autowired
     private GameIconService gameIconService;
     @Autowired
@@ -46,23 +44,26 @@ public class GamesController {
     @GetMapping("/all-games")
     public ResponseEntity GetAllGames() {
         ApiResponse apiResponse;
-        if (redisGameIconService.CheckAllGameIconsCache()) {
-            List<GameIconVO> gameIconVOList = redisGameIconService.GetAllGameIconsCache();
-            apiResponse = ApiResponse.success(gameIconVOList);
-
+        List<GameIconVO> gameIconVOList;
+        Jedis jedis = new Jedis("localhost");
+        boolean existsInCache = jedis.exists(ALL_GAME_ICON_KEY);
+        if (existsInCache) {
+            logger.info("ALL_GAME_ICONS exists in Redis cache");
+            gameIconVOList = redisGameIconService.GetAllGameIconsCache();
         } else {
-            List<GameIconVO> gameIconVOList = gameIconService.GetAllGameIcons();
+            logger.info("ALL_GAME_ICONS doesn't exist in Redis cache");
+            gameIconVOList = gameIconService.GetAllGameIcons();
             redisGameIconService.SetAllGameIconsCache(gameIconVOList);
-            apiResponse = ApiResponse.success(gameIconVOList);
         }
-        return ResponseEntity.ok(apiResponse);
+        apiResponse = ApiResponse.success(gameIconVOList);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @GetMapping("/all-games-genres")
     public ResponseEntity GetAllGameGenres() {
         List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();
         ApiResponse apiResponse = ApiResponse.success(gameGenreVOList);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
 //    @GetMapping("/all-games-genres/{genreId}")
@@ -83,24 +84,24 @@ public class GamesController {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else {
             if (!GameIdValidator.CheckGameId(gameId) || gameService.GetGameById(gameId) == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            } else {
+                userFavoriteGameService.SetUserFavoriteGame(userId, gameId);
+                apiResponse = ApiResponse.success(null);
             }
         }
-        userFavoriteGameService.SetUserFavoriteGame(userId, gameId);
-        apiResponse = ApiResponse.success(null);
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/all-games/favorite-games")
-    public ResponseEntity GetSavedForums(HttpSession session) {
+    public ResponseEntity GetUserFavoriteGames(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         List<UserFavoriteGameVO> userFavoriteGameVOList;
         if (userId == null) {
+            logger.info("User not logged in");
             userFavoriteGameVOList = new ArrayList<>();
         } else {
             userFavoriteGameVOList = userFavoriteGameService.GetUserFavoriteGames(userId);

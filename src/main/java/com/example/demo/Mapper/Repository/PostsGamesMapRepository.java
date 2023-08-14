@@ -3,6 +3,7 @@ package com.example.demo.Mapper.Repository;
 import com.example.demo.Model.Entity.PostsGamesMap;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -40,4 +41,13 @@ public interface PostsGamesMapRepository extends JpaRepository<PostsGamesMap, St
             "FROM\n" +
             "    PostsWithGame p;", nativeQuery = true)
     List<Map<Short, Object>> findLatestPostsGamesMap();
+
+    @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment, pi.like, pi.favorite , ui.username\n" +
+            "FROM afk.posts_games_map pgm \n" +
+            "JOIN afk.posts_info pi ON pi.post_id = pgm.post_id \n" +
+            "JOIN afk.posts p ON p.post_id = pgm.post_id\n" +
+            "JOIN afk.posts_users_map pum ON pum.post_id = pgm.post_id\n" +
+            "JOIN afk.users_info ui ON ui.user_id = pum.user_id\n" +
+            "WHERE pgm.game_id =:gameId",nativeQuery = true)
+    List<Map<Short, Object>> findAllPostInfoWithOneGame(@Param("gameId") Short gameId);
 }

@@ -34,17 +34,7 @@ public class GameGenreService {
         }
     }
 
-    public boolean isGameGenreExist(Byte genreId) {
-        logger.info("Checking if game genre exists: genreId = {}", genreId);
-        try {
-            return gameGenresRepository.existsById(genreId);
-        } catch (Exception e) {
-            logger.error("Failed to check if game genre exists: {}", e.getMessage(), e);
-            return false;
-        }
-    }
-
-    private List<GameGenreVO> MapGameGenresToVOList(List<GameGenre> gameGenreList) {
+    private static List<GameGenreVO> MapGameGenresToVOList(List<GameGenre> gameGenreList) {
         List<GameGenreVO> gameGenreVOList = new ArrayList<>();
         for (GameGenre gameGenre : gameGenreList) {
             GameGenreVO gameGenreVO = new GameGenreVO();

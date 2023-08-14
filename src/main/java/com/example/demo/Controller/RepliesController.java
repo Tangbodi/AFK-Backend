@@ -43,7 +43,6 @@ public class RepliesController {
         logger.info("EditReply:::replyDTO:::" + replyDTO);
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } else {
             GetPostDTO getPostDTO = new GetPostDTO();
             getPostDTO.setPostId(postId);
@@ -52,33 +51,31 @@ public class RepliesController {
             ShowPostVO showPostVO = postService.GetPost(getPostDTO);
             if (showPostVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
             } else {
-                //
+                String ipAddress = HttpUtils.getRequestIP(request);
+                logger.info("EditPost:::ipAddress:::" + ipAddress);
+                if (ipService.isValidInet4Address(ipAddress)) {
+                    logger.info("EditPost:::ipAddress is valid");
+                    String[] ip = ipAddress.split("\\.");
+                    logger.info("EditPost:::ipAddress split:::" + ip);
+                    Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
+                    logger.info("EditPost:::ipvF:::" + ipvF);
+                    replyDTO.setIpvFour(ipvF);
+                } else if (ipService.isValidInet6Address(ipAddress)) {
+                    logger.info("EditPost:::ipAddress is valid");
+                    String[] ip = ipAddress.split(":");
+                    logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
+                    replyDTO.setIpvSix(ip.toString());
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+                    return ResponseEntity.badRequest().body(apiResponse);
+                }
+                replyDTO.setFromUid(userId);
+                replyDTO.setCreatedAt(Instant.now());
+                ReplyVO replyVO = replyService.SetReply(replyDTO);
+                apiResponse = ApiResponse.success(replyVO);
             }
         }
-        String ipAddress = HttpUtils.getRequestIP(request);
-        logger.info("EditPost:::ipAddress:::" + ipAddress);
-        if (ipService.isValidInet4Address(ipAddress)) {
-            logger.info("EditPost:::ipAddress is valid");
-            String[] ip = ipAddress.split("\\.");
-            logger.info("EditPost:::ipAddress split:::" + ip);
-            Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-            logger.info("EditPost:::ipvF:::" + ipvF);
-            replyDTO.setIpvFour(ipvF);
-        } else if (ipService.isValidInet6Address(ipAddress)) {
-            logger.info("EditPost:::ipAddress is valid");
-            String[] ip = ipAddress.split(":");
-            logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
-            replyDTO.setIpvSix(ip.toString());
-        } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
-            return ResponseEntity.badRequest().body(apiResponse);
-        }
-        replyDTO.setFromUid(userId);
-        replyDTO.setCreatedAt(Instant.now());
-        ReplyVO replyVO = replyService.SetReply(replyDTO);
-        apiResponse = ApiResponse.success(replyVO);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

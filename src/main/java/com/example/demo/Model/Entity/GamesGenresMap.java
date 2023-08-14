@@ -1,22 +1,23 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "games_genres_map")
 public class GamesGenresMap {
     @EmbeddedId
     private GamesGenresMapId id;
 
-    public GamesGenresMapId getId() {
-        return id;
-    }
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    public void setId(GamesGenresMapId id) {
-        this.id = id;
-    }
-
-    //TODO [JPA Buddy] generate columns from DB
 }

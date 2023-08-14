@@ -154,7 +154,6 @@ public class PostService {
 
         try {
             PostsGamesMap postsGamesMap = postsGamesMapRepository.findById(getPostDTO.getPostId()).orElse(null);
-
             Post post = postRepository.findById(getPostDTO.getPostId()).orElse(null);
             if (postsGamesMap == null || post == null) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
@@ -211,7 +210,7 @@ public class PostService {
         logger.info("Searching by keyword: {}", keyword);
         try {
             List<Post> postList = postRepository.findByKeyword(keyword);
-            if (!postList.isEmpty()) {
+            if (postList != null) {
                 logger.info("Content found related to keyword: {}", keyword);
                 List<SearchPostVO> searchPostVOList = new ArrayList<>();
                 for (Post post : postList) {

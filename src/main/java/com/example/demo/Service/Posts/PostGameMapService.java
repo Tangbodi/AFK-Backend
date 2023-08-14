@@ -39,7 +39,7 @@ public class PostGameMapService {
         return Collections.emptyList();
     }
 
-    private List<LatestPostVO> TransferToLatestPostVO(List<Map<Short, Object>> postsGamesMaps) {
+    private static List<LatestPostVO> TransferToLatestPostVO(List<Map<Short, Object>> postsGamesMaps) {
         logger.info("Transferring to latest post VO");
         List<LatestPostVO> latestPostVOList = new ArrayList<>();
         for (Map<Short, Object> map : postsGamesMaps) {

@@ -83,7 +83,7 @@ public class CommentsController {
         commentDTO.setCreatedAt(Instant.now());
         CommentVO commentVO = commentService.SetComment(commentDTO);
         apiResponse = ApiResponse.success(commentVO);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @GetMapping("/all-games-genres/genre/newest-comment")

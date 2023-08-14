@@ -48,7 +48,7 @@ public class CommentService {
         return null;
     }
 
-    public CommentVO TransferToVO(CommentDTO commentDTO) {
+    private static CommentVO TransferToVO(CommentDTO commentDTO) {
         CommentVO commentVO = new CommentVO();
         commentVO.setCommentId(commentDTO.getCommentId());
         commentVO.setPostId(commentDTO.getPostId());
@@ -60,7 +60,7 @@ public class CommentService {
         return commentRepository.findByPostId(postId);
     }
 
-    private void MapCommentDTOtoPostComment(CommentDTO commentDTO, PostComment postComment) {
+    private static void MapCommentDTOtoPostComment(CommentDTO commentDTO, PostComment postComment) {
         postComment.setPostId(commentDTO.getPostId());
         postComment.setContent(commentDTO.getContent());
         postComment.setFromUid(commentDTO.getFromUid());
