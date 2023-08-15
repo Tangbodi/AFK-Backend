@@ -93,8 +93,13 @@ public class RepliesController {
         if (userId == null) {
             apiResponse = ApiResponse.success(null);
         } else {
-            List<MessageVO> messageVOList = replyService.GetUnreadMessage(userId);
-            apiResponse = ApiResponse.success(messageVOList);
+            if(redisService.CacheExists(MESSAGE_MENTION_KEY+userId)){
+                List<MessageVO> messageVOList = replyService.GetUnreadMessageViaMessageUserMap(userId);
+                apiResponse = ApiResponse.success(messageVOList);
+            }
+            else{
+                apiResponse = ApiResponse.success(null);
+            }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
@@ -106,13 +111,7 @@ public class RepliesController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-
-            if(redisService.CacheExists(MESSAGE_MENTION_KEY+userId)){
-                replyService.UpdateReadStatus(userId);
-            }
-            else{
-                //
-            }
+            replyService.UpdateMessageUserMap(userId);
             apiResponse = ApiResponse.success(null);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

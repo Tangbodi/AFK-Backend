@@ -2,6 +2,7 @@ package com.example.demo.Service.EmailValidation;
 
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,7 @@ public class ProcessEmailService {
     public boolean ProcessRegistrationEmailValidation(HttpServletRequest request, String userId, UserRegisterDTO userRegisterDTO) {
         logger.info("Processing registration email validation: {}");
         try {
-            UUID uuid = UUID.randomUUID();
-            String token = uuid.toString();
+            String token = UUIDCreator.CreateUUID();
 //            siteURL = siteURL.replace("http://", "https://");
             if (userVerificationService.SetUserRegistrationVerificationToken(token, userId, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();

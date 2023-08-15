@@ -10,6 +10,7 @@ import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersPostsSetting.UserPostSettingService;
+import com.example.demo.Util.UUIDCreator;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class UserRegistrationService {
         logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUIDCreator.CreateUUID();
             Instant createdAt = Instant.now();
             userRegisterDTO.setUserId(uuid);
             userRegisterDTO.setCreatedAt(createdAt);

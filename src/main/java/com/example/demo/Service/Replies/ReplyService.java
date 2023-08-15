@@ -10,6 +10,7 @@ import com.example.demo.Model.Entity.PostReply;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.ReplyVO;
 import com.example.demo.Service.Redis.RedisMessageService;
+import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class ReplyService {
     public ReplyVO SetReply(ReplyDTO replyDTO) {
         logger.info("Setting reply");
         try {
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUIDCreator.CreateUUID();
             replyDTO.setReplyId(uuid);
             PostReply postReply = new PostReply();
             postReply.setReplyId(uuid);
@@ -101,7 +102,7 @@ public class ReplyService {
         }
     }
 
-    public List<MessageVO> GetUnreadMessage(String userId) {
+    public List<MessageVO> GetUnreadMessageViaMessageUserMap(String userId) {
         logger.info("Getting unread message");
         List<Map<Short, Object>> messagesUsersMapList;
         try {
@@ -125,7 +126,7 @@ public class ReplyService {
         return Collections.emptyList();
     }
     @Transactional
-    public void UpdateReadStatus(String userId){
+    public void UpdateMessageUserMap(String userId){
         logger.info("Updating read status");
         List<MessagesUsersMap> messagesUsersMapList;
         try{

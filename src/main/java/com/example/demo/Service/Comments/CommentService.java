@@ -4,6 +4,7 @@ import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentVO;
+import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class CommentService {
         logger.info("Setting comment: {}", commentDTO);
         try {
             PostComment postComment = new PostComment();
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUIDCreator.CreateUUID();
             commentDTO.setCommentId(uuid);
             postComment.setId(uuid);
             MapCommentDTOtoPostComment(commentDTO, postComment);

@@ -26,4 +26,5 @@ public interface PostsGamesMapRepository extends JpaRepository<PostsGamesMap, St
             "JOIN afk.users_info ui ON ui.user_id = pum.user_id\n" +
             "WHERE pgm.game_id =:gameId",nativeQuery = true)
     List<Map<Short, Object>> findAllPostInfoWithOneGame(@Param("gameId") Short gameId);
+
 }

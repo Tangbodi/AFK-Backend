@@ -23,7 +23,7 @@ public class PostDTO {
     @NotBlank(message = "Content is required")
     @Length(max = 4095, message = "Text length not eligible")
     private String textRender;
-    private List<PostImage> images;
+    private List<PostImageDTO> images;
     private Long ipvFour;
     private String ipvSix;
     private Instant createdAt;

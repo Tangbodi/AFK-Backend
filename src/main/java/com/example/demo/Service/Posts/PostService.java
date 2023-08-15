@@ -6,9 +6,11 @@ import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.*;
+import com.example.demo.Model.VO.PostHistoryVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.SearchPostVO;
 import com.example.demo.Model.VO.ShowPostVO;
+import com.example.demo.Util.UUIDCreator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -17,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 public class PostService {
@@ -43,7 +43,7 @@ public class PostService {
         try {
             Document document = Jsoup.parse(postDTO.getTextRender());
             String textHTML = document.html();
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUIDCreator.CreateUUID();
             postDTO.setPostId(uuid);
             Post post = new Post();
             post.setId(uuid);
@@ -231,4 +231,43 @@ public class PostService {
         }
     }
 
+    public List<PostHistoryVO> GetAllPostsByUserId(String userId) {
+        logger.info("Getting all posts by user ID");
+        try {
+            List<Map<Short, Object>> allPostsByUserId = postsUsersMapRepository.findAllPostsByUserId(userId);
+            if (!allPostsByUserId.isEmpty()) {
+                logger.info("Got all posts by user ID");
+                return TransferToPostHistoryVO(allPostsByUserId);
+            } else {
+                logger.info("No posts found by user ID");
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get all posts by user ID", e);
+            return Collections.emptyList();
+        }
+    }
+
+    private static List<PostHistoryVO> TransferToPostHistoryVO(List<Map<Short, Object>> allPostsByUserId) {
+        logger.info("Transferring all posts by user ID to VO");
+        List<PostHistoryVO> postHistoryVOList = new ArrayList<>();
+        try {
+            for (Map<Short, Object> map : allPostsByUserId) {
+                PostHistoryVO postHistoryVO = new PostHistoryVO();
+                postHistoryVO.setPostId((String) map.get("post_id"));
+                postHistoryVO.setTitle((String) map.get("title"));
+                postHistoryVO.setView((Integer) map.get("view"));
+                postHistoryVO.setComment((Integer) map.get("comment"));
+                postHistoryVO.setLike((Integer) map.get("like"));
+                postHistoryVO.setFavorite((Integer) map.get("favorite"));
+                Timestamp timestamp = (Timestamp) map.get("created_at");
+                postHistoryVO.setCreated_at(timestamp.toInstant());
+                postHistoryVOList.add(postHistoryVO);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to transfer all posts by user ID to VO", e);
+            return Collections.emptyList();
+        }
+        return postHistoryVOList;
+    }
 }

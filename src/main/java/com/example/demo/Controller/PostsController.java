@@ -186,33 +186,6 @@ public class PostsController {
             }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
-//    @GetMapping("/all-games-genres/genre/latest-posts")
-//    public ResponseEntity ShowLatestPosts() {
-//        ApiResponse apiResponse;
-//        List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
-//        apiResponse = ApiResponse.success(latestPosts);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-//
-//    @GetMapping("/all-games-genres/genre/popular-posts")
-//    public ResponseEntity ShowPopularPosts() {
-//        ApiResponse apiResponse;
-//        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
-//        apiResponse = ApiResponse.success(popularPosts);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-//    @GetMapping("/all-games-genres/genre/newest-comment")
-//    public ResponseEntity ShowNewestComment() {
-//        ApiResponse apiResponse;
-//        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
-//        if (!newestCommentVOList.isEmpty()) {
-//            apiResponse = ApiResponse.success(newestCommentVOList);
-//        } else {
-//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
-//        }
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
     @PostMapping("/all-games-genres/genre/home-merged")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
@@ -240,5 +213,32 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
+//    @GetMapping("/all-games-genres/genre/latest-posts")
+//    public ResponseEntity ShowLatestPosts() {
+//        ApiResponse apiResponse;
+//        List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
+//        apiResponse = ApiResponse.success(latestPosts);
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
+//
+//    @GetMapping("/all-games-genres/genre/popular-posts")
+//    public ResponseEntity ShowPopularPosts() {
+//        ApiResponse apiResponse;
+//        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
+//        apiResponse = ApiResponse.success(popularPosts);
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
+//    @GetMapping("/all-games-genres/genre/newest-comment")
+//    public ResponseEntity ShowNewestComment() {
+//        ApiResponse apiResponse;
+//        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
+//        if (!newestCommentVOList.isEmpty()) {
+//            apiResponse = ApiResponse.success(newestCommentVOList);
+//        } else {
+//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
+//        }
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
 
 }

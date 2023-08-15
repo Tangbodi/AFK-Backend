@@ -80,9 +80,9 @@ public class NewsService {
                 news.setSource(GameSpot);
                 news.setCreatedAt(Instant.now());
                 news.setModifiedAt(Instant.now());
-                String userId = item.getElementsByTagName("guid").item(0).getTextContent();
-                logger.info("UserId: {}" + userId);
-                news.setId(userId);
+                String newsId = item.getElementsByTagName("guid").item(0).getTextContent();
+                logger.info("NewsId: {}" + newsId);
+                news.setId(newsId);
 
                 String title = item.getElementsByTagName("title").item(0).getTextContent();
                 logger.info("Title: {}" + title);

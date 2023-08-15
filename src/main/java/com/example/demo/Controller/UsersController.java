@@ -5,8 +5,10 @@ import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
+import com.example.demo.Model.VO.PostHistoryVO;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +33,7 @@ import org.springframework.web.util.HtmlUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @Validated
@@ -52,6 +56,8 @@ public class UsersController {
     private RedisUsernameService redisService;
     @Autowired
     private UserLoginService userLoginService;
+    @Autowired
+    private PostService postService;
 
     @PostMapping("/user/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
@@ -119,6 +125,19 @@ public class UsersController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+    @GetMapping("/user/user-info/get-posts")
+    public ResponseEntity GetPostsByUserId(HttpServletRequest request, HttpSession session) {
+        ApiResponse apiResponse;
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else {
+            List<PostHistoryVO> postHistoryVOList = postService.GetAllPostsByUserId(userId);
+            apiResponse = ApiResponse.success(postHistoryVOList);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
 
     @PostMapping("/user/logout")
     public ResponseEntity UserLogout(HttpServletRequest request) {

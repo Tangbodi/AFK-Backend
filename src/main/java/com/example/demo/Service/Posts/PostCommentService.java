@@ -17,12 +17,9 @@ import java.util.Map;
 public class PostCommentService {
     private static final Logger logger = LoggerFactory.getLogger(PostCommentService.class);
 
-    private final CommentRepository commentRepository;
-
     @Autowired
-    public PostCommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
+    private CommentRepository commentRepository;
+
 
     public List<NewestCommentVO> GetNewestComments() {
         logger.info("Getting newest comments");
