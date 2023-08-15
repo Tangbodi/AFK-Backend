@@ -216,6 +216,7 @@ public class PostsController {
     @PostMapping("/all-games-genres/genre/home-merged")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
+        logger.info("TypeDTO:::" + typeDTO.getType());
         if ("latest".equals(typeDTO.getType())) {
             List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
             apiResponse = ApiResponse.success(latestPosts);
