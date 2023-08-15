@@ -74,15 +74,4 @@ public class CommentsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/genre/newest-comment")
-    public ResponseEntity ShowNewestComment() {
-        ApiResponse apiResponse;
-        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
-        if (!newestCommentVOList.isEmpty()) {
-            apiResponse = ApiResponse.success(newestCommentVOList);
-        } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 }

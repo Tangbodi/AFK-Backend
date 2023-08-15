@@ -5,11 +5,13 @@ import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
+import com.example.demo.Model.DTO.TypeDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.Posts.PostCommentService;
 import com.example.demo.Service.Posts.PostGameMapService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Posts.PostService;
@@ -51,6 +53,8 @@ public class PostsController {
     private PostInfoService postInfoService;
     @Autowired
     private GameGenreMapService gameGenreMapService;
+    @Autowired
+    private PostCommentService postCommentService;
 
     @GetMapping("/all-games-genres/posts")
     public ResponseEntity ShowAllPostInfoWithOneGame(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
@@ -183,19 +187,52 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/genre/latest-posts")
-    public ResponseEntity ShowLatestPosts() {
+//    @GetMapping("/all-games-genres/genre/latest-posts")
+//    public ResponseEntity ShowLatestPosts() {
+//        ApiResponse apiResponse;
+//        List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
+//        apiResponse = ApiResponse.success(latestPosts);
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
+//
+//    @GetMapping("/all-games-genres/genre/popular-posts")
+//    public ResponseEntity ShowPopularPosts() {
+//        ApiResponse apiResponse;
+//        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
+//        apiResponse = ApiResponse.success(popularPosts);
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
+//    @GetMapping("/all-games-genres/genre/newest-comment")
+//    public ResponseEntity ShowNewestComment() {
+//        ApiResponse apiResponse;
+//        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
+//        if (!newestCommentVOList.isEmpty()) {
+//            apiResponse = ApiResponse.success(newestCommentVOList);
+//        } else {
+//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
+//        }
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
+    @PostMapping("/all-games-genres/genre/home-merged")
+    public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
-        List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
-        apiResponse = ApiResponse.success(latestPosts);
+        if ("latest".equals(typeDTO.getType())) {
+            List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
+            apiResponse = ApiResponse.success(latestPosts);
+        } else if ("popular".equals(typeDTO.getType())) {
+            List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
+            apiResponse = ApiResponse.success(popularPosts);
+        } else if ("newest".equals(typeDTO.getType())) {
+            List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
+            if (!newestCommentVOList.isEmpty()) {
+                apiResponse = ApiResponse.success(newestCommentVOList);
+            } else {
+                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
+            }
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+        }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/genre/popular-posts")
-    public ResponseEntity ShowPopularPosts() {
-        ApiResponse apiResponse;
-        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
-        apiResponse = ApiResponse.success(popularPosts);
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 }
