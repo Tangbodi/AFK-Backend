@@ -217,21 +217,26 @@ public class PostsController {
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
         logger.info("TypeDTO:::" + typeDTO.getType());
-        if ("latest".equals(typeDTO.getType())) {
-            List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
-            apiResponse = ApiResponse.success(latestPosts);
-        } else if ("popular".equals(typeDTO.getType())) {
-            List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
-            apiResponse = ApiResponse.success(popularPosts);
-        } else if ("newest".equals(typeDTO.getType())) {
-            List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
-            if (!newestCommentVOList.isEmpty()) {
-                apiResponse = ApiResponse.success(newestCommentVOList);
-            } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
-            }
-        } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+        switch(typeDTO.getType()){
+            case "latest":
+                List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
+                apiResponse = ApiResponse.success(latestPosts);
+                break;
+            case "popular":
+                List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
+                apiResponse = ApiResponse.success(popularPosts);
+                break;
+            case "newest":
+                List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
+                if (!newestCommentVOList.isEmpty()) {
+                    apiResponse = ApiResponse.success(newestCommentVOList);
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
+                }
+                break;
+            default:
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
