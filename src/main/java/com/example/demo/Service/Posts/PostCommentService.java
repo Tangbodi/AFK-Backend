@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,8 @@ public class PostCommentService {
                 newestCommentVO.setPostId((String) map.get("post_id"));
                 newestCommentVO.setContent((String) map.get("content"));
                 newestCommentVO.setGameName((String) map.get("game_name"));
+                Timestamp timestamp = (Timestamp) map.get("created_at");
+                newestCommentVO.setCreatedAt(timestamp.toInstant());
                 newestCommentVOList.add(newestCommentVO);
             } catch (Exception e) {
                 logger.error("Failed to transfer to newest comment VO", e);

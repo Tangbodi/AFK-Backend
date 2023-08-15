@@ -11,35 +11,11 @@ import java.util.Map;
 
 @Repository
 public interface PostsGamesMapRepository extends JpaRepository<PostsGamesMap, String> {
-    @Query(value = "WITH RankedPosts AS (\n" +
-            "    SELECT\n" +
-            "        post_id,\n" +
-            "        game_id,\n" +
-            "        genre_id,\n" +
-            "        created_at,\n" +
-            "        ROW_NUMBER() OVER (PARTITION BY genre_id ORDER BY created_at DESC) AS row_num  \n" +
-            "    FROM\n" +
-            "        afk.posts_games_map \n" +
-            "),\n" +
-            "PostsWithGame AS (\n" +
-            "    SELECT\n" +
-            "        rp.post_id,\n" +
-            "        p.title,\n" +
-            "        gm.game_name\n" +
-            "    FROM\n" +
-            "        RankedPosts rp\n" +
-            "    JOIN\n" +
-            "        afk.posts p ON rp.post_id = p.post_id\n" +
-            "    JOIN\n" +
-            "        afk.games gm ON rp.game_id = gm.game_id\n" +
-            "        WHERE row_num =1\n" +
-            ")\n" +
-            "SELECT\n" +
-            "    p.post_id,\n" +
-            "    p.title,\n" +
-            "    p.game_name\n" +
-            "FROM\n" +
-            "    PostsWithGame p;", nativeQuery = true)
+    @Query(value = "WITH RankedPosts AS ( SELECT post_id, game_id,  genre_id, created_at, ROW_NUMBER() \n" +
+            "OVER (PARTITION BY genre_id ORDER BY created_at DESC) AS row_num FROM afk.posts_games_map ),\n" +
+            "PostsWithGame AS (  SELECT rp.post_id, rp.genre_id, p.title, gm.game_name, rp.created_at FROM RankedPosts rp \n" +
+            "JOIN afk.posts p ON rp.post_id = p.post_id JOIN afk.games gm ON rp.game_id = gm.game_id\n" +
+            "WHERE row_num <=3) SELECT  p.post_id, p.genre_id, p.title, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC", nativeQuery = true)
     List<Map<Short, Object>> findLatestPostsGamesMap();
 
     @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment, pi.like, pi.favorite , ui.username\n" +

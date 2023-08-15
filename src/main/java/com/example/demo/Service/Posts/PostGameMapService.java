@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +50,8 @@ public class PostGameMapService {
                 latestPostVO.setPostId((String) map.get("post_id"));
                 latestPostVO.setTitle((String) map.get("title"));
                 latestPostVO.setGameName((String) map.get("game_name"));
+                Timestamp timestamp = (Timestamp) map.get("created_at");
+                latestPostVO.setCreatedAt(timestamp.toInstant());
                 latestPostVOList.add(latestPostVO);
             } catch (Exception e) {
                 logger.error("Failed to transfer to latest post VO", e);
