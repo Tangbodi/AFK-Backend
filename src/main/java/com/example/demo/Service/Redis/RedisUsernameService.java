@@ -11,8 +11,6 @@ import redis.clients.jedis.JedisPool;
 @Service
 public class RedisUsernameService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUsernameService.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String ALL_GAME_ICON_KEY = "ALL_GAME_ICON";
     @Autowired
     private JedisPool jedisPool;
 

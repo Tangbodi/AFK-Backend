@@ -1,5 +1,6 @@
 package com.example.demo.Service.Redis;
 
+import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class RedisEmailService {
 
     private static String GenerateEmailToken() {
         logger.info("Generating email token: {}");
-        String token = UUID.randomUUID().toString();
+        String token = UUIDCreator.CreateUUID();
         logger.info("Email token generated: {}" + token);
         return token;
     }
@@ -28,8 +29,8 @@ public class RedisEmailService {
         try {
             jedis = jedisPool.getResource();
             String token = GenerateEmailToken();
-            jedis.mset(token, newEmail);
-            jedis.expire(token, 600);
+            jedis.set(token, newEmail);
+            jedis.expire(token, 180);
             logger.info("Redis cache for email update set up successfully: {}" + newEmail);
             return token;
         } catch (Exception e) {

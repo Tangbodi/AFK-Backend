@@ -11,22 +11,21 @@ import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.IP.IpService;
-import com.example.demo.Service.Posts.PostCommentService;
-import com.example.demo.Service.Posts.PostGameMapService;
-import com.example.demo.Service.Posts.PostInfoService;
-import com.example.demo.Service.Posts.PostService;
+import com.example.demo.Service.Posts.*;
+import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -55,6 +54,10 @@ public class PostsController {
     private GameGenreMapService gameGenreMapService;
     @Autowired
     private PostCommentService postCommentService;
+    @Autowired
+    private RedisPostService redisPostService;
+    @Autowired
+    private PostImageService postImageService;
 
     @GetMapping("/all-games-genres/posts")
     public ResponseEntity ShowAllPostInfoWithOneGame(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
@@ -62,11 +65,11 @@ public class PostsController {
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
-        if(!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)){
+        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-        }else if(gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null){
+        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-        }else{
+        } else {
             List<PostInfoVO> showPostVOList = postInfoService.GetAllPostInfoWithOneGame(gameGenreMapIdDTO);
             apiResponse = ApiResponse.success(showPostVOList);
         }
@@ -81,7 +84,7 @@ public class PostsController {
         gameGenreMapIdDTO.setGenreId(genreId);
         if (!PostIdValidator.CheckPostId(postId) || !GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-        } else if(gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null){
+        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
         } else {
             GetPostDTO getPostDTO = new GetPostDTO();
@@ -107,9 +110,9 @@ public class PostsController {
         gameGenreMapIdDTO.setGenreId(genreId);
         if (!PostIdValidator.CheckPostId(postId) || !GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-        } else if(gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null){
+        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Post not found");
-        }else {
+        } else {
             GetPostDTO getPostDTO = new GetPostDTO();
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
@@ -154,43 +157,64 @@ public class PostsController {
     }
 
     @PostMapping(value = "/all-games-genres/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public ResponseEntity EditPost(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
+    public ResponseEntity SetPostInCache(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        }  else {
-                logger.info("EditPost:::userId:::" + userId);
-                String ipAddress = HttpUtils.getRequestIP(request);
-                logger.info("EditPost:::ipAddress:::" + ipAddress);
-                if (ipService.isValidInet4Address(ipAddress)) {
-                    logger.info("EditPost:::ipAddress is valid");
-                    String[] ip = ipAddress.split("\\.");
-                    logger.info("EditPost:::ipAddress split:::" + ip);
-                    Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                    logger.info("EditPost:::ipvF:::" + ipvF);
-                    postDTO.setIpvFour(ipvF);
-                } else if (ipService.isValidInet6Address(ipAddress)) {
-                    logger.info("EditPost:::ipAddress is valid");
-                    String[] ip = ipAddress.split(":");
-                    logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
-                    postDTO.setIpvSix(ip.toString());
-                } else {
-                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
-                    return ResponseEntity.badRequest().body(apiResponse);
-                }
-                postDTO.setUserId(userId);
-                postDTO.setCreatedAt(Instant.now());
-                PostSavedVO postSavedVO = postService.EditPost(postDTO);
-                apiResponse = ApiResponse.success(postSavedVO);
+        } else {
+            logger.info("EditPost:::userId:::" + userId);
+            String ipAddress = HttpUtils.getRequestIP(request);
+            logger.info("EditPost:::ipAddress:::" + ipAddress);
+            if (ipService.isValidInet4Address(ipAddress)) {
+                logger.info("EditPost:::ipAddress is valid");
+                String[] ip = ipAddress.split("\\.");
+                logger.info("EditPost:::ipAddress split:::" + ip);
+                Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
+                logger.info("EditPost:::ipvF:::" + ipvF);
+                postDTO.setIpvFour(ipvF);
+            } else if (ipService.isValidInet6Address(ipAddress)) {
+                logger.info("EditPost:::ipAddress is valid");
+                String[] ip = ipAddress.split(":");
+                logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
+                postDTO.setIpvSix(ip.toString());
+            } else {
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+                return ResponseEntity.badRequest().body(apiResponse);
             }
+            postDTO.setUserId(userId);
+            postDTO.setCreatedAt(Instant.now());
+            postService.SetPostCache(postDTO);
+            apiResponse = ApiResponse.success("Set Post Cache Successfully");
+        }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
+    @PostMapping("/all-games-genres/save-post")
+    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
+        ApiResponse apiResponse;
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else if (redisPostService.CheckPostCache(userId)) {
+            PostSavedVO postSavedVO = postService.SavePost(userId);
+            if(!imageFiles.isEmpty()){
+                postImageService.SavePostImage(imageFiles,postSavedVO.getPostId());
+            } else {
+                logger.info("No image uploaded");
+            }
+            apiResponse = ApiResponse.success(postSavedVO);
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC408.getCode(), "Request timeout, please try again");
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
     @PostMapping("/all-games-genres/genre/home-merged")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
         logger.info("TypeDTO:::" + typeDTO.getType());
-        switch(typeDTO.getType()){
+        switch (typeDTO.getType()) {
             case "latest":
                 List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
                 apiResponse = ApiResponse.success(latestPosts);

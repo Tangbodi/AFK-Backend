@@ -1,20 +1,42 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Util.ApiResponse;
+import com.example.demo.Mapper.Repository.PostImageRepository;
+import com.example.demo.Model.Entity.PostImage;
+import com.example.demo.Service.Posts.PostImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
 
 @RestController
 public class TestController {
     private static final Logger logger = LoggerFactory.getLogger(TestController.class);
-
-    @GetMapping("/getData")
-    public ResponseEntity getData() {
-        ApiResponse apiResponse = ApiResponse.success("Hello World");
-        return ResponseEntity.ok(apiResponse);
+    @Autowired
+    private PostImageRepository postImageRepository;
+    @Autowired
+    private PostImageService postImageService;
+    @PostMapping("/getData")
+    public ResponseEntity getData(@RequestParam("imageFiles") Queue<MultipartFile> imageFiles) throws IOException {
+        logger.info("getData:::"+imageFiles.size());
+        for (MultipartFile imageFile : imageFiles) {
+            byte[] imageData = imageFile.getBytes();
+            logger.info("ImageData for " + imageFile.getOriginalFilename() + ": " + imageData);
+            imageFile.getContentType();
+            System.out.println(imageFile.getContentType());
+            // Process the imageData as needed image/jpeg
+            int len = imageFile.getContentType().length();
+            String imageType = imageFile.getContentType().substring(6,len);
+            System.out.println(imageType);
+        }
+        return ResponseEntity.ok().build();
     }
 
 }

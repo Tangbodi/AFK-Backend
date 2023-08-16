@@ -53,7 +53,7 @@ public class UsersController {
     @Autowired
     private UserResetPasswordService userResetPasswordService;
     @Autowired
-    private RedisUsernameService redisService;
+    private RedisUsernameService redisUsernameService;
     @Autowired
     private UserLoginService userLoginService;
     @Autowired
@@ -68,8 +68,9 @@ public class UsersController {
         userRegisterDTO.setEmail(encodedEmail);
         if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             apiResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password and confirm password must be the same");
-        } else if (redisService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
+        } else if (redisUsernameService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Username already exists");
+            redisUsernameService.SetUsernameExistsCache(userRegisterDTO.getUsername());
         } else if (userRegistrationService.CheckEmailExists(userRegisterDTO.getEmail()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
         } else {
@@ -110,7 +111,7 @@ public class UsersController {
         } else if (res == 0) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but not verified, verification email has been sent out, please check your email");
         } else if (res == 2) {
-            apiResponse= ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
@@ -125,6 +126,7 @@ public class UsersController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @GetMapping("/user/user-info/get-posts")
     public ResponseEntity GetPostsByUserId(HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;

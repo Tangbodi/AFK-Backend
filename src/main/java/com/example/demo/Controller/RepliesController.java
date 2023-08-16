@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -93,13 +92,10 @@ public class RepliesController {
         if (userId == null) {
             apiResponse = ApiResponse.success(null);
         } else {
-            if(redisService.CacheExists(MESSAGE_MENTION_KEY+userId)){
-                List<MessageVO> messageVOList = replyService.GetUnreadMessageViaMessageUserMap(userId);
-                apiResponse = ApiResponse.success(messageVOList);
-            }
-            else{
-                apiResponse = ApiResponse.success(null);
-            }
+            //redisService.CacheExists(MESSAGE_MENTION_KEY+userId)
+            List<MessageVO> messageVOList = replyService.GetUnreadMessageViaMessageUserMap(userId);
+            apiResponse = ApiResponse.success(messageVOList);
+
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
