@@ -60,10 +60,10 @@ public class PostInfoService {
         }
         return popularPostVOList;
     }
-    public List<PostInfoVO> GetAllPostInfoWithOneGame(GameGenreMapIdDTO gameGenreMapIdDTO){
+    public List<PostInfoVO> GetAllPostInfoInOneGame(GameGenreMapIdDTO gameGenreMapIdDTO){
         logger.info("Getting all post info with one game");
         try {
-            List<Map<Short, Object>> allPostInfoWithOneGame = postsGamesMapRepository.findAllPostInfoWithOneGame(gameGenreMapIdDTO.getGameId());
+            List<Map<Short, Object>> allPostInfoWithOneGame = postsGamesMapRepository.findAllPostInfoInOneGame(gameGenreMapIdDTO.getGameId());
             if (!allPostInfoWithOneGame.isEmpty()) {
                 logger.info("Got all post info with one game");
                 return TransferToPostInfoVO(allPostInfoWithOneGame);

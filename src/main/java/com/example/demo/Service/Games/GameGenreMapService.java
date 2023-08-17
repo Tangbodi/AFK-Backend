@@ -17,24 +17,24 @@ public class GameGenreMapService {
     @Autowired
     private GamesGenresMapRepository gamesGenresMapRepository;
 
-    public GamesGenresMap FindGamesGenresMapById(GameGenreMapIdDTO gameGenreMapIdDTO) {
-        logger.info("Finding game genre map by id: genreId = {}, gameId = {}", gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
+    public GamesGenresMap FindGamesGenresMapById(Byte genreId, Short gameId) {
+        logger.info("Finding game genre map by id: genreId = {}, gameId = {}", genreId, gameId);
         GamesGenresMap gamesGenresMap;
         try {
             GamesGenresMapId gamesGenresMapId = new GamesGenresMapId();
-            gamesGenresMapId.setGenreId(gameGenreMapIdDTO.getGenreId());
-            gamesGenresMapId.setGameId(gameGenreMapIdDTO.getGameId());
+            gamesGenresMapId.setGenreId(genreId);
+            gamesGenresMapId.setGameId(gameId);
             gamesGenresMap = gamesGenresMapRepository.findById(gamesGenresMapId).orElse(null);
             if(gamesGenresMap != null) {
                 logger.info("Game genre map found");
+                return gamesGenresMap;
             } else {
                 logger.info("No game genre map found");
-                gamesGenresMap = new GamesGenresMap();
+                return null;
             }
         } catch (Exception e) {
             logger.error("Failed to find game genre map by id: {}", e.getMessage(), e);
-            gamesGenresMap = new GamesGenresMap();
         }
-        return gamesGenresMap;
+        return null;
     }
 }

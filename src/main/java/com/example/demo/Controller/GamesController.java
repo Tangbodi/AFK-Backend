@@ -6,12 +6,16 @@ import com.example.demo.Model.VO.GameGenreVO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
+import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.Games.GameService;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
+import com.example.demo.Util.GameIdValidator;
+import com.example.demo.Util.GenreIdValidator;
+import com.example.demo.Util.PostIdValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +47,8 @@ public class GamesController {
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired
     private GameService gameService;
+    @Autowired
+    private GameGenreMapService gameGenreMapService;
 
 
     @GetMapping("/all-games")
@@ -82,21 +88,27 @@ public class GamesController {
 //        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
 //    }
 
-    @PostMapping("/all-games/save-forums")
-    public ResponseEntity SaveForums(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
+    @PostMapping("/all-games/save-favorite-game")
+    public ResponseEntity SaveFavoriteGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        } else {
-            userFavoriteGameService.SetUserFavoriteGame(userId, gameGenreMapIdDTO.getGameId());
+        } else if (!GameIdValidator.CheckGameId(gameGenreMapIdDTO.getGameId()) || !GenreIdValidator.CheckGenreId(gameGenreMapIdDTO.getGenreId())) {
+            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
+        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(),gameGenreMapIdDTO.getGameId()) == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
+        }
+        else {
+            gameGenreMapIdDTO.setUserId(userId);
+            userFavoriteGameService.SetUserFavoriteGame(gameGenreMapIdDTO);
             apiResponse = ApiResponse.success(null);
         }
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/all-games/favorite-games")
-    public ResponseEntity GetUserFavoriteGames(HttpSession session) {
+    public ResponseEntity GetFavoriteGames(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         List<UserFavoriteGameVO> userFavoriteGameVOList;

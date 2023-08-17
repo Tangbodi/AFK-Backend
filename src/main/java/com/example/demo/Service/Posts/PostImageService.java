@@ -1,6 +1,7 @@
 package com.example.demo.Service.Posts;
 
 import com.example.demo.Mapper.Repository.PostImageRepository;
+import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Util.TimestampCreator;
@@ -32,14 +33,14 @@ public class PostImageService {
     private RedisPostService redisPostService;
 
     @Transactional
-    public void SavePostImage(List<MultipartFile> imageFiles, String postId) throws IOException {
+    public void SavePostImage(List<MultipartFile> imageFiles, PostDTO postDTO) throws IOException {
         logger.info("Setting up PostImage: {}");
         try {
             for (MultipartFile imageFile : imageFiles) {
                 String imageId = TimestampCreator.CreateTimestamp();
                 PostImage postImage = new PostImage();
                 postImage.setId(imageId);
-                postImage.setPostId(postId);
+                postImage.setPostId(postDTO.getPostId());
                 String imageType = imageFile.getContentType().substring(6, imageFile.getContentType().length());
                 String imageName = imageId + "." + imageType;
                 postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);

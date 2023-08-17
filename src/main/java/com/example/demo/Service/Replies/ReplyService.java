@@ -17,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReplyService {
@@ -60,6 +62,11 @@ public class ReplyService {
             logger.error("Failed to set reply", e);
         }
         return null;
+    }
+
+    public List<Map<Short, Object>> GetRepliesByCommentId(List<String> commentIds) {
+        List<Map<Short, Object>> replyList = replyRepository.findByCommentId(commentIds);
+        return replyList;
     }
 
     private static ReplyVO TransferToVO(ReplyDTO replyDTO) {
@@ -125,13 +132,14 @@ public class ReplyService {
         }
         return Collections.emptyList();
     }
+
     @Transactional
-    public void UpdateMessageUserMap(String userId){
+    public void UpdateMessageUserMap(String userId) {
         logger.info("Updating read status");
         List<MessagesUsersMap> messagesUsersMapList;
-        try{
+        try {
             messagesUsersMapList = messagesUsersMapRepository.findUnreadMessagesByMentionedUid(userId);
-            if (!messagesUsersMapList.isEmpty()){
+            if (!messagesUsersMapList.isEmpty()) {
                 messagesUsersMapList.stream()
                         .forEach(messagesUsersMap -> {
                             messagesUsersMap.setReadStatus(true);
@@ -139,7 +147,7 @@ public class ReplyService {
                         });
             }
             redisMessageService.DeleteUserReadStatus(userId);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to update read status", e);
         }
     }

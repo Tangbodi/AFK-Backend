@@ -18,13 +18,13 @@ public interface PostsGamesMapRepository extends JpaRepository<PostsGamesMap, St
             "WHERE row_num <=3) SELECT  p.post_id, p.genre_id, p.title, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC", nativeQuery = true)
     List<Map<Short, Object>> findLatestPostsGamesMap();
 
-    @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment, pi.like, pi.favorite , ui.username\n" +
+    @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment, pi.like, pi.favorite , ui.username, pgm.created_at\n" +
             "FROM afk.posts_games_map pgm \n" +
             "JOIN afk.posts_info pi ON pi.post_id = pgm.post_id \n" +
             "JOIN afk.posts p ON p.post_id = pgm.post_id\n" +
             "JOIN afk.posts_users_map pum ON pum.post_id = pgm.post_id\n" +
             "JOIN afk.users_info ui ON ui.user_id = pum.user_id\n" +
-            "WHERE pgm.game_id =:gameId",nativeQuery = true)
-    List<Map<Short, Object>> findAllPostInfoWithOneGame(@Param("gameId") Short gameId);
+            "WHERE pgm.game_id =:gameId ORDER BY created_at DESC",nativeQuery = true)
+    List<Map<Short, Object>> findAllPostInfoInOneGame(@Param("gameId") Short gameId);
 
 }

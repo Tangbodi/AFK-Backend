@@ -11,7 +11,7 @@ public class TimestampCreator {
     private static final Logger logger = Logger.getLogger(TimestampCreator.class.getName());
     public static String CreateTimestamp(){
         try{
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             String timestamp = sdf.format(new Date());
             return timestamp;
         }catch (Exception e){

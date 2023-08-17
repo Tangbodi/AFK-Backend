@@ -8,7 +8,6 @@ import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,19 +23,25 @@ public class ForumsSearchController {
     private PostService postService;
 
     @PostMapping("/search-forums")
-    public ResponseEntity searchForumsByKeyword(@Validated @RequestBody ForumSearchDTO forumSearchDTO) {
+    public ResponseEntity SearchForumsByKeyword(@Validated @RequestBody ForumSearchDTO forumSearchDTO) {
         ApiResponse apiResponse;
-        List<SearchPostVO> searchPostVOList = postService.SearchByKeyword(forumSearchDTO.getKeyword());
-        if (!searchPostVOList.isEmpty()) {
-            apiResponse = ApiResponse.success(searchPostVOList);
-        } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode() , "No search results found");
+        switch (forumSearchDTO.getType()) {
+            case "store":
+                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No search results found");
+                break;
+            case "forum":
+                List<SearchPostVO> searchPostVOList = postService.SearchByKeyword(forumSearchDTO.getKeyword());
+                if (!searchPostVOList.isEmpty()) {
+                    apiResponse = ApiResponse.success(searchPostVOList);
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No search results found");
+                }
+                break;
+            default:
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+                break;
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-//    @PostMapping("/search/store")
-//    public ResponseEntity searchMerchandiseByKeyword() {
-//
-//    }
 }

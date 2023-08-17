@@ -18,11 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostService {
@@ -46,33 +49,9 @@ public class PostService {
     public void SetPostCache(PostDTO postDTO) {
         logger.info("Setting post for userId: {}" + postDTO.getUserId());
         try {
-            Document document = Jsoup.parse(postDTO.getTextRender());
-            String textHTML = document.html();
             String uuid = UUIDCreator.CreateUUID();
             postDTO.setPostId(uuid);
-            Post post = new Post();
-            post.setId(uuid);
-            post.setTitle(postDTO.getTitle());
-            int start = textHTML.indexOf("<body>") + 6;
-            int end = textHTML.indexOf("</body>");
-            textHTML = textHTML.substring(start, end);
-            logger.info("Removed body tag from textHTML: {}" + textHTML);
-            post.setTextRender(textHTML);
-            post.setIpvFour(postDTO.getIpvFour());
-            post.setIpvSix(postDTO.getIpvSix());
-            post.setCreatedAt(postDTO.getCreatedAt());
-            post.setModifiedAt(postDTO.getCreatedAt());
-            redisPostService.SetPostCache(post, postDTO.getUserId());
-//            if (postRepository.save(post) != null) {
-//                logger.info("Post saved successfully: {}");
-//                SetPostInfo(postDTO);
-//                SetPostUserMap(postDTO);
-//                SetPostGameMap(postDTO);
-//            } else {
-//                logger.info("Failed to save post: {}");
-//            }
-//            PostSavedVO postSavedVO = TransferToPostSavedVO(postDTO);
-//            return postSavedVO;
+            redisPostService.SetPostCache(postDTO);
         } catch (Exception e) {
             logger.error("Failed to set post: {}", e.getMessage(), e);
         }
@@ -82,12 +61,38 @@ public class PostService {
     public PostSavedVO SavePost(String userId) {
         logger.info("Saving post");
         try {
-            Post post = redisPostService.GetPostViaCache(userId);
-            postRepository.save(post);
-            SetPostInfo(post);
-            SetPostUserMap(post, userId);
-            redisPostService.DeletePostCache(userId);
-            return TransferToPostSavedVO(post);
+            PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
+            if (postDTO != null) {
+                logger.info("Transfer postDTO to post");
+                postDTO.setCreatedAt(Instant.now());
+                Post post = new Post();
+                post.setId(postDTO.getPostId());
+                post.setTitle(postDTO.getTitle());
+                Document document = Jsoup.parse(postDTO.getTextRender());
+                String textHTML = document.html();
+                int start = textHTML.indexOf("<body>") + 6;
+                int end = textHTML.indexOf("</body>");
+                textHTML = textHTML.substring(start, end);
+                logger.info("Removed body tag from textHTML: {}" + textHTML);
+                post.setTextRender(textHTML);
+                post.setIpvFour(postDTO.getIpvFour());
+                post.setIpvSix(postDTO.getIpvSix());
+                post.setCreatedAt(postDTO.getCreatedAt());
+                post.setModifiedAt(postDTO.getCreatedAt());
+                if (postRepository.save(post) != null) {
+                    logger.info("Post saved successfully");
+                    SetPostInfo(postDTO);
+                    SetPostUserMap(postDTO);
+                    SetPostGameMap(postDTO);
+                } else {
+                    logger.info("Failed to save post");
+                    return null;
+                }
+            } else {
+                return null;
+            }
+            redisPostService.DeletePostCache(postDTO.getUserId());
+            return TransferToPostSavedVO(postDTO);
         } catch (Exception e) {
             logger.error("Failed to save post: {}", e.getMessage(), e);
         }
@@ -95,11 +100,11 @@ public class PostService {
     }
 
     @Transactional
-    public void SetPostInfo(Post post) {
+    public void SetPostInfo(PostDTO postDTO) {
         logger.info("Setting post info: {}");
         try {
             PostsInfo postsInfo = new PostsInfo();
-            postsInfo.setPostId(post.getId());
+            postsInfo.setPostId(postDTO.getPostId());
             postsInfo.setView(0);
             postsInfo.setComment(0);
             postsInfo.setLike(0);
@@ -115,32 +120,32 @@ public class PostService {
     }
 
     @Transactional
-    public void SetPostUserMap(Post post, String userId) {
+    public void SetPostUserMap(PostDTO postDTO) {
         logger.info("Setting post user map: {}");
         try {
             PostsUsersMapId postsUsersMapId = new PostsUsersMapId();
             PostsUsersMap postsUsersMap = new PostsUsersMap();
-            postsUsersMapId.setPostId(post.getId());
-            postsUsersMapId.setUserId(userId);
+            postsUsersMapId.setPostId(postDTO.getPostId());
+            postsUsersMapId.setUserId(postDTO.getUserId());
             postsUsersMap.setId(postsUsersMapId);
-            postsUsersMap.setCreatedAt(post.getCreatedAt());
-            postsUsersMap.setModifiedAt(post.getCreatedAt());
+            postsUsersMap.setCreatedAt(postDTO.getCreatedAt());
+            postsUsersMap.setModifiedAt(postDTO.getCreatedAt());
             if (postsUsersMapRepository.save(postsUsersMap) != null) {
                 logger.info("Post info saved successfully: {}");
             } else {
-                logger.info("Failed to save post info: {}");
+                logger.info("Failed to save post user map: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to set post info: {}", e.getMessage(), e);
+            logger.error("Failed to set post user map: {}", e.getMessage(), e);
         }
     }
 
-    private PostSavedVO TransferToPostSavedVO(Post post) {
-        logger.info("Transferring post to VO for post ID: {}", post.getId());
+    private PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
+        logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
         try {
             PostSavedVO postSavedVO = new PostSavedVO();
-            postSavedVO.setPostId(post.getId());
-            postSavedVO.setCreatedAt(post.getCreatedAt());
+            postSavedVO.setPostId(postDTO.getPostId());
+            postSavedVO.setCreatedAt(postDTO.getCreatedAt());
             return postSavedVO;
         } catch (Exception e) {
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);

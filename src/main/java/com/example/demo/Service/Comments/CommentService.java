@@ -4,6 +4,7 @@ import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentVO;
+import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,21 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
-    private final CommentRepository commentRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
-
+    private ReplyService replyService;
     @Transactional
     public CommentVO SetComment(CommentDTO commentDTO) {
         logger.info("Setting comment: {}", commentDTO);
@@ -60,7 +57,37 @@ public class CommentService {
     public List<Map<Short, Object>> GetAllCommentsByPostId(String postId) {
         return commentRepository.findByPostId(postId);
     }
-
+    public List<List<Object>> GetAllCommentsAndReplies(String postId){
+        List<Map<Short, Object>> commentsList = GetAllCommentsByPostId(postId);
+        List<String> commentIds = new ArrayList<>();
+        for (Map<Short, Object> row : commentsList) {
+            commentIds.add((String) row.get("comment_id"));
+        }
+        List<Map<Short, Object>> replyList = replyService.GetRepliesByCommentId(commentIds);
+        List<List<Object>> res = new ArrayList<>();
+        for (Map<Short, Object> commentRow : commentsList) {
+            String commentId = (String) commentRow.get("comment_id");
+            List<Map<String, String>> replies = new ArrayList<>();
+            for (Map<Short, Object> replyRow : replyList) {
+                Map<String, String> repliesMap = new HashMap<>();
+                String commentId2 = (String) replyRow.get("comment_id");
+                if (commentId.equals(commentId2)) {
+                    repliesMap.put("from_username", (String) replyRow.get("from_username"));
+                    repliesMap.put("to_username", (String) replyRow.get("to_username"));
+                    repliesMap.put("content", (String) replyRow.get("content"));
+                    repliesMap.put("created_at", replyRow.get("created_at").toString());
+                    replies.add(repliesMap);
+                } else {
+                    continue;
+                }
+            }
+            List<Object> combinedList = new ArrayList<>();
+            combinedList.add(commentRow);
+            combinedList.add(replies);
+            res.add(combinedList);
+        }
+        return res;
+    }
     private static void MapCommentDTOtoPostComment(CommentDTO commentDTO, PostComment postComment) {
         postComment.setPostId(commentDTO.getPostId());
         postComment.setContent(commentDTO.getContent());

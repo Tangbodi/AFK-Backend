@@ -2,6 +2,7 @@ package com.example.demo.Service.UserFavoriteGame;
 
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Mapper.Repository.UsersFavoriteGamesRepository;
+import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
 import com.example.demo.Model.VO.LatestPostVO;
@@ -25,13 +26,14 @@ public class UserFavoriteGameService {
     private UsersFavoriteGamesRepository usersFavoriteGamesRepository;
 
     @Transactional
-    public void SetUserFavoriteGame(String userId, Short gameId) {
-        logger.info("Setting user favorite game for user ID: {}, game ID: {}", userId, gameId);
+    public void SetUserFavoriteGame(GameGenreMapIdDTO gameGenreMapIdDTO) {
+        logger.info("Setting user favorite game for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
+                gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
 
         try {
             UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
-            usersFavoriteGameId.setUserId(userId);
-            usersFavoriteGameId.setGameId(gameId);
+            usersFavoriteGameId.setUserId(gameGenreMapIdDTO.getUserId());
+            usersFavoriteGameId.setGameId(gameGenreMapIdDTO.getGameId());
             UsersFavoriteGame usersFavoriteGame = usersFavoriteGamesRepository.findById(usersFavoriteGameId)
                     .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
 
@@ -39,7 +41,8 @@ public class UserFavoriteGameService {
             usersFavoriteGame.setModifiedAt(Instant.now());
             usersFavoriteGamesRepository.save(usersFavoriteGame);
 
-            logger.info("User favorite game set successfully for user ID: {}, game ID: {}", userId, gameId);
+            logger.info("User favorite game set successfully for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
+                    gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
         } catch (Exception e) {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
             throw e; // Re-throw the exception to be handled at the controller level

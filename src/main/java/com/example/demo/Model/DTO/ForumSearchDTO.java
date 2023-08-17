@@ -8,6 +8,9 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class ForumSearchDTO {
+
+    @NotBlank(message = "Type is required")
+    private String type;
     @NotBlank(message = "Keyword is required")
     @Length(min = 1, max = 99, message = "Keyword length not eligible")
     @ValidForumKeyword(message = "Keyword can't contain special characters or whitespace")
