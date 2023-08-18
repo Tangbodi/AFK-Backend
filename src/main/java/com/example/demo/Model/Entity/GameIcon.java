@@ -24,6 +24,11 @@ public class GameIcon {
     @Column(name = "genre_id", nullable = false)
     private Byte genreId;
 
+    @Size(max = 127)
+    @NotNull
+    @Column(name = "game_name", nullable = false, length = 127)
+    private String gameName;
+
     @Size(max = 69)
     @NotNull
     @Column(name = "icon_path", nullable = false, length = 69)

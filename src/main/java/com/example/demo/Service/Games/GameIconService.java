@@ -2,7 +2,10 @@ package com.example.demo.Service.Games;
 
 import com.example.demo.Mapper.Repository.GameIconRepository;
 import com.example.demo.Mapper.Repository.HomeGameImageRepository;
+import com.example.demo.Model.DTO.GameGenreMapIdDTO;
+import com.example.demo.Model.Entity.GameIcon;
 import com.example.demo.Model.VO.GameIconVO;
+import com.example.demo.Model.VO.GameVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +36,6 @@ public class GameIconService {
         }
     }
 
-//    public List<Map<Short, Object>> GetGameIconsUnderOneGenre(Byte genreId) {
-//        logger.info("Getting game icons under one genre: genreId = {}", genreId);
-//        try {
-//            return gameIconsRepository.findAllGameIconUnderOneGenre(genreId);
-//        } catch (Exception e) {
-//            logger.error("Failed to get game icons under one genre: {}", e.getMessage(), e);
-//            return Collections.emptyList();
-//        }
-//    }
 
     private static List<GameIconVO> MapGameIconsToVOList(List<Map<Short, Object>> gameIconList) {
         logger.info("Transferring game icons to VO");
@@ -86,6 +80,27 @@ public class GameIconService {
             return Collections.emptyList();
         }
         return homeGameImageVOList;
+    }
+    public GameIconVO GetGameById(GameGenreMapIdDTO gameGenreMapIdDTO) {
+        logger.info("Getting game by id: gameId = {}", gameGenreMapIdDTO.getGameId());
+        try {
+            GameIcon gameIcon = gameIconRepository.findById(gameGenreMapIdDTO.getGameId()).orElse(null);
+            if(gameIcon == null) {
+                logger.info("Game not found with id: {}", gameGenreMapIdDTO.getGameId());
+                return null;
+            }else{
+                GameIconVO gameIconVO = new GameIconVO();
+                gameIconVO.setGenreId(gameIcon.getGenreId());
+                gameIconVO.setGameId(gameIcon.getId());
+                gameIconVO.setGameName(gameIcon.getGameName());
+                gameIconVO.setIconUrl(gameIcon.getIconUrl());
+                return gameIconVO;
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to get game by id: {}", e.getMessage(), e);
+            return null;
+        }
     }
 }
 

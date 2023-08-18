@@ -5,4 +5,7 @@ import lombok.Data;
 @Data
 public class GameVO {
     private Short gameId;
+    private Byte genreId;
+    private String gameName;
+    private String iconUrl;
 }

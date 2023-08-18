@@ -8,5 +8,6 @@ public class GameIconVO {
     private Byte genreId;
     private String gameName;
     private String iconUrl;
+    private String description;
 
 }
