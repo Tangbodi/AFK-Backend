@@ -1,11 +1,9 @@
 package com.example.demo.Service.UserFavoriteGame;
 
-import com.example.demo.Exception.UserNotFoundException;
-import com.example.demo.Mapper.Repository.UsersFavoriteGamesRepository;
+import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
-import com.example.demo.Model.VO.LatestPostVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +21,10 @@ import java.util.Map;
 public class UserFavoriteGameService {
     private static final Logger logger = LoggerFactory.getLogger(UserFavoriteGameService.class);
     @Autowired
-    private UsersFavoriteGamesRepository usersFavoriteGamesRepository;
+    private UserFavoriteGameRepository userFavoriteGameRepository;
 
     @Transactional
-    public void SetUserFavoriteGame(GameGenreMapIdDTO gameGenreMapIdDTO) {
+    public boolean SetUserFavoriteGame(GameGenreMapIdDTO gameGenreMapIdDTO) {
         logger.info("Setting user favorite game for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
                 gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
 
@@ -34,21 +32,23 @@ public class UserFavoriteGameService {
             UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
             usersFavoriteGameId.setUserId(gameGenreMapIdDTO.getUserId());
             usersFavoriteGameId.setGameId(gameGenreMapIdDTO.getGameId());
-            UsersFavoriteGame usersFavoriteGame = usersFavoriteGamesRepository.findById(usersFavoriteGameId)
+            UsersFavoriteGame usersFavoriteGame = userFavoriteGameRepository.findById(usersFavoriteGameId)
                     .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
 
             usersFavoriteGame.setFavoriteStatus(!usersFavoriteGame.getFavoriteStatus());
             usersFavoriteGame.setModifiedAt(Instant.now());
-            usersFavoriteGamesRepository.save(usersFavoriteGame);
-
-            logger.info("User favorite game set successfully for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
+            userFavoriteGameRepository.save(usersFavoriteGame);
+            logger.info("User favorite game saved successfully for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
                     gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
+
+            return usersFavoriteGame.getFavoriteStatus();
         } catch (Exception e) {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
-            throw e; // Re-throw the exception to be handled at the controller level
+
         }
+        return false;
     }
-    @Transactional
+
     private UsersFavoriteGame CreateUserFavoriteGame(UsersFavoriteGameId usersFavoriteGameId) {
         logger.info("Creating user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
 
@@ -60,11 +60,12 @@ public class UserFavoriteGameService {
         logger.info("Created user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
         return usersFavoriteGame;
     }
+
     public List<UserFavoriteGameVO> GetUserFavoriteGames(String userId) {
         logger.info("Getting user favorite games for user ID: {}", userId);
 
         try {
-            List<Map<Short, Object>> userFavoriteGames = usersFavoriteGamesRepository.findByUserId(userId);
+            List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findByUserId(userId);
             if (!userFavoriteGames.isEmpty()) {
                 logger.info("User favorite games found for user ID: {}", userId);
                 return TransferToUserFavoriteGameVO(userFavoriteGames);
@@ -78,11 +79,12 @@ public class UserFavoriteGameService {
             return Collections.emptyList();
         }
     }
-    private static List<UserFavoriteGameVO> TransferToUserFavoriteGameVO(List<Map<Short, Object>> userFavoriteGames){
+
+    private static List<UserFavoriteGameVO> TransferToUserFavoriteGameVO(List<Map<Short, Object>> userFavoriteGames) {
         logger.info("Transferring user favorite games to VO");
-        try{
+        try {
             List<UserFavoriteGameVO> userFavoriteGameVOList = new ArrayList<>();
-            for(Map<Short, Object> map : userFavoriteGames){
+            for (Map<Short, Object> map : userFavoriteGames) {
                 UserFavoriteGameVO userFavoriteGameVO = new UserFavoriteGameVO();
                 userFavoriteGameVO.setGameId((Short) map.get("icon_id"));
                 userFavoriteGameVO.setGenreId((Byte) map.get("genre_id"));
@@ -91,9 +93,9 @@ public class UserFavoriteGameService {
                 userFavoriteGameVOList.add(userFavoriteGameVO);
             }
             return userFavoriteGameVOList;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error transferring user favorite games to VO: {}", e.getMessage(), e);
-            throw e;
         }
+        return Collections.emptyList();
     }
 }

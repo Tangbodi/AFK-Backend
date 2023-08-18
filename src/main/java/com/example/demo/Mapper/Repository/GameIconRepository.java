@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface GameIconsRepository extends JpaRepository<GameIcon, Short>{
+public interface GameIconRepository extends JpaRepository<GameIcon, Short>{
     @Query(value = "SELECT afk.game_icons.icon_id, afk.game_icons.game_name, afk.game_icons.icon_url\n" +
             "FROM afk.game_icons\n" +
             "LEFT JOIN afk.games_genres_map ON game_icons.game_id = games_genres_map.game_id\n" +

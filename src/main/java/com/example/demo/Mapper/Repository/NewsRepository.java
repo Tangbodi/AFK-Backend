@@ -10,6 +10,9 @@ import java.util.List;
 @Repository
 public interface NewsRepository extends JpaRepository<News, String>{
 
-    @Query(value = "SELECT * FROM afk.news WHERE pub_date <= DATE_SUB(CURDATE(), INTERVAL 2 DAY)",nativeQuery = true)
+    @Query(value = "SELECT *\n" +
+            "FROM afk.news\n" +
+            "WHERE STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)\n" +
+            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') DESC",nativeQuery = true)
     List<News> findNewsByPublishDate();
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 public interface PostsInfoRepository extends JpaRepository<PostsInfo, String> {
     @Query(value = "SELECT\n" +
             "    p.post_id,\n" +
-            "    ps.title,\n" +
+            "    p.title,\n" +
             "    gm.game_name\n" +
             "FROM\n" +
             "    posts_info c\n" +
@@ -22,8 +22,6 @@ public interface PostsInfoRepository extends JpaRepository<PostsInfo, String> {
             "    afk.posts_games_map pgm ON p.post_id = pgm.post_id\n" +
             "JOIN\n" +
             "    afk.games gm ON pgm.game_id = gm.game_id\n" +
-            "JOIN\n" +
-            "    afk.posts ps ON c.post_id = ps.post_id\n" +
             "ORDER BY\n" +
             "    (c.comment + c.view) DESC\n" +
             "LIMIT\n" +

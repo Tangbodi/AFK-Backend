@@ -36,11 +36,11 @@ public class PostService {
     @Autowired
     private PostsInfoRepository postsInfoRepository;
     @Autowired
-    private PostsUsersMapRepository postsUsersMapRepository;
+    private PostUserMapRepository postUserMapRepository;
     @Autowired
-    private PostsGamesMapRepository postsGamesMapRepository;
+    private PostGameMapRepository postGameMapRepository;
     @Autowired
-    private UsersInfoRepository usersInfoRepository;
+    private UserInfoRepository userInfoRepository;
     @Autowired
     private RedisPostService redisPostService;
     @Autowired
@@ -130,7 +130,7 @@ public class PostService {
             postsUsersMap.setId(postsUsersMapId);
             postsUsersMap.setCreatedAt(postDTO.getCreatedAt());
             postsUsersMap.setModifiedAt(postDTO.getCreatedAt());
-            if (postsUsersMapRepository.save(postsUsersMap) != null) {
+            if (postUserMapRepository.save(postsUsersMap) != null) {
                 logger.info("Post info saved successfully: {}");
             } else {
                 logger.info("Failed to save post user map: {}");
@@ -163,7 +163,7 @@ public class PostService {
             postsGamesMap.setGenreId(postDTO.getGenreId());
             postsGamesMap.setCreatedAt(postDTO.getCreatedAt());
             postsGamesMap.setModifiedAt(postDTO.getCreatedAt());
-            if (postsGamesMapRepository.save(postsGamesMap) != null) {
+            if (postGameMapRepository.save(postsGamesMap) != null) {
                 logger.info("Post game map saved successfully: {}");
             } else {
                 logger.info("Failed to save post game map: {}");
@@ -178,18 +178,15 @@ public class PostService {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-            PostsGamesMap postsGamesMap = postsGamesMapRepository.findById(getPostDTO.getPostId()).orElse(null);
-            Post post = postRepository.findById(getPostDTO.getPostId()).orElse(null);
-            if (postsGamesMap == null || post == null) {
+//            PostsGamesMap postsGamesMap = postsGamesMapRepository.findById(getPostDTO.getPostId()).orElse(null);
+//            Post post = postRepository.findById(getPostDTO.getPostId()).orElse(null);
+            List<Map<Short,Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(),getPostDTO.getGameId(),getPostDTO.getPostId());
+            if (post.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
-            } else if (postsGamesMap.getId().equals(getPostDTO.getPostId()) &&
-                    postsGamesMap.getGameId().equals(getPostDTO.getGameId()) &&
-                    postsGamesMap.getGenreId().equals(getPostDTO.getGenreId())) {
-                return TransferToShowPostVO(post);
             } else {
-                logger.info("PostId, GenreId, and GameId doesn't match with ID: " + getPostDTO.getPostId());
-                return null;
+
+                return TransferToShowPostVO(post);
             }
         } catch (PostNotFoundException e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
@@ -200,25 +197,19 @@ public class PostService {
         }
     }
 
-    private ShowPostVO TransferToShowPostVO(Post post) {
-        logger.info("Transferring post to VO for post ID: {}", post.getId());
-
+    private ShowPostVO TransferToShowPostVO(List<Map<Short,Object>> post) {
+        logger.info("Transferring post to VO for post ID: {}");
         try {
             ShowPostVO showPostVO = new ShowPostVO();
-            String postId = post.getId();
-            PostsUsersMap postsUsersMap = postsUsersMapRepository.findByPostId(postId)
-                    .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
-
-            String userId = postsUsersMap.getId().getUserId();
-            UsersInfo userInfo = usersInfoRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-
-            showPostVO.setUserName(userInfo.getUsername());
-            showPostVO.setTitle(post.getTitle());
-            showPostVO.setTextRender(post.getTextRender());
-            showPostVO.setCreatedAt(post.getCreatedAt());
-
-            logger.info("Transferred post to VO successfully for post ID: {}", post.getId());
+            for(Map<Short,Object> map : post){
+                showPostVO.setPostId((String) map.get("post_id"));
+                showPostVO.setUserName((String) map.get("username"));
+                showPostVO.setTitle((String) map.get("title"));
+                showPostVO.setTextRender((String) map.get("text_render"));
+                Timestamp timestamp = (Timestamp) map.get("created_at");
+                showPostVO.setCreatedAt(timestamp.toInstant());
+            }
+            logger.info("Transferred post to VO successfully for post ID: {}", showPostVO.getPostId());
             return showPostVO;
         } catch (PostNotFoundException | UserNotFoundException e) {
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
@@ -256,10 +247,10 @@ public class PostService {
         }
     }
 
-    public List<PostHistoryVO> GetAllPostsByUserId(String userId) {
+    public List<PostHistoryVO> FindAllPostsHistory(String userId) {
         logger.info("Getting all posts by user ID");
         try {
-            List<Map<Short, Object>> allPostsByUserId = postsUsersMapRepository.findAllPostsByUserId(userId);
+            List<Map<Short, Object>> allPostsByUserId = postUserMapRepository.findAllPostsHistory(userId);
             if (!allPostsByUserId.isEmpty()) {
                 logger.info("Got all posts by user ID");
                 return TransferToPostHistoryVO(allPostsByUserId);

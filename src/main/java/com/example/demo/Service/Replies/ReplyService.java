@@ -1,7 +1,7 @@
 package com.example.demo.Service.Replies;
 
-import com.example.demo.Mapper.Repository.MessagesRepository;
-import com.example.demo.Mapper.Repository.MessagesUsersMapRepository;
+import com.example.demo.Mapper.Repository.MessageRepository;
+import com.example.demo.Mapper.Repository.MessageUserMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.ReplyDTO;
 import com.example.demo.Model.Entity.Message;
@@ -28,9 +28,9 @@ public class ReplyService {
     @Autowired
     private ReplyRepository replyRepository;
     @Autowired
-    private MessagesRepository messagesRepository;
+    private MessageRepository messageRepository;
     @Autowired
-    private MessagesUsersMapRepository messagesUsersMapRepository;
+    private MessageUserMapRepository messageUserMapRepository;
     @Autowired
     private RedisMessageService redisMessageService;
 
@@ -89,7 +89,7 @@ public class ReplyService {
             message.setToUid(replyDTO.getToUid());
             message.setCreatedAt(replyDTO.getCreatedAt());
             message.setModifiedAt(replyDTO.getCreatedAt());
-            return messagesRepository.save(message);
+            return messageRepository.save(message);
         } catch (Exception e) {
             logger.error("Failed to set reply mention", e);
         }
@@ -103,7 +103,7 @@ public class ReplyService {
             messagesUsersMap.setMessageId(message.getId());
             messagesUsersMap.setMentionedUid(message.getToUid());
             messagesUsersMap.setReadStatus(false);
-            messagesUsersMapRepository.save(messagesUsersMap);
+            messageUserMapRepository.save(messagesUsersMap);
         } catch (Exception e) {
             logger.error("Failed to set message user map", e);
         }
@@ -113,7 +113,7 @@ public class ReplyService {
         logger.info("Getting unread message");
         List<Map<Short, Object>> messagesUsersMapList;
         try {
-            messagesUsersMapList = messagesUsersMapRepository.findUnreadMessages(userId);
+            messagesUsersMapList = messageUserMapRepository.findUnreadMessages(userId);
             logger.info("Unread message list size: " + messagesUsersMapList.size());
             if (!messagesUsersMapList.isEmpty()) {
                 redisMessageService.SetUserReadStatus(userId);
@@ -138,12 +138,12 @@ public class ReplyService {
         logger.info("Updating read status");
         List<MessagesUsersMap> messagesUsersMapList;
         try {
-            messagesUsersMapList = messagesUsersMapRepository.findUnreadMessagesByMentionedUid(userId);
+            messagesUsersMapList = messageUserMapRepository.findUnreadMessagesByMentionedUid(userId);
             if (!messagesUsersMapList.isEmpty()) {
                 messagesUsersMapList.stream()
                         .forEach(messagesUsersMap -> {
                             messagesUsersMap.setReadStatus(true);
-                            messagesUsersMapRepository.save(messagesUsersMap);
+                            messageUserMapRepository.save(messagesUsersMap);
                         });
             }
             redisMessageService.DeleteUserReadStatus(userId);

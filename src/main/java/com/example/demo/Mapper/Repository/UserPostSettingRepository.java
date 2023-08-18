@@ -1,9 +1,9 @@
 package com.example.demo.Mapper.Repository;
 
-import com.example.demo.Model.Entity.Message;
+import com.example.demo.Model.Entity.UsersPostsSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MessagesRepository extends JpaRepository<Message,Long> {
+public interface UserPostSettingRepository extends JpaRepository<UsersPostsSetting, String> {
 }

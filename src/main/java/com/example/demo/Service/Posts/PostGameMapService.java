@@ -1,6 +1,6 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.PostsGamesMapRepository;
+import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Model.VO.LatestPostVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +18,13 @@ public class PostGameMapService {
     private static final Logger logger = LoggerFactory.getLogger(PostGameMapService.class);
 
     @Autowired
-    private PostsGamesMapRepository postsGamesMapRepository;
+    private PostGameMapRepository postGameMapRepository;
 
 
     public List<LatestPostVO> ShowLatestPosts() {
         logger.info("Showing latest posts");
         try {
-            List<Map<Short, Object>> postsGamesMaps = postsGamesMapRepository.findLatestPostsGamesMap();
+            List<Map<Short, Object>> postsGamesMaps = postGameMapRepository.findLatestPostsGamesMap();
             if (!postsGamesMaps.isEmpty()) {
                 logger.info("Latest posts found");
                 return TransferToLatestPostVO(postsGamesMaps);

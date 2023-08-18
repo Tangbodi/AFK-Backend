@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersAuth;
 
-import com.example.demo.Mapper.Repository.UsersAuthRepository;
+import com.example.demo.Mapper.Repository.UserAuthRepository;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersAuth;
@@ -20,7 +20,7 @@ import java.time.Instant;
 public class UserAuthService {
     private static final Logger logger = LoggerFactory.getLogger(UserAuthService.class);
     @Autowired
-    private UsersAuthRepository usersAuthRepository;
+    private UserAuthRepository userAuthRepository;
     @Lazy
     @Autowired
     private UserVerificationService userVerificationService;
@@ -38,7 +38,7 @@ public class UserAuthService {
             usersAuth.setIsBlocked(false);
             usersAuth.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersAuth.setModifiedAt(userRegisterDTO.getCreatedAt());
-            usersAuthRepository.save(usersAuth);
+            userAuthRepository.save(usersAuth);
         } catch (Exception e) {
             logger.error("Failed to set UsersAuth: {}", e.getMessage(), e);
         }
@@ -47,7 +47,7 @@ public class UserAuthService {
     public int CheckUserExistsAndAuth(UserLoginDTO userLoginDTO, HttpServletRequest request) {
         logger.info("Checking if username exists: {}", userLoginDTO.getUsername());
         try {
-            UsersAuth usersAuth = usersAuthRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
+            UsersAuth usersAuth = userAuthRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
             if (usersAuth == null) {
                 logger.info("Username does not exists: {}", userLoginDTO.getUsername());
                 return -1;
@@ -78,14 +78,14 @@ public class UserAuthService {
     public boolean UpdateUserAuth(String userId) {
         logger.info("Updating user's verification status: {}", userId);
         try {
-            UsersAuth usersAuth = usersAuthRepository.findById(userId).orElse(null);
+            UsersAuth usersAuth = userAuthRepository.findById(userId).orElse(null);
             if (usersAuth == null) {
                 logger.info("User not found with id: {}", userId);
                 return false;
             } else {
                 usersAuth.setIsVerified(true);
                 usersAuth.setModifiedAt(Instant.now());
-                usersAuthRepository.save(usersAuth);
+                userAuthRepository.save(usersAuth);
                 logger.info("Updated user's verification status: {}", userId);
                 return true;
             }

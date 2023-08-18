@@ -1,8 +1,6 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Exception.GameNotFoundException;
-import com.example.demo.Exception.PostNotFoundException;
-import com.example.demo.Mapper.Repository.GamesRepository;
+import com.example.demo.Mapper.Repository.GameRepository;
 import com.example.demo.Model.Entity.Game;
 import com.example.demo.Model.VO.GameVO;
 import org.slf4j.Logger;
@@ -14,11 +12,11 @@ import org.springframework.stereotype.Service;
 public class GameService {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
     @Autowired
-    private GamesRepository gamesRepository;
+    private GameRepository gameRepository;
     public GameVO GetGameById(Short gameId) {
         logger.info("Getting game by id: gameId = {}", gameId);
         try {
-            Game game = gamesRepository.findById(gameId).orElse(null);
+            Game game = gameRepository.findById(gameId).orElse(null);
             if(game == null) {
                 logger.info("Game not found with id: {}", gameId);
                 return null;

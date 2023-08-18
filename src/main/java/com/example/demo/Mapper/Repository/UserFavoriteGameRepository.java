@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface UsersFavoriteGamesRepository extends JpaRepository<UsersFavoriteGame, UsersFavoriteGameId> {
+public interface UserFavoriteGameRepository extends JpaRepository<UsersFavoriteGame, UsersFavoriteGameId> {
 
     @Query(value = "SELECT gi.icon_id, gi.genre_id, gi.game_name, gi.icon_url\n" +
             "FROM game_icons gi\n" +

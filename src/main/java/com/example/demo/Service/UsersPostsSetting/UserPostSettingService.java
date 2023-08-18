@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersPostsSetting;
 
-import com.example.demo.Mapper.Repository.UsersPostsSettingRepository;
+import com.example.demo.Mapper.Repository.UserPostSettingRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersPostsSetting;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 public class UserPostSettingService {
     private static final Logger logger = LoggerFactory.getLogger(UserPostSettingService.class);
     @Autowired
-    private UsersPostsSettingRepository usersPostsSettingRepository;
+    private UserPostSettingRepository userPostSettingRepository;
 
     @Transactional
     public void SaveSetting(UserRegisterDTO userRegisterDTO) {
@@ -25,7 +25,7 @@ public class UserPostSettingService {
             usersPostsSetting.setMentionOn(true);
             usersPostsSetting.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersPostsSetting.setModifiedAt(userRegisterDTO.getCreatedAt());
-            usersPostsSettingRepository.save(usersPostsSetting);
+            userPostSettingRepository.save(usersPostsSetting);
         } catch (Exception e) {
             logger.error("Failed to set UsersPostsSetting: {}", e.getMessage(),e);
         }

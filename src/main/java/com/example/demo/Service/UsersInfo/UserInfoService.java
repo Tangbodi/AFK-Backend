@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersInfo;
 
-import com.example.demo.Mapper.Repository.UsersInfoRepository;
+import com.example.demo.Mapper.Repository.UserInfoRepository;
 import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
@@ -21,7 +21,7 @@ import java.time.Instant;
 public class UserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
     @Autowired
-    private UsersInfoRepository usersInfoRepository;
+    private UserInfoRepository userInfoRepository;
     @Autowired
     private RedisEmailService redisEmailService;
     @Lazy
@@ -31,7 +31,7 @@ public class UserInfoService {
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
+            UsersInfo usersInfo = userInfoRepository.findByUsername(username).orElse(null);
             if (usersInfo != null) {
                 logger.info("Username: {}" + usersInfo.getUsername());
                 return usersInfo;
@@ -47,7 +47,7 @@ public class UserInfoService {
     public UsersInfo CheckEmailExists(String email) {
         logger.info("Checking if email exists: {}", email);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findByEmail(email).orElse(null);
+            UsersInfo usersInfo = userInfoRepository.findByEmail(email).orElse(null);
             if (usersInfo != null) {
                 logger.info("Email: {}" + usersInfo.getEmail());
                 return usersInfo;
@@ -70,7 +70,7 @@ public class UserInfoService {
             usersInfo.setEmail(userRegisterDTO.getEmail());
             usersInfo.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
-            usersInfoRepository.save(usersInfo);
+            userInfoRepository.save(usersInfo);
         } catch (Exception e) {
             logger.error("Failed to set UsersInfo: {}", e.getMessage(),e);
         }
@@ -79,7 +79,7 @@ public class UserInfoService {
     public UserInfoDTO GetUserInfoByUsername(String username) {
         logger.info("Getting UsersInfo: {}" + username);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findByUsername(username).orElse(null);
+            UsersInfo usersInfo = userInfoRepository.findByUsername(username).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
                 UserInfoDTO userInfoDTO = new UserInfoDTO();
@@ -102,7 +102,7 @@ public class UserInfoService {
     public UserInfoDTO GetUserInfoByUserId(String userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
+            UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
 //                UserInfoVO userInfoVO = new UserInfoVO();
@@ -144,14 +144,14 @@ public class UserInfoService {
     public boolean UpdateUserEmail(String userId, String email) {
         logger.info("Updating email: {}" + userId + "::::::" + email);
         try {
-            UsersInfo usersInfo = usersInfoRepository.findById(userId).orElse(null);
+            UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
                 logger.info("Old email: {}" + usersInfo.getEmail());
                 usersInfo.setEmail(email);
                 logger.info("New email: {}" + email);
                 usersInfo.setModifiedAt(Instant.now());
-                usersInfoRepository.save(usersInfo);
+                userInfoRepository.save(usersInfo);
                 logger.info("Updated email successfully: {}");
                 return true;
             } else {

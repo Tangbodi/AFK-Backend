@@ -1,9 +1,8 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.PostsGamesMapRepository;
+import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Mapper.Repository.PostsInfoRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
-import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.VO.PopularPostVO;
 import com.example.demo.Model.VO.PostInfoVO;
 import org.slf4j.Logger;
@@ -23,7 +22,7 @@ public class PostInfoService {
     @Autowired
     private PostsInfoRepository postsInfoRepository;
     @Autowired
-    private PostsGamesMapRepository postsGamesMapRepository;
+    private PostGameMapRepository postGameMapRepository;
 
 
     public List<PopularPostVO> GetMostPopularPosts() {
@@ -63,7 +62,7 @@ public class PostInfoService {
     public List<PostInfoVO> GetAllPostInfoInOneGame(GameGenreMapIdDTO gameGenreMapIdDTO){
         logger.info("Getting all post info with one game");
         try {
-            List<Map<Short, Object>> allPostInfoWithOneGame = postsGamesMapRepository.findAllPostInfoInOneGame(gameGenreMapIdDTO.getGameId());
+            List<Map<Short, Object>> allPostInfoWithOneGame = postGameMapRepository.findAllPostInfoInOneGame(gameGenreMapIdDTO.getGameId());
             if (!allPostInfoWithOneGame.isEmpty()) {
                 logger.info("Got all post info with one game");
                 return TransferToPostInfoVO(allPostInfoWithOneGame);

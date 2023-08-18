@@ -2,29 +2,25 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentDTO;
-import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.VO.CommentVO;
-import com.example.demo.Model.VO.NewestCommentVO;
-import com.example.demo.Model.VO.ShowPostVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
-import com.example.demo.Service.Posts.PostCommentService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 
 @RestController
 public class CommentsController {
@@ -35,18 +31,16 @@ public class CommentsController {
     @Autowired
     private IpService ipService;
     @Autowired
-    private PostCommentService postCommentService;
-    @Autowired
     private PostService postService;
+
     @PostMapping("/all-games-genres/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentDTO commentDTO, HttpSession session) {
         logger.info("EditComment:::");
         String userId = (String) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        }
-        else {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your opinion");
+        } else {
 
             String ipAddress = HttpUtils.getRequestIP(request);
             logger.info("EditPost:::ipAddress:::" + ipAddress);
@@ -63,7 +57,7 @@ public class CommentsController {
                 logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
                 commentDTO.setIpvSix(ip.toString());
             } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentDTO.setFromUid(userId);

@@ -1,6 +1,6 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Mapper.Repository.GameGenresRepository;
+import com.example.demo.Mapper.Repository.GameGenreRepository;
 import com.example.demo.Model.Entity.GameGenre;
 import com.example.demo.Model.VO.GameGenreVO;
 import org.slf4j.Logger;
@@ -16,17 +16,17 @@ import java.util.List;
 public class GameGenreService {
     private static final Logger logger = LoggerFactory.getLogger(GameGenreService.class);
 
-    private final GameGenresRepository gameGenresRepository;
+    private final GameGenreRepository gameGenreRepository;
 
     @Autowired
-    public GameGenreService(GameGenresRepository gameGenresRepository) {
-        this.gameGenresRepository = gameGenresRepository;
+    public GameGenreService(GameGenreRepository gameGenreRepository) {
+        this.gameGenreRepository = gameGenreRepository;
     }
 
     public List<GameGenreVO> GetAllGameGenres() {
         logger.info("Getting all game genres");
         try {
-            List<GameGenre> gameGenreList = gameGenresRepository.findAll();
+            List<GameGenre> gameGenreList = gameGenreRepository.findAll();
             return MapGameGenresToVOList(gameGenreList);
         } catch (Exception e) {
             logger.error("Failed to get all game genres: {}", e.getMessage(), e);

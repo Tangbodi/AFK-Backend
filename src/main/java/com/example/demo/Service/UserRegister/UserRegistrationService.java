@@ -1,11 +1,10 @@
 package com.example.demo.Service.UserRegister;
 
-import com.example.demo.Mapper.Repository.UsersInfoRepository;
+import com.example.demo.Mapper.Repository.UserInfoRepository;
 import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.UUID;
 
 @Service
 public class UserRegistrationService {
@@ -27,7 +25,7 @@ public class UserRegistrationService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UsersInfoRepository usersInfoRepository;
+    private UserInfoRepository userInfoRepository;
     @Autowired
     private UserInfoService userInfoService;
     @Autowired

@@ -1,6 +1,6 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Mapper.Repository.GameIconsRepository;
+import com.example.demo.Mapper.Repository.GameIconRepository;
 import com.example.demo.Mapper.Repository.HomeGameImageRepository;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
@@ -18,14 +18,14 @@ import java.util.Map;
 public class GameIconService {
     private static final Logger logger = LoggerFactory.getLogger(GameIconService.class);
     @Autowired
-    private GameIconsRepository gameIconsRepository;
+    private GameIconRepository gameIconRepository;
     @Autowired
     private HomeGameImageRepository homeGameImageRepository;
 
     public List<GameIconVO> GetAllGameIcons() {
         logger.info("Getting all game icons");
         try {
-            List<Map<Short, Object>> gameIconList = gameIconsRepository.findAllGameIcons();
+            List<Map<Short, Object>> gameIconList = gameIconRepository.findAllGameIcons();
             return MapGameIconsToVOList(gameIconList);
         } catch (Exception e) {
             logger.error("Failed to get all game icons: {}", e.getMessage(), e);

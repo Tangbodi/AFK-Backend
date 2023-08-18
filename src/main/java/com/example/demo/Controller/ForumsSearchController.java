@@ -27,18 +27,18 @@ public class ForumsSearchController {
         ApiResponse apiResponse;
         switch (forumSearchDTO.getType()) {
             case "store":
-                apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No search results found");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "No search results found");
                 break;
             case "forum":
                 List<SearchPostVO> searchPostVOList = postService.SearchByKeyword(forumSearchDTO.getKeyword());
                 if (!searchPostVOList.isEmpty()) {
                     apiResponse = ApiResponse.success(searchPostVOList);
                 } else {
-                    apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No search results found");
+                    apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "No search results found");
                 }
                 break;
             default:
-                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid type");
                 break;
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

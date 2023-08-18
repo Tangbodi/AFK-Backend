@@ -1,7 +1,7 @@
 package com.example.demo.Service.UsersInfo;
 
 import com.example.demo.Exception.UserNotFoundException;
-import com.example.demo.Mapper.Repository.UsersMailAddressRepository;
+import com.example.demo.Mapper.Repository.UserMailAddressRepository;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersMailAddress;
@@ -17,12 +17,12 @@ import java.time.Instant;
 public class UserMailAddressService {
     private static final Logger logger = LoggerFactory.getLogger(UserMailAddressService.class);
     @Autowired
-    private UsersMailAddressRepository usersMailAddressRepository;
+    private UserMailAddressRepository userMailAddressRepository;
     public void UpdateUserMailAddress(UserMailDTO userMailDTO) {
         logger.info("Updating user mail address for user ID: {}", userMailDTO.getUserId());
 
         try {
-            UsersMailAddress usersMailAddress = usersMailAddressRepository.findById(userMailDTO.getUserId())
+            UsersMailAddress usersMailAddress = userMailAddressRepository.findById(userMailDTO.getUserId())
                     .orElseGet(() -> CreateUserMailAddress(userMailDTO));
 
             usersMailAddress.setCountry(userMailDTO.getCountry());
@@ -32,7 +32,7 @@ public class UserMailAddressService {
             usersMailAddress.setZip(userMailDTO.getZip());
             usersMailAddress.setPhone(userMailDTO.getPhone());
             usersMailAddress.setModifiedAt(Instant.now());
-            usersMailAddressRepository.save(usersMailAddress);
+            userMailAddressRepository.save(usersMailAddress);
 
             logger.info("Updated user mail address: {}", userMailDTO.getUserId());
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class UserMailAddressService {
         newUsersMailAddress.setCreatedAt(Instant.now());
         newUsersMailAddress.setModifiedAt(Instant.now());
 
-        usersMailAddressRepository.save(newUsersMailAddress);
+        userMailAddressRepository.save(newUsersMailAddress);
 
         logger.info("Created new user mail address: {}", userMailDTO.getUserId());
         return newUsersMailAddress;
@@ -64,7 +64,7 @@ public class UserMailAddressService {
         logger.info("Getting user mail address for user ID: {}", userId);
 
         try {
-            UsersMailAddress usersMailAddress = usersMailAddressRepository.findById(userId)
+            UsersMailAddress usersMailAddress = userMailAddressRepository.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException("User not found"));
 
             logger.info("User mail address found: {}", usersMailAddress.getId());
@@ -93,7 +93,7 @@ public class UserMailAddressService {
             usersMailAddress.setId(userRegisterDTO.getUserId());
             usersMailAddress.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersMailAddress.setModifiedAt(userRegisterDTO.getCreatedAt());
-            usersMailAddressRepository.save(usersMailAddress);
+            userMailAddressRepository.save(usersMailAddress);
             logger.info("Set user mail address: {}");
         }catch (Exception e){
             logger.error("Failed to set user mail address: {}",e.getMessage(),e);

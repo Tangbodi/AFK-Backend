@@ -1,56 +1,37 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "users_favorite_posts")
 public class UsersFavoritePost {
     @EmbeddedId
     private UsersFavoritePostId id;
 
-    @Column(name = "favorite_status", nullable = false)
-    private Boolean favoriteStatus = false;
+    @NotNull
+    @Column(name = "like_status", nullable = false)
+    private Boolean likeStatus = false;
 
+    @NotNull
+    @Column(name = "save_status", nullable = false)
+    private Boolean saveStatus = false;
+
+    @NotNull
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @NotNull
     @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
-
-    public UsersFavoritePostId getId() {
-        return id;
-    }
-
-    public void setId(UsersFavoritePostId id) {
-        this.id = id;
-    }
-
-    public Boolean getFavoriteStatus() {
-        return favoriteStatus;
-    }
-
-    public void setFavoriteStatus(Boolean favoriteStatus) {
-        this.favoriteStatus = favoriteStatus;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getModifiedAt() {
-        return modifiedAt;
-    }
-
-    public void setModifiedAt(Instant modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
 
 }

@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersResetPassword;
 
-import com.example.demo.Mapper.Repository.UsersResetPasswordRepository;
+import com.example.demo.Mapper.Repository.UserResetPasswordRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersResetPasswordToken;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
@@ -17,7 +17,7 @@ public class UserResetPasswordService {
     private static final Logger logger = LoggerFactory.getLogger(UserVerificationService.class);
 
     @Autowired
-    private UsersResetPasswordRepository usersResetPasswordRepository;
+    private UserResetPasswordRepository userResetPasswordRepository;
 
     @Transactional
     public boolean SetUserResetPasswordToken(String token, String userId, UserRegisterDTO userRegisterDTO) {
@@ -29,7 +29,7 @@ public class UserResetPasswordService {
             usersResetPasswordToken.setEmail(userRegisterDTO.getEmail());
             usersResetPasswordToken.setCreatedAt(Instant.now());
             usersResetPasswordToken.setModifiedAt(Instant.now());
-            usersResetPasswordRepository.save(usersResetPasswordToken);
+            userResetPasswordRepository.save(usersResetPasswordToken);
             logger.info("Saved UserResetPasswordToken successfully: {}");
             return true;
         } catch (Exception e) {
@@ -42,12 +42,12 @@ public class UserResetPasswordService {
     public boolean UpdateUserEmail(String userId, String email) {
         logger.info("Updating Email: {}" + userId + "::::::" + email);
         try {
-            UsersResetPasswordToken usersResetPasswordToken = usersResetPasswordRepository.findById(userId).orElse(null);
+            UsersResetPasswordToken usersResetPasswordToken = userResetPasswordRepository.findById(userId).orElse(null);
             logger.info("Old email: {}" + usersResetPasswordToken.getEmail());
             usersResetPasswordToken.setEmail(email);
             logger.info("New email: {}" + email);
             usersResetPasswordToken.setModifiedAt(Instant.now());
-            usersResetPasswordRepository.save(usersResetPasswordToken);
+            userResetPasswordRepository.save(usersResetPasswordToken);
             logger.info("Updated email successfully: {}");
             return true;
         } catch (Exception e) {

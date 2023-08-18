@@ -15,10 +15,10 @@ public interface ReplyRepository extends JpaRepository<PostReply, String> {
             "r.comment_id, r.content, r.reply_id, fm.username as from_username, tm.username as to_username, r.created_at\n" +
             "FROM afk.post_replies r\n" +
             "JOIN afk.post_comments c ON r.comment_id = c.comment_id\n" +
-            "left join vw_userid_username_mapping fm\n" +
-            "on r.from_uid = fm.user_id\n" +
-            "left join vw_userid_username_mapping tm\n" +
-            "on r.to_uid = tm.user_id\n" +
-            "WHERE c.comment_id IN  (:ids)", nativeQuery = true)
+            "LEFT JOIN vw_userid_username_mapping fm\n" +
+            "ON r.from_uid = fm.user_id\n" +
+            "LEFT JOIN vw_userid_username_mapping tm\n" +
+            "ON r.to_uid = tm.user_id\n" +
+            "WHERE c.comment_id IN  (:ids) ORDER BY r.created_at ASC", nativeQuery = true)
     List<Map<Short, Object>> findByCommentId(@Param("ids") List<String> commentIds);
 }

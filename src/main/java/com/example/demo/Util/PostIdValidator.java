@@ -15,12 +15,4 @@ public class PostIdValidator {
             return false;
         }
     }
-//    public static boolean ValidPostId(String postId){
-//        try {
-//            UUID uuid = UUID.fromString(postId);
-//            return true; // Valid UUID
-//        } catch (IllegalArgumentException e) {
-//            return false; // Invalid UUID
-//        }
-//    }
 }

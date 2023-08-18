@@ -67,12 +67,12 @@ public class UsersController {
         logger.info("Encoded email: {}", encodedEmail);
         userRegisterDTO.setEmail(encodedEmail);
         if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
-            apiResponse = ApiResponse.error(ReturnCode.RC406.getCode(), "Password and confirm password must be the same");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Password and confirm password must be the same");
         } else if (redisUsernameService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Username already exists");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Username already exists");
             redisUsernameService.SetUsernameExistsCache(userRegisterDTO.getUsername());
         } else if (userRegistrationService.CheckEmailExists(userRegisterDTO.getEmail()) != null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email already exists");
         } else {
             // If all checks are passed, register user
             logger.info("User doesn't exist");
@@ -107,11 +107,11 @@ public class UsersController {
         if (res == -2) {
             apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
         } else if (res == -1) {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "User not found");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User not found");
         } else if (res == 0) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but not verified, verification email has been sent out, please check your email");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but not verified, verification email has been sent out, please check your email");
         } else if (res == 2) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but blocked");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but blocked");
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
@@ -121,7 +121,7 @@ public class UsersController {
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
             } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "User found but password is incorrect");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but password is incorrect");
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -132,9 +132,9 @@ public class UsersController {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
         } else {
-            List<PostHistoryVO> postHistoryVOList = postService.GetAllPostsByUserId(userId);
+            List<PostHistoryVO> postHistoryVOList = postService.FindAllPostsHistory(userId);
             apiResponse = ApiResponse.success(postHistoryVOList);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -146,6 +146,6 @@ public class UsersController {
         logger.info("Logging out");
         request.getSession().invalidate();
         ApiResponse apiResponse = ApiResponse.success("Logged out successfully");
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

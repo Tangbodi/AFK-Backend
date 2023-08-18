@@ -5,8 +5,8 @@ import com.example.demo.Model.DTO.ReplyDTO;
 import com.example.demo.Model.Entity.Message;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.ReplyVO;
+import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
-import com.example.demo.Service.Posts.PostCommentService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -33,8 +34,6 @@ public class RepliesController {
 
     @Autowired
     private ReplyService replyService;
-    @Autowired
-    private PostCommentService postCommentService;
     @Autowired
     private IpService ipService;
     @Autowired
@@ -50,7 +49,7 @@ public class RepliesController {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to share your opinion");
         } else {
             String ipAddress = HttpUtils.getRequestIP(request);
             logger.info("EditPost:::ipAddress:::" + ipAddress);
@@ -67,7 +66,7 @@ public class RepliesController {
                 logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
                 replyDTO.setIpvSix(ip.toString());
             } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             replyDTO.setFromUid(userId);
@@ -90,7 +89,7 @@ public class RepliesController {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.success(null);
+            apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
             //redisService.CacheExists(MESSAGE_MENTION_KEY+userId)
             List<MessageVO> messageVOList = replyService.GetUnreadMessageViaMessageUserMap(userId);
@@ -105,7 +104,7 @@ public class RepliesController {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to see unread messages");
         } else {
             replyService.UpdateMessageUserMap(userId);
             apiResponse = ApiResponse.success(null);

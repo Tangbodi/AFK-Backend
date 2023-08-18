@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersVerification;
 
-import com.example.demo.Mapper.Repository.UsersVerificationRepository;
+import com.example.demo.Mapper.Repository.UserVerificationRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersVerificationToken;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
@@ -25,7 +25,7 @@ public class UserVerificationService {
     @Autowired
     private UserInfoService userInfoService;
     @Autowired
-    private UsersVerificationRepository usersVerificationRepository;
+    private UserVerificationRepository userVerificationRepository;
     @Lazy
     @Autowired
     private ProcessEmailService processEmailService;
@@ -46,7 +46,7 @@ public class UserVerificationService {
             usersVerificationToken.setCreatedAt(Instant.now());
             usersVerificationToken.setModifiedAt(Instant.now());
 
-            usersVerificationRepository.save(usersVerificationToken);
+            userVerificationRepository.save(usersVerificationToken);
 
             logger.info("Saved UserRegistrationVerificationToken successfully");
             return true;
@@ -61,7 +61,7 @@ public class UserVerificationService {
     public void SetUserLoginVerificationToken(String userId, HttpServletRequest request) {
         try {
             logger.info("Finding user via UsersVerificationToken: {}", userId);
-            Optional<UsersVerificationToken> optionalToken = usersVerificationRepository.findById(userId);
+            Optional<UsersVerificationToken> optionalToken = userVerificationRepository.findById(userId);
 
             if (optionalToken.isPresent()) {
                 UsersVerificationToken usersVerificationToken = optionalToken.get();
@@ -85,7 +85,7 @@ public class UserVerificationService {
     public boolean GetByToken(String token) {
         logger.info("Getting UsersVerificationToken: {}", token);
         try {
-            Optional<UsersVerificationToken> optionalToken = usersVerificationRepository.findByToken(token);
+            Optional<UsersVerificationToken> optionalToken = userVerificationRepository.findByToken(token);
             if (optionalToken.isPresent()) {
                 UsersVerificationToken usersVerificationToken = optionalToken.get();
                 logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getUserId());
@@ -109,7 +109,7 @@ public class UserVerificationService {
         try {
             usersVerificationToken.setToken(null);
             usersVerificationToken.setModifiedAt(Instant.now());
-            usersVerificationRepository.save(usersVerificationToken);
+            userVerificationRepository.save(usersVerificationToken);
             logger.info("Removed token successfully");
             return true;
         } catch (Exception e) {
@@ -123,7 +123,7 @@ public class UserVerificationService {
     public void UpdateUserEmail(String userId, String email) {
         logger.info("Updating Email for user: userId={}, email={}", userId, email);
         try {
-            UsersVerificationToken usersVerificationToken = usersVerificationRepository.findById(userId).orElse(null);
+            UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
             if (usersVerificationToken != null) {
                 logger.info("Old email: {}", usersVerificationToken.getEmail());
                 logger.info("Updating email to: {}", email);
@@ -131,7 +131,7 @@ public class UserVerificationService {
                 usersVerificationToken.setEmail(email);
                 usersVerificationToken.setToken(null);
                 usersVerificationToken.setModifiedAt(Instant.now());
-                usersVerificationRepository.save(usersVerificationToken);
+                userVerificationRepository.save(usersVerificationToken);
 
                 logger.info("Updated email successfully");
             } else {
@@ -147,11 +147,11 @@ public class UserVerificationService {
     public void UpdateTokenForUpdateEmail(String token, String userId, HttpServletRequest request) {
         logger.info("Updating token for update email: token={}, userId={}", token, userId);
         try {
-            UsersVerificationToken usersVerificationToken = usersVerificationRepository.findById(userId).orElse(null);
+            UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
             if (usersVerificationToken != null) {
                 usersVerificationToken.setToken(token);
                 usersVerificationToken.setModifiedAt(Instant.now());
-                usersVerificationRepository.save(usersVerificationToken);
+                userVerificationRepository.save(usersVerificationToken);
                 logger.info("Updated token for update email successfully");
 
                 processEmailService.ProcessUpdateEmailValidation(request, token, usersVerificationToken.getEmail());

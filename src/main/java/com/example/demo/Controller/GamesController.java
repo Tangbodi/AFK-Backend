@@ -76,35 +76,23 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-//    @GetMapping("/all-games-genres/{genreId}")
-//    public ResponseEntity GetGameUnderOneGenre(@PathVariable Byte genreId) {
-//        ApiResponse apiResponse;
-//        if (!GenreIdValidator.CheckGenreId(genreId)) {
-//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Genre not found");
-//        } else {
-//            List<Map<Short, Object>> gameIconUnderOneGenre = gameIconService.GetGameIconsUnderOneGenre(genreId);
-//            apiResponse = ApiResponse.success(gameIconUnderOneGenre);
-//        }
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-
     @PostMapping("/all-games/save-favorite-game")
     public ResponseEntity SaveFavoriteGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access games that you’ve liked or saved");
         } else if (!GameIdValidator.CheckGameId(gameGenreMapIdDTO.getGameId()) || !GenreIdValidator.CheckGenreId(gameGenreMapIdDTO.getGenreId())) {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(),gameGenreMapIdDTO.getGameId()) == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "Game not found");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         }
         else {
             gameGenreMapIdDTO.setUserId(userId);
-            userFavoriteGameService.SetUserFavoriteGame(gameGenreMapIdDTO);
-            apiResponse = ApiResponse.success(null);
+            boolean saveStatus = userFavoriteGameService.SetUserFavoriteGame(gameGenreMapIdDTO);
+            apiResponse = ApiResponse.success(saveStatus);
         }
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @GetMapping("/all-games/favorite-games")
@@ -119,13 +107,13 @@ public class GamesController {
             userFavoriteGameVOList = userFavoriteGameService.GetUserFavoriteGames(userId);
         }
         apiResponse = ApiResponse.success(userFavoriteGameVOList);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
     @GetMapping("/all-games/home-game-images")
     public ResponseEntity GetHomeGameImages() {
         ApiResponse apiResponse;
         List<HomeGameImageVO> homeGameImages = gameIconService.GetHomeGameImages();
         apiResponse = ApiResponse.success(homeGameImages);
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

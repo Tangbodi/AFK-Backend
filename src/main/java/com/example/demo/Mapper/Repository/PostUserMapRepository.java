@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public interface PostsUsersMapRepository extends JpaRepository<PostsUsersMap, PostsUsersMapId>{
+public interface PostUserMapRepository extends JpaRepository<PostsUsersMap, PostsUsersMapId>{
     @Query(value = "SELECT * FROM afk.posts_users_map WHERE post_id = :postId", nativeQuery = true)
     Optional<PostsUsersMap> findByPostId(@Param("postId") String postId);
 
@@ -20,5 +20,5 @@ public interface PostsUsersMapRepository extends JpaRepository<PostsUsersMap, Po
             "JOIN afk.posts_info pi ON pum.post_id = pi.post_id\n" +
             "JOIN afk.posts p ON pum.post_id = p.post_id\n" +
             "WHERE pum.user_id = :userId",nativeQuery = true)
-    List<Map<Short, Object>> findAllPostsByUserId(@Param("userId") String userId);
+    List<Map<Short, Object>> findAllPostsHistory(@Param("userId") String userId);
 }
