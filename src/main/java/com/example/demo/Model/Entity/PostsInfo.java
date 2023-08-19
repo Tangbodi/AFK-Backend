@@ -21,8 +21,8 @@ public class PostsInfo {
     @Column(name = "`like`", nullable = false)
     private Integer like;
 
-    @Column(name = "favorite", nullable = false)
-    private Integer favorite;
+    @Column(name = "save", nullable = false)
+    private Integer save;
 
     public String getPostId() {
         return id;
@@ -56,12 +56,11 @@ public class PostsInfo {
         this.like = like;
     }
 
-    public Integer getFavorite() {
-        return favorite;
+    public Integer getSave() {
+        return save;
     }
 
-    public void setFavorite(Integer favorite) {
-        this.favorite = favorite;
+    public void setSave(Integer save) {
+        this.save = save;
     }
-
 }

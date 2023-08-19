@@ -20,10 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpSession;
@@ -48,7 +45,7 @@ public class GamesController {
 
 
     @GetMapping("/all-games")
-    public ResponseEntity GetAllGames() throws JsonProcessingException {
+    public ResponseEntity GetAllGameIcons() throws JsonProcessingException {
         ApiResponse apiResponse;
         List<GameIconVO> gameIconVOList;
         Jedis jedis = new Jedis("localhost");
@@ -65,15 +62,15 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres")
-    public ResponseEntity GetAllGameGenres() {
-        List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();
-        ApiResponse apiResponse = ApiResponse.success(gameGenreVOList);
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
+//    @GetMapping("/all-games-genres")
+//    public ResponseEntity GetAllGameGenres() {
+//        List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();
+//        ApiResponse apiResponse = ApiResponse.success(gameGenreVOList);
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
 
-    @PostMapping("/all-games/save-favorite-game")
-    public ResponseEntity SaveFavoriteGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
+    @PostMapping("/all-games/save-game")
+    public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
@@ -90,8 +87,8 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games/favorite-games")
-    public ResponseEntity GetFavoriteGames(HttpSession session) {
+    @GetMapping("/all-games/saved-games")
+    public ResponseEntity GetSavedGames(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         List<UserFavoriteGameVO> userFavoriteGameVOList;
@@ -113,15 +110,18 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games/game-info")
-    public ResponseEntity GetGameInfo(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO) {
+    @PostMapping("/all-games-genres/posts")
+    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
         ApiResponse apiResponse;
-        if (!GameIdValidator.CheckGameId(gameGenreMapIdDTO.getGameId()) || !GenreIdValidator.CheckGenreId(gameGenreMapIdDTO.getGenreId())) {
+        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId()) == null) {
+        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
-            GameIconVO gameIconVO = gameIconService.GetGameById(gameGenreMapIdDTO);
+            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
+            gameGenreMapIdDTO.setGameId(gameId);
+            gameGenreMapIdDTO.setGenreId(genreId);
+            GameIconVO gameIconVO = gameIconService.GetOneGameIcon(gameGenreMapIdDTO);
             apiResponse = ApiResponse.success(gameIconVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

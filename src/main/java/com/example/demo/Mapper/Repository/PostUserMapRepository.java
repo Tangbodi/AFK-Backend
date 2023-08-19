@@ -16,9 +16,10 @@ public interface PostUserMapRepository extends JpaRepository<PostsUsersMap, Post
     @Query(value = "SELECT * FROM afk.posts_users_map WHERE post_id = :postId", nativeQuery = true)
     Optional<PostsUsersMap> findByPostId(@Param("postId") String postId);
 
-    @Query(value = "SELECT pi.post_id, p.title, pi.view, pi.comment, pi.like, pi.favorite, pum.created_at FROM afk.posts_users_map pum\n" +
+    @Query(value = "SELECT pi.post_id, p.title, ui.user_id, ui.username, pi.view, pi.comment, pi.like, pi.save, pum.created_at FROM afk.posts_users_map pum\n" +
             "JOIN afk.posts_info pi ON pum.post_id = pi.post_id\n" +
             "JOIN afk.posts p ON pum.post_id = p.post_id\n" +
+            "JOIN afk.users_info ui ON pum.user_id = ui.user_id\n" +
             "WHERE pum.user_id = :userId",nativeQuery = true)
-    List<Map<Short, Object>> findAllPostsHistory(@Param("userId") String userId);
+    List<Map<Short, Object>> findPostUserMapByUserId(@Param("userId") String userId);
 }

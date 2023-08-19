@@ -14,22 +14,19 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "posts")
-public class Post {
+@Table(name = "ip_address")
+public class IpAddress {
     @Id
-    @Size(max = 36)
-    @Column(name = "post_id", nullable = false, length = 36)
-    private String id;
+    @Size(max = 32)
+    @Column(name = "pcr_id", nullable = false, length = 32)
+    private String Id;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "title", nullable = false)
-    private String title;
+    @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")
+    private Long ipvFour;
 
-    @Size(max = 4095)
-    @NotNull
-    @Column(name = "text_render", nullable = false, length = 4095)
-    private String textRender;
+    @Size(max = 16)
+    @Column(name = "ipv_six", length = 16)
+    private String ipvSix;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

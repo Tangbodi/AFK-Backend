@@ -166,7 +166,7 @@ public class UserInfoService {
         UserInfoVO userInfoVO = new UserInfoVO();
         userInfoVO.setUsername(userInfoDTO.getUsername());
         userInfoVO.setEmail(userInfoDTO.getEmail());
-        userInfoVO.setAvatar_url(userInfoDTO.getAvatarUrl());
+        userInfoVO.setAvatarUrl(userInfoDTO.getAvatarUrl());
         userInfoVO.setCreatedAt(userInfoDTO.getCreatedAt());
         userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
         return userInfoVO;

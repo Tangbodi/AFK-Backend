@@ -1,24 +1,19 @@
 package com.example.demo.Service.Replies;
 
-import com.example.demo.Mapper.Repository.MessageRepository;
-import com.example.demo.Mapper.Repository.MessageUserMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
-import com.example.demo.Model.DTO.ReplyDTO;
-import com.example.demo.Model.Entity.Message;
-import com.example.demo.Model.Entity.MessagesUsersMap;
+import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.Entity.PostReply;
-import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.ReplyVO;
-import com.example.demo.Service.Redis.RedisMessageService;
+import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.IP.IpService;
 import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -28,33 +23,32 @@ public class ReplyService {
     @Autowired
     private ReplyRepository replyRepository;
     @Autowired
-    private MessageRepository messageRepository;
-    @Autowired
-    private MessageUserMapRepository messageUserMapRepository;
-    @Autowired
-    private RedisMessageService redisMessageService;
-
-    public ReplyVO SetReply(ReplyDTO replyDTO) {
+    private IpAddressService ipAddressService;
+    public ReplyVO SetReply(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting reply");
         try {
             String uuid = UUIDCreator.CreateUUID();
-            replyDTO.setReplyId(uuid);
+            commentReplyDTO.setReplyId(uuid);
+            commentReplyDTO.setCreatedAt(Instant.now());
             PostReply postReply = new PostReply();
-            postReply.setReplyId(uuid);
-            postReply.setCommentId(replyDTO.getCommentId());
-            postReply.setParentReplyId(replyDTO.getParentReplyId());
-            postReply.setReplyType(replyDTO.getReplyType());
-            postReply.setContent(replyDTO.getContent());
-            postReply.setFromUid(replyDTO.getFromUid());
-            postReply.setToUid(replyDTO.getToUid());
-            postReply.setIpvFour(replyDTO.getIpvFour());
-            postReply.setIpvSix(replyDTO.getIpvSix());
-            postReply.setCreatedAt(replyDTO.getCreatedAt());
-            postReply.setModifiedAt(replyDTO.getCreatedAt());
+            postReply.setId(uuid);
+            postReply.setCommentId(commentReplyDTO.getCommentId());
+            postReply.setToReplyId(commentReplyDTO.getToReplyId());
+            postReply.setContent(commentReplyDTO.getContent());
+            postReply.setFromUid(commentReplyDTO.getFromUid());
+            postReply.setToUid(commentReplyDTO.getToUid());
+            postReply.setCreatedAt(commentReplyDTO.getCreatedAt());
+            postReply.setModifiedAt(commentReplyDTO.getCreatedAt());
             PostReply savedReply = replyRepository.save(postReply);
             if (savedReply != null) {
                 logger.info("Reply saved successfully");
-                return TransferToVO(replyDTO);
+                IpAddressDTO ipAddressDTO = new IpAddressDTO();
+                ipAddressDTO.setId(commentReplyDTO.getReplyId());
+                ipAddressDTO.setIpvFour(commentReplyDTO.getIpvFour());
+                ipAddressDTO.setIpvSix(commentReplyDTO.getIpvSix());
+                ipAddressDTO.setCreatedAt(commentReplyDTO.getCreatedAt());
+                ipAddressService.SetIpAddress(ipAddressDTO);
+                return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Failed to save reply");
             }
@@ -69,87 +63,14 @@ public class ReplyService {
         return replyList;
     }
 
-    private static ReplyVO TransferToVO(ReplyDTO replyDTO) {
+    private static ReplyVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         ReplyVO replyVO = new ReplyVO();
-        replyVO.setReplyId(replyDTO.getReplyId());
-        replyVO.setCommentId(replyDTO.getCommentId());
-        replyVO.setParentReplyId(replyDTO.getParentReplyId());
-        replyVO.setToUid(replyDTO.getToUid());
-        replyVO.setCreatedAt(replyDTO.getCreatedAt());
+        replyVO.setReplyId(commentReplyDTO.getReplyId());
+        replyVO.setCommentId(commentReplyDTO.getCommentId());
+        replyVO.setToReplyId(commentReplyDTO.getToReplyId());
+        replyVO.setToUid(commentReplyDTO.getToUid());
+        replyVO.setCreatedAt(commentReplyDTO.getCreatedAt());
         return replyVO;
-    }
-
-    public Message SetMessage(ReplyDTO replyDTO) {
-        logger.info("Setting message");
-        try {
-            Message message = new Message();
-            message.setReplyId(replyDTO.getReplyId());
-            message.setContent(replyDTO.getContent());
-            message.setFromUid(replyDTO.getFromUid());
-            message.setToUid(replyDTO.getToUid());
-            message.setCreatedAt(replyDTO.getCreatedAt());
-            message.setModifiedAt(replyDTO.getCreatedAt());
-            return messageRepository.save(message);
-        } catch (Exception e) {
-            logger.error("Failed to set reply mention", e);
-        }
-        return null;
-    }
-
-    public void SetMessageUserMap(Message message) {
-        logger.info("Setting message user map");
-        try {
-            MessagesUsersMap messagesUsersMap = new MessagesUsersMap();
-            messagesUsersMap.setMessageId(message.getId());
-            messagesUsersMap.setMentionedUid(message.getToUid());
-            messagesUsersMap.setReadStatus(false);
-            messageUserMapRepository.save(messagesUsersMap);
-        } catch (Exception e) {
-            logger.error("Failed to set message user map", e);
-        }
-    }
-
-    public List<MessageVO> GetUnreadMessageViaMessageUserMap(String userId) {
-        logger.info("Getting unread message");
-        List<Map<Short, Object>> messagesUsersMapList;
-        try {
-            messagesUsersMapList = messageUserMapRepository.findUnreadMessages(userId);
-            logger.info("Unread message list size: " + messagesUsersMapList.size());
-            if (!messagesUsersMapList.isEmpty()) {
-                redisMessageService.SetUserReadStatus(userId);
-                List<MessageVO> messageVOList = new ArrayList<>();
-                for (Map<Short, Object> messagesUsersMap : messagesUsersMapList) {
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setReplyId((String) messagesUsersMap.get("reply_id"));
-                    messageVO.setFromUid((String) messagesUsersMap.get("username"));
-                    messageVO.setContent((String) messagesUsersMap.get("content"));
-                    messageVOList.add(messageVO);
-                }
-                return messageVOList;
-            }
-        } catch (Exception e) {
-            logger.error("Failed to get unread message", e);
-        }
-        return Collections.emptyList();
-    }
-
-    @Transactional
-    public void UpdateMessageUserMap(String userId) {
-        logger.info("Updating read status");
-        List<MessagesUsersMap> messagesUsersMapList;
-        try {
-            messagesUsersMapList = messageUserMapRepository.findUnreadMessagesByMentionedUid(userId);
-            if (!messagesUsersMapList.isEmpty()) {
-                messagesUsersMapList.stream()
-                        .forEach(messagesUsersMap -> {
-                            messagesUsersMap.setReadStatus(true);
-                            messageUserMapRepository.save(messagesUsersMap);
-                        });
-            }
-            redisMessageService.DeleteUserReadStatus(userId);
-        } catch (Exception e) {
-            logger.error("Failed to update read status", e);
-        }
     }
 }
 

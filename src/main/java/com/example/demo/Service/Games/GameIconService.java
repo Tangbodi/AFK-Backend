@@ -81,7 +81,7 @@ public class GameIconService {
         }
         return homeGameImageVOList;
     }
-    public GameIconVO GetGameById(GameGenreMapIdDTO gameGenreMapIdDTO) {
+    public GameIconVO GetOneGameIcon(GameGenreMapIdDTO gameGenreMapIdDTO) {
         logger.info("Getting game by id: gameId = {}", gameGenreMapIdDTO.getGameId());
         try {
             GameIcon gameIcon = gameIconRepository.findById(gameGenreMapIdDTO.getGameId()).orElse(null);

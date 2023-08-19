@@ -36,13 +36,6 @@ public class PostComment {
     @Column(name = "from_uid", nullable = false, length = 36)
     private String fromUid;
 
-    @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")
-    private Long ipvFour;
-
-    @Size(max = 16)
-    @Column(name = "ipv_six", length = 16)
-    private String ipvSix;
-
     @NotNull
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

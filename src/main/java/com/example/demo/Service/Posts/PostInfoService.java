@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +63,7 @@ public class PostInfoService {
     public List<PostInfoVO> GetAllPostInfoInOneGame(GameGenreMapIdDTO gameGenreMapIdDTO){
         logger.info("Getting all post info with one game");
         try {
-            List<Map<Short, Object>> allPostInfoWithOneGame = postGameMapRepository.findAllPostInfoInOneGame(gameGenreMapIdDTO.getGameId());
+            List<Map<Short, Object>> allPostInfoWithOneGame = postGameMapRepository.findAllPostsInOneGame(gameGenreMapIdDTO.getGameId());
             if (!allPostInfoWithOneGame.isEmpty()) {
                 logger.info("Got all post info with one game");
                 return TransferToPostInfoVO(allPostInfoWithOneGame);
@@ -79,15 +80,17 @@ public class PostInfoService {
         logger.info("Transferring all post info with one game to VO");
         try{
             List<PostInfoVO> postInfoVOList = new ArrayList<>();
-            for (Map<Short, Object> postInfoWithOneGame : allPostInfoWithOneGame) {
+            for (Map<Short, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
-                postInfoVO.setPostId((String) postInfoWithOneGame.get("post_id"));
-                postInfoVO.setTitle((String) postInfoWithOneGame.get("title"));
-                postInfoVO.setView((Integer) postInfoWithOneGame.get("view"));
-                postInfoVO.setComment((Integer) postInfoWithOneGame.get("comment"));
-                postInfoVO.setLike((Integer) postInfoWithOneGame.get("like"));
-                postInfoVO.setFavorite((Integer) postInfoWithOneGame.get("favorite"));
-                postInfoVO.setUsername((String) postInfoWithOneGame.get("username"));
+                postInfoVO.setPostId((String) map.get("post_id"));
+                postInfoVO.setTitle((String) map.get("title"));
+                postInfoVO.setView((Integer) map.get("view"));
+                postInfoVO.setComment((Integer) map.get("comment"));
+                postInfoVO.setLike((Integer) map.get("like"));
+                postInfoVO.setSave((Integer) map.get("save"));
+                postInfoVO.setUsername((String) map.get("username"));
+                Timestamp timestamp = (Timestamp) map.get("created_at");
+                postInfoVO.setCreatedAt(timestamp.toInstant());
                 postInfoVOList.add(postInfoVO);
             }
             return postInfoVOList;

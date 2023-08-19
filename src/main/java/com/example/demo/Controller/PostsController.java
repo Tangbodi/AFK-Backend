@@ -90,7 +90,7 @@ public class PostsController {
     }
 
     @GetMapping("/all-games-genres/post-body")
-    public ResponseEntity ShowPostContent(HttpServletRequest request, @RequestParam(value = "game") Short gameId,
+    public ResponseEntity ShowPostBody(HttpServletRequest request, @RequestParam(value = "game") Short gameId,
                                           @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
@@ -105,11 +105,11 @@ public class PostsController {
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
-            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
-            if (showPostVO == null) {
+            ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
+            if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
-                apiResponse = ApiResponse.success(showPostVO);
+                apiResponse = ApiResponse.success(showPostBodyVO);
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -130,9 +130,9 @@ public class PostsController {
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
-            ShowPostVO showPostVO = postService.GetPost(getPostDTO);
+            ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
 
-            if (showPostVO == null) {
+            if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
                 List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId);
@@ -153,21 +153,21 @@ public class PostsController {
         } else if (gameGenreMapService.FindGamesGenresMapById(postDTO.getGenreId(), postDTO.getGameId()) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
-            logger.info("EditPost:::userId:::" + userId);
+            logger.info("userId:::" + userId);
             String ipAddress = HttpUtils.getRequestIP(request);
-            logger.info("EditPost:::ipAddress:::" + ipAddress);
+            logger.info("ipAddress:::" + ipAddress);
             //set ip
             if (ipService.isValidInet4Address(ipAddress)) {
-                logger.info("EditPost:::ipAddress is valid");
+                logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split("\\.");
-                logger.info("EditPost:::ipAddress split:::" + ip);
+                logger.info("ipAddress split:::" + ip);
                 Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                logger.info("EditPost:::ipvF:::" + ipvF);
+                logger.info("ipvF:::" + ipvF);
                 postDTO.setIpvFour(ipvF);
             } else if (ipService.isValidInet6Address(ipAddress)) {
-                logger.info("EditPost:::ipAddress is valid");
+                logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split(":");
-                logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
+                logger.info("ipvS:::" + Arrays.toString(ip));
                 postDTO.setIpvSix(ip.toString());
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
@@ -223,8 +223,8 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/genre/like-post")
-    public ResponseEntity SetUserFavoritePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
+    @PostMapping("/all-games-genres/genre/like-save-post")
+    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
@@ -249,20 +249,6 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/genre/user-favorite-post")
-    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
-        ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.success(false);
-            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-        } else {
-            userFavoritePostDTO.setUserId(userId);
-            UserFavoritePostVO userFavoritePostVO = userFavoritePostService.GetUserFavoritePostStatus(userFavoritePostDTO);
-            apiResponse = ApiResponse.success(userFavoritePostVO);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 
 //    @GetMapping("/all-games-genres/genre/latest-posts")
 //    public ResponseEntity ShowLatestPosts() {

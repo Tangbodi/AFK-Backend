@@ -1,10 +1,13 @@
 package com.example.demo.Service.Comments;
 
 import com.example.demo.Mapper.Repository.CommentRepository;
-import com.example.demo.Model.DTO.CommentDTO;
+import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentVO;
 import com.example.demo.Model.VO.NewestCommentVO;
+import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
@@ -14,33 +17,44 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 
 @Service
 public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
-
     @Autowired
     private CommentRepository commentRepository;
-
     @Autowired
     private ReplyService replyService;
+    @Autowired
+    private IpAddressService ipAddressService;
     @Transactional
-    public CommentVO SetComment(CommentDTO commentDTO) {
-        logger.info("Setting comment: {}", commentDTO);
+    public CommentVO SetComment(CommentReplyDTO commentReplyDTO) {
+        logger.info("Setting comment: {}");
         try {
-            PostComment postComment = new PostComment();
             String uuid = UUIDCreator.CreateUUID();
-            commentDTO.setCommentId(uuid);
+            commentReplyDTO.setCommentId(uuid);
+            commentReplyDTO.setCreatedAt(Instant.now());
+            PostComment postComment = new PostComment();
             postComment.setId(uuid);
-            MapCommentDTOtoPostComment(commentDTO, postComment);
-
+            postComment.setContent(commentReplyDTO.getContent());
+            postComment.setFromUid(commentReplyDTO.getFromUid());
+            postComment.setPostId(commentReplyDTO.getPostId());
+            postComment.setCreatedAt(commentReplyDTO.getCreatedAt());
+            postComment.setModifiedAt(commentReplyDTO.getCreatedAt());
             PostComment savedComment = commentRepository.save(postComment);
             if (savedComment != null) {
                 logger.info("Comment saved successfully: {}", savedComment);
-                return TransferToVO(commentDTO);
+                IpAddressDTO ipAddressDTO = new IpAddressDTO();
+                ipAddressDTO.setId(commentReplyDTO.getCommentId());
+                ipAddressDTO.setIpvFour(commentReplyDTO.getIpvFour());
+                ipAddressDTO.setIpvSix(commentReplyDTO.getIpvSix());
+                ipAddressDTO.setCreatedAt(commentReplyDTO.getCreatedAt());
+                ipAddressService.SetIpAddress(ipAddressDTO);
+                return TransferToVO(commentReplyDTO);
             } else {
-                logger.warn("Comment not saved: {}", commentDTO);
+                logger.info("Comment not saved: {}");
             }
         } catch (Exception e) {
             logger.error("Failed to set comment: {}", e.getMessage(), e);
@@ -48,11 +62,11 @@ public class CommentService {
         return null;
     }
 
-    private static CommentVO TransferToVO(CommentDTO commentDTO) {
+    private static CommentVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         CommentVO commentVO = new CommentVO();
-        commentVO.setCommentId(commentDTO.getCommentId());
-        commentVO.setPostId(commentDTO.getPostId());
-        commentVO.setCreatedAt(commentDTO.getCreatedAt());
+        commentVO.setCommentId(commentReplyDTO.getCommentId());
+        commentVO.setPostId(commentReplyDTO.getPostId());
+        commentVO.setCreatedAt(Instant.now());
         return commentVO;
     }
 
@@ -75,8 +89,11 @@ public class CommentService {
                 String commentId2 = (String) replyRow.get("comment_id");
                 if (commentId.equals(commentId2)) {
                     repliesMap.put("reply_id", (String) replyRow.get("reply_id"));
-//                    repliesMap.put("comment_id", (String) replyRow.get("comment_id"));
+                    repliesMap.put("comment_id", (String) replyRow.get("comment_id"));
+                    repliesMap.put("from_uid", (String) replyRow.get("from_uid"));
+                    repliesMap.put("fmui_avatar_url", (String) replyRow.get("fmui_avatar_url"));
                     repliesMap.put("from_username", (String) replyRow.get("from_username"));
+                    repliesMap.put("to_uid", (String) replyRow.get("to_uid"));
                     repliesMap.put("to_username", (String) replyRow.get("to_username"));
                     repliesMap.put("content", (String) replyRow.get("content"));
                     repliesMap.put("created_at", replyRow.get("created_at").toString());
@@ -91,15 +108,6 @@ public class CommentService {
             res.add(combinedList);
         }
         return res;
-    }
-    private static void MapCommentDTOtoPostComment(CommentDTO commentDTO, PostComment postComment) {
-        postComment.setPostId(commentDTO.getPostId());
-        postComment.setContent(commentDTO.getContent());
-        postComment.setFromUid(commentDTO.getFromUid());
-        postComment.setIpvFour(commentDTO.getIpvFour());
-        postComment.setIpvSix(commentDTO.getIpvSix());
-        postComment.setCreatedAt(commentDTO.getCreatedAt());
-        postComment.setModifiedAt(commentDTO.getCreatedAt());
     }
 
     public List<NewestCommentVO> GetNewestComments() {

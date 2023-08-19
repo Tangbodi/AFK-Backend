@@ -1,12 +1,10 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
-import com.example.demo.Model.DTO.ReplyDTO;
-import com.example.demo.Model.Entity.Message;
-import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.VO.ReplyVO;
-import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
@@ -24,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 public class RepliesController {
@@ -42,73 +38,47 @@ public class RepliesController {
     private RedisMessageService redisMessageService;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private MessageService messageService;
 
 
     @PostMapping("/all-games-genres/edit-reply")
-    public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody ReplyDTO replyDTO, HttpSession session) {
+    public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to share your opinion");
         } else {
             String ipAddress = HttpUtils.getRequestIP(request);
-            logger.info("EditPost:::ipAddress:::" + ipAddress);
+            logger.info("ipAddress:::" + ipAddress);
             if (ipService.isValidInet4Address(ipAddress)) {
-                logger.info("EditPost:::ipAddress is valid");
+                logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split("\\.");
-                logger.info("EditPost:::ipAddress split:::" + ip);
+                logger.info("ipAddress split:::" + ip);
                 Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                logger.info("EditPost:::ipvF:::" + ipvF);
-                replyDTO.setIpvFour(ipvF);
+                logger.info("ipvF:::" + ipvF);
+                commentReplyDTO.setIpvFour(ipvF);
             } else if (ipService.isValidInet6Address(ipAddress)) {
-                logger.info("EditPost:::ipAddress is valid");
+                logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split(":");
-                logger.info("EditPost:::ipvS:::" + Arrays.toString(ip));
-                replyDTO.setIpvSix(ip.toString());
+                logger.info("ipvS:::" + Arrays.toString(ip));
+                commentReplyDTO.setIpvSix(ip.toString());
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
-            replyDTO.setFromUid(userId);
-            replyDTO.setCreatedAt(Instant.now());
-            ReplyVO replyVO = replyService.SetReply(replyDTO);
-            if (replyVO != null) {
-                Message message = replyService.SetMessage(replyDTO);
-                replyService.SetMessageUserMap(message);
-                redisMessageService.SetUserReadStatus(replyDTO.getToUid());
+            commentReplyDTO.setFromUid(userId);
+            ReplyVO replyVO = replyService.SetReply(commentReplyDTO);
+            //Set mention message after saved reply
+            if (replyVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
+                messageService.SetMessage(commentReplyDTO);
+                redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
             } else {
-                //
+               //
             }
             apiResponse = ApiResponse.success(replyVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/unread-reply")
-    public ResponseEntity GetUnreadMessages(HttpSession session) {
-        ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.success(Collections.emptyList());
-        } else {
-            //redisService.CacheExists(MESSAGE_MENTION_KEY+userId)
-            List<MessageVO> messageVOList = replyService.GetUnreadMessageViaMessageUserMap(userId);
-            apiResponse = ApiResponse.success(messageVOList);
-
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
-
-    @PutMapping("/all-games-genres/read-reply")
-    public ResponseEntity ReadMessages(HttpSession session) {
-        ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to see unread messages");
-        } else {
-            replyService.UpdateMessageUserMap(userId);
-            apiResponse = ApiResponse.success(null);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 }

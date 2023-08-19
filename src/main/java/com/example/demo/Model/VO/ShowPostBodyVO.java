@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ShowPostVO {
+public class ShowPostBodyVO {
     private String postId;
+    private String userId;
     private String userName;
     private String title;
     private String textRender;

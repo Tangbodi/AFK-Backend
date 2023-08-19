@@ -1,12 +1,21 @@
 package com.example.demo.Service.IP;
 
+import com.example.demo.Mapper.Repository.IpAddressRepository;
+import com.example.demo.Model.DTO.IpAddressDTO;
+import com.example.demo.Model.DTO.PostDTO;
+import com.example.demo.Model.Entity.IpAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+
 @Service
 public class IpService {
     private static final Logger logger = LoggerFactory.getLogger(IpService.class);
@@ -29,4 +38,5 @@ public class IpService {
         }
         return false;
     }
+
 }

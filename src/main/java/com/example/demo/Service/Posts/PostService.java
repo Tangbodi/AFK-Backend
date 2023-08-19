@@ -4,12 +4,15 @@ import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.GetPostDTO;
+import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.*;
-import com.example.demo.Model.VO.PostHistoryVO;
+import com.example.demo.Model.VO.PostInfoVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.SearchPostVO;
-import com.example.demo.Model.VO.ShowPostVO;
+import com.example.demo.Model.VO.ShowPostBodyVO;
+import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Util.UUIDCreator;
 import org.jsoup.Jsoup;
@@ -45,6 +48,8 @@ public class PostService {
     private RedisPostService redisPostService;
     @Autowired
     private PostImageService postImageService;
+    @Autowired
+    private IpAddressService ipAddressService;
 
     public void SetPostCache(PostDTO postDTO) {
         logger.info("Setting post for userId: {}" + postDTO.getUserId());
@@ -57,7 +62,7 @@ public class PostService {
         }
     }
 
-    @Transactional
+
     public PostSavedVO SavePost(String userId) {
         logger.info("Saving post");
         try {
@@ -75,12 +80,16 @@ public class PostService {
                 textHTML = textHTML.substring(start, end);
                 logger.info("Removed body tag from textHTML: {}" + textHTML);
                 post.setTextRender(textHTML);
-                post.setIpvFour(postDTO.getIpvFour());
-                post.setIpvSix(postDTO.getIpvSix());
                 post.setCreatedAt(postDTO.getCreatedAt());
                 post.setModifiedAt(postDTO.getCreatedAt());
                 if (postRepository.save(post) != null) {
                     logger.info("Post saved successfully");
+                    IpAddressDTO ipAddressDTO = new IpAddressDTO();
+                    ipAddressDTO.setId(postDTO.getPostId());
+                    ipAddressDTO.setIpvFour(postDTO.getIpvFour());
+                    ipAddressDTO.setIpvSix(postDTO.getIpvSix());
+                    ipAddressDTO.setCreatedAt(postDTO.getCreatedAt());
+                    ipAddressService.SetIpAddress(ipAddressDTO);
                     SetPostInfo(postDTO);
                     SetPostUserMap(postDTO);
                     SetPostGameMap(postDTO);
@@ -108,7 +117,7 @@ public class PostService {
             postsInfo.setView(0);
             postsInfo.setComment(0);
             postsInfo.setLike(0);
-            postsInfo.setFavorite(0);
+            postsInfo.setSave(0);
             if (postsInfoRepository.save(postsInfo) != null) {
                 logger.info("Post info saved successfully: {}");
             } else {
@@ -174,12 +183,10 @@ public class PostService {
     }
 
 
-    public ShowPostVO GetPost(GetPostDTO getPostDTO) {
+    public ShowPostBodyVO GetPost(GetPostDTO getPostDTO) {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-//            PostsGamesMap postsGamesMap = postsGamesMapRepository.findById(getPostDTO.getPostId()).orElse(null);
-//            Post post = postRepository.findById(getPostDTO.getPostId()).orElse(null);
             List<Map<Short,Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(),getPostDTO.getGameId(),getPostDTO.getPostId());
             if (post.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
@@ -197,20 +204,21 @@ public class PostService {
         }
     }
 
-    private ShowPostVO TransferToShowPostVO(List<Map<Short,Object>> post) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short,Object>> post) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
-            ShowPostVO showPostVO = new ShowPostVO();
+            ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
             for(Map<Short,Object> map : post){
-                showPostVO.setPostId((String) map.get("post_id"));
-                showPostVO.setUserName((String) map.get("username"));
-                showPostVO.setTitle((String) map.get("title"));
-                showPostVO.setTextRender((String) map.get("text_render"));
+                showPostBodyVO.setPostId((String) map.get("post_id"));
+                showPostBodyVO.setUserId((String) map.get("user_id"));
+                showPostBodyVO.setUserName((String) map.get("username"));
+                showPostBodyVO.setTitle((String) map.get("title"));
+                showPostBodyVO.setTextRender((String) map.get("text_render"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
-                showPostVO.setCreatedAt(timestamp.toInstant());
+                showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
-            logger.info("Transferred post to VO successfully for post ID: {}", showPostVO.getPostId());
-            return showPostVO;
+            logger.info("Transferred post to VO successfully for post ID: {}", showPostBodyVO.getPostId());
+            return showPostBodyVO;
         } catch (PostNotFoundException | UserNotFoundException e) {
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
             throw e; // Re-throw the custom exceptions to be handled at the controller level
@@ -247,10 +255,10 @@ public class PostService {
         }
     }
 
-    public List<PostHistoryVO> FindAllPostsHistory(String userId) {
+    public List<PostInfoVO> FindUserPostHistory(String userId) {
         logger.info("Getting all posts by user ID");
         try {
-            List<Map<Short, Object>> allPostsByUserId = postUserMapRepository.findAllPostsHistory(userId);
+            List<Map<Short, Object>> allPostsByUserId = postUserMapRepository.findPostUserMapByUserId(userId);
             if (!allPostsByUserId.isEmpty()) {
                 logger.info("Got all posts by user ID");
                 return TransferToPostHistoryVO(allPostsByUserId);
@@ -264,20 +272,21 @@ public class PostService {
         }
     }
 
-    private static List<PostHistoryVO> TransferToPostHistoryVO(List<Map<Short, Object>> allPostsByUserId) {
+    private static List<PostInfoVO> TransferToPostHistoryVO(List<Map<Short, Object>> allPostsByUserId) {
         logger.info("Transferring all posts by user ID to VO");
-        List<PostHistoryVO> postHistoryVOList = new ArrayList<>();
+        List<PostInfoVO> postHistoryVOList = new ArrayList<>();
         try {
             for (Map<Short, Object> map : allPostsByUserId) {
-                PostHistoryVO postHistoryVO = new PostHistoryVO();
+                PostInfoVO postHistoryVO = new PostInfoVO();
                 postHistoryVO.setPostId((String) map.get("post_id"));
                 postHistoryVO.setTitle((String) map.get("title"));
+                postHistoryVO.setUsername((String) map.get("username"));
                 postHistoryVO.setView((Integer) map.get("view"));
                 postHistoryVO.setComment((Integer) map.get("comment"));
                 postHistoryVO.setLike((Integer) map.get("like"));
-                postHistoryVO.setFavorite((Integer) map.get("favorite"));
+                postHistoryVO.setSave((Integer) map.get("save"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
-                postHistoryVO.setCreated_at(timestamp.toInstant());
+                postHistoryVO.setCreatedAt(timestamp.toInstant());
                 postHistoryVOList.add(postHistoryVO);
             }
         } catch (Exception e) {

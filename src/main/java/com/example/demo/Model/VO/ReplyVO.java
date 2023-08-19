@@ -8,7 +8,7 @@ import java.time.Instant;
 public class ReplyVO {
     private String replyId;
     private String commentId;
-    private String parentReplyId;
+    private String toReplyId;
     private String toUid;
     private Instant createdAt;
 }

@@ -1,15 +1,18 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Model.DTO.UserFavoritePostDTO;
 import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
-import com.example.demo.Model.VO.PostHistoryVO;
+import com.example.demo.Model.VO.PostInfoVO;
+import com.example.demo.Model.VO.UserFavoritePostVO;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisUsernameService;
+import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
@@ -56,8 +59,6 @@ public class UsersController {
     private RedisUsernameService redisUsernameService;
     @Autowired
     private UserLoginService userLoginService;
-    @Autowired
-    private PostService postService;
 
     @PostMapping("/user/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
@@ -123,19 +124,6 @@ public class UsersController {
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but password is incorrect");
             }
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
-
-    @GetMapping("/user/user-info/get-posts")
-    public ResponseEntity GetPostsByUserId(HttpServletRequest request, HttpSession session) {
-        ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
-        } else {
-            List<PostHistoryVO> postHistoryVOList = postService.FindAllPostsHistory(userId);
-            apiResponse = ApiResponse.success(postHistoryVOList);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

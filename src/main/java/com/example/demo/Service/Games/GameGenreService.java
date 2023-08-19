@@ -16,12 +16,8 @@ import java.util.List;
 public class GameGenreService {
     private static final Logger logger = LoggerFactory.getLogger(GameGenreService.class);
 
-    private final GameGenreRepository gameGenreRepository;
-
     @Autowired
-    public GameGenreService(GameGenreRepository gameGenreRepository) {
-        this.gameGenreRepository = gameGenreRepository;
-    }
+    private GameGenreRepository gameGenreRepository;
 
     public List<GameGenreVO> GetAllGameGenres() {
         logger.info("Getting all game genres");
