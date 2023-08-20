@@ -20,7 +20,7 @@ public class RedisUsernameService {
         try {
             jedis = jedisPool.getResource();
             jedis.set(username, "true");
-            jedis.expire(username, 30);
+            jedis.expire(username, 180);
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {

@@ -32,11 +32,13 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if (userVerificationService.GetByToken(token)) {
+        if(redisEmailService.CheckEmailCache(token)){
+            userVerificationService.GetByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
         }
+
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
         if (isRedirected) {
             isRedirected = false;
@@ -52,7 +54,8 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if (userVerificationService.GetByToken(token)) {
+        if(redisEmailService.CheckEmailCache(token)){
+            userVerificationService.GetByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
@@ -71,7 +74,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckUpdateEmailCache(token)) {
+        if(redisEmailService.CheckEmailCache(token)) {
             String newEmail = redisEmailService.GetEmailByToken(token);
             userVerificationService.UpdateUserEmail(userId,newEmail);
             userInfoService.UpdateUserEmail(userId,newEmail);

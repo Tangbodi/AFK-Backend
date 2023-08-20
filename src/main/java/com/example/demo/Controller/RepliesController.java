@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.Arrays;
 
 @RestController
+@RequestMapping("/all-games-genres")
 public class RepliesController {
     private static final Logger logger = LoggerFactory.getLogger(RepliesController.class);
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
@@ -42,7 +43,7 @@ public class RepliesController {
     private MessageService messageService;
 
 
-    @PostMapping("/all-games-genres/edit-reply")
+    @PostMapping("/edit-reply")
     public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");

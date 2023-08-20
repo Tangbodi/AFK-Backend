@@ -44,7 +44,7 @@ public class UserAuthService {
         }
     }
 
-    public int CheckUserExistsAndAuth(UserLoginDTO userLoginDTO, HttpServletRequest request) {
+    public int CheckUserExistsAndAuth(UserLoginDTO userLoginDTO) {
         logger.info("Checking if username exists: {}", userLoginDTO.getUsername());
         try {
             UsersAuth usersAuth = userAuthRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
@@ -64,7 +64,7 @@ public class UserAuthService {
                     return 2;
                 } else {
                     logger.info("Username exists but not verified: {}", userLoginDTO.getUsername());
-                    userVerificationService.SetUserLoginVerificationToken(usersAuth.getUserId(), request);
+//                    userVerificationService.SetUserLoginVerificationToken(usersAuth.getUserId(), request);
                     return 0;
                 }
             }

@@ -6,6 +6,7 @@ import com.example.demo.Model.VO.*;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
+import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Posts.PostGameMapService;
 import com.example.demo.Service.Posts.PostImageService;
@@ -36,6 +37,7 @@ import java.util.List;
 
 @RestController
 @Validated
+@RequestMapping("/all-games-genres")
 public class PostsController {
     private static final Logger logger = LoggerFactory.getLogger(PostsController.class);
     @Autowired
@@ -60,9 +62,10 @@ public class PostsController {
     private PostImageService postImageService;
     @Autowired
     private UserFavoritePostService userFavoritePostService;
+    @Autowired
+    private GameIconService gameIconService;
 
-
-    @GetMapping("/all-games-genres/posts")
+    @GetMapping("/posts")
     public ResponseEntity ShowAllPostsInOneGame(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId,
                                                 @RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
@@ -89,7 +92,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/post-body")
+    @GetMapping("/post-body")
     public ResponseEntity ShowPostBody(HttpServletRequest request, @RequestParam(value = "game") Short gameId,
                                           @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
         ApiResponse apiResponse;
@@ -115,7 +118,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games-genres/comments-replies")
+    @GetMapping("/comments-replies")
     public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
@@ -142,7 +145,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping(value = "/all-games-genres/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
+    @PostMapping(value = "/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
     public ResponseEntity SetPostInCache(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -181,7 +184,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/save-post")
+    @PostMapping("/save-post")
     public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -200,7 +203,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/genre/latest-popular-newest")
+    @PostMapping("/genre/latest-popular-newest")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
         logger.info("TypeDTO:::" + typeDTO.getType());
@@ -223,7 +226,7 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/genre/like-save-post")
+    @PostMapping("/genre/like-save-post")
     public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -248,7 +251,22 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
+    @PostMapping("/posts")
+    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
+        ApiResponse apiResponse;
+        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else {
+            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
+            gameGenreMapIdDTO.setGameId(gameId);
+            gameGenreMapIdDTO.setGenreId(genreId);
+            GameIconVO gameIconVO = gameIconService.GetOneGameIcon(gameGenreMapIdDTO);
+            apiResponse = ApiResponse.success(gameIconVO);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
 
 //    @GetMapping("/all-games-genres/genre/latest-posts")
 //    public ResponseEntity ShowLatestPosts() {

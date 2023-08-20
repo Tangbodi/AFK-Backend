@@ -7,6 +7,7 @@ import com.example.demo.Service.UsersVerification.UserVerificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,7 +19,7 @@ public class UserResetPasswordService {
 
     @Autowired
     private UserResetPasswordRepository userResetPasswordRepository;
-
+    @Async("MultiExecutor")
     @Transactional
     public boolean SetUserResetPasswordToken(String token, String userId, UserRegisterDTO userRegisterDTO) {
         logger.info("Setting UserResetPasswordToken: {}");

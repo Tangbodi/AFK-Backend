@@ -32,6 +32,7 @@ import java.util.List;
 
 @RestController
 @Validated
+@RequestMapping("/user-info")
 public class UsersInfoController {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoController.class);
     @Autowired
@@ -49,7 +50,7 @@ public class UsersInfoController {
     @Autowired
     private MessageService messageService;
 
-    @GetMapping("/user-info/username")
+    @GetMapping("/username")
     public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
         logger.info("GetUserInfo:::session:::" + session);
         String userId = (String) session.getAttribute("userId");
@@ -65,7 +66,7 @@ public class UsersInfoController {
 
     }
 
-    @PutMapping("/user-info/username/update-email")
+    @PutMapping("/username/update-email")
     public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -89,7 +90,7 @@ public class UsersInfoController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PutMapping("/user-info/username/update-mail-address")
+    @PutMapping("/username/update-mail-address")
     public ResponseEntity UpdateUserMailAddress(@RequestBody UserMailDTO userMailDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -103,7 +104,7 @@ public class UsersInfoController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/user-info/username/mail-address")
+    @GetMapping("/username/mail-address")
     public ResponseEntity GetMailAddress(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -116,7 +117,7 @@ public class UsersInfoController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/user-info/post-history")
+    @GetMapping("/post-history")
     public ResponseEntity GetUserPostHistory(HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -128,7 +129,7 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @PostMapping("/user-info/favorite-post")
+    @PostMapping("/favorite-post")
     public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -142,7 +143,7 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @GetMapping("/user-info/unread-message")
+    @GetMapping("/unread-message")
     public ResponseEntity GetUnreadMessages(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -157,7 +158,7 @@ public class UsersInfoController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PutMapping("/user-info/mark-all-as-read")
+    @PutMapping("/mark-all-as-read")
     public ResponseEntity ReadMessages(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");

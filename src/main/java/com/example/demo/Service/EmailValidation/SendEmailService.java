@@ -36,6 +36,7 @@ public class SendEmailService {
             mimeMessageHelper.setText(content, true);
             javaMailSender.send(message);
             logger.info("sent emailValidationLink: {}" + emailValidationLink);
+
         } catch (MessagingException e) {
             logger.error("Failed to send email validation link: {}", e.getMessage(),e);
         }

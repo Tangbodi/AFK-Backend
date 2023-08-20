@@ -51,21 +51,20 @@ public class UserRegistrationService {
         try {
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
             String uuid = UUIDCreator.CreateUUID();
-            Instant createdAt = Instant.now();
             userRegisterDTO.setUserId(uuid);
-            userRegisterDTO.setCreatedAt(createdAt);
+            userRegisterDTO.setCreatedAt(Instant.now());
             logger.info("Setting up User :{}");
             User user = new User();
             user.setUserId(uuid);
             user.setUsername(userRegisterDTO.getUsername());
             String encodedPassword = BCrypt.hashpw(userRegisterDTO.getPassword(), BCrypt.gensalt());
             user.setPassword(encodedPassword);
-            user.setCreatedAt(createdAt);
-            user.setModifiedAt(createdAt);
+            user.setCreatedAt(userRegisterDTO.getCreatedAt());
+            user.setModifiedAt(userRegisterDTO.getCreatedAt());
             userAuthService.SetUsersAuth(userRegisterDTO);
             userInfoService.SetUserInfo(userRegisterDTO);
-            userMailAddressService.SetUserMailAddress(userRegisterDTO);
-            userPostSettingService.SaveSetting(userRegisterDTO);
+//            userMailAddressService.SetUserMailAddress(userRegisterDTO);
+//            userPostSettingService.SaveSetting(userRegisterDTO);
             return userRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);

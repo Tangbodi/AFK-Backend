@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 
 @RestController
+@RequestMapping("/all-games-genres")
 public class CommentsController {
     private static final Logger logger = LoggerFactory.getLogger(CommentsController.class);
 
@@ -39,7 +41,7 @@ public class CommentsController {
     @Autowired
     private RedisMessageService redisMessageService;
 
-    @PostMapping("/all-games-genres/edit-comment")
+    @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         logger.info("EditComment:::");
         String userId = (String) session.getAttribute("userId");

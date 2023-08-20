@@ -1,17 +1,12 @@
 package com.example.demo.Model.Entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
-
 
 @Getter
 @Setter
@@ -21,35 +16,44 @@ public class News {
     @Id
     @Size(max = 15)
     @Column(name = "news_id", nullable = false, length = 15)
-    private String id;
+    private String Id;
 
     @Size(max = 31)
-    @Column(name = "source", length = 31)
+    @NotNull
+    @Column(name = "source", nullable = false, length = 31)
     private String source;
 
     @Size(max = 255)
-    @Column(name = "title")
+    @NotNull
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Size(max = 255)
-    @Column(name = "link")
+    @NotNull
+    @Column(name = "link", nullable = false)
     private String link;
 
-    @Size(max = 8191)
-    @Column(name = "description", length = 8191)
+    @NotNull
+    @Lob
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Size(max = 255)
-    @Column(name = "media_content_url")
+    @NotNull
+    @Column(name = "media_content_url", nullable = false)
     private String mediaContentUrl;
+
     @Size(max = 63)
-    @Column(name = "pub_date")
+    @NotNull
+    @Column(name = "pub_date", nullable = false, length = 63)
     private String pubDate;
 
-    @Column(name = "created_at")
+    @NotNull
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    @Column(name = "modified_at")
+    @NotNull
+    @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
 
 }

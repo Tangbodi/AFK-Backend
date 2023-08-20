@@ -1,9 +1,8 @@
 package com.example.demo.Service.News;
 
-import com.example.demo.Service.Redis.RedisNewsService;
-import org.w3c.dom.*;
-import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.Entity.News;
+import com.example.demo.Service.Redis.RedisNewsService;
+import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.VO.NewsVO;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -31,8 +30,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;

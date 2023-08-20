@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/all-games")
 public class GamesController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
     private static final String ALL_GAME_ICON_KEY = "ALL_GAME_ICONS";
@@ -44,7 +45,7 @@ public class GamesController {
     private GameGenreMapService gameGenreMapService;
 
 
-    @GetMapping("/all-games")
+    @GetMapping("/")
     public ResponseEntity GetAllGameIcons() throws JsonProcessingException {
         ApiResponse apiResponse;
         List<GameIconVO> gameIconVOList;
@@ -69,7 +70,7 @@ public class GamesController {
 //        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
 //    }
 
-    @PostMapping("/all-games/save-game")
+    @PostMapping("/save-game")
     public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -87,7 +88,7 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games/saved-games")
+    @GetMapping("/saved-games")
     public ResponseEntity GetSavedGames(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -102,7 +103,7 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/all-games/home-game-images")
+    @GetMapping("/home-game-images")
     public ResponseEntity GetHomeGameImages() {
         ApiResponse apiResponse;
         List<HomeGameImageVO> homeGameImages = gameIconService.GetHomeGameImages();
@@ -110,20 +111,4 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/all-games-genres/posts")
-    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
-        ApiResponse apiResponse;
-        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else {
-            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
-            gameGenreMapIdDTO.setGameId(gameId);
-            gameGenreMapIdDTO.setGenreId(genreId);
-            GameIconVO gameIconVO = gameIconService.GetOneGameIcon(gameGenreMapIdDTO);
-            apiResponse = ApiResponse.success(gameIconVO);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 }

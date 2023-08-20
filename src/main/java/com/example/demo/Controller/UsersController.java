@@ -27,10 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +37,7 @@ import java.util.List;
 
 @RestController
 @Validated
+@RequestMapping("/user")
 public class UsersController {
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
@@ -60,7 +58,7 @@ public class UsersController {
     @Autowired
     private UserLoginService userLoginService;
 
-    @PostMapping("/user/registration")
+    @PostMapping("/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
         // Encode email for avoiding email scraping and spam bots
         ApiResponse apiResponse;
@@ -81,11 +79,10 @@ public class UsersController {
             if (user != null) {
                 logger.info("User registered successfully");
                 //Setup email validation
-                if (processEmailService.ProcessRegistrationEmailValidation(request, user.getUserId(), userRegisterDTO)) {
-                    apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
-                } else {
-                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
-                }
+                userRegisterDTO.setUserId(user.getUserId());
+                userRegisterDTO.setCreatedAt(user.getCreatedAt());
+                processEmailService.ProcessRegistrationEmailValidation(request, userRegisterDTO);
+                apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
             } else {
                 logger.info("Failed to register user : {}");
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
@@ -95,8 +92,8 @@ public class UsersController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/user/login")
-    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request, HttpSession session, BindingResult bindingResult) {
+    @PostMapping("/login")
+    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;
         // If all checks are passed, check if user exists and user's auth via UsersAuth
         //-2 --- Internal Server Error
@@ -104,12 +101,15 @@ public class UsersController {
         //0 --- User found but not verified
         //1 --- User found and verified
         //2 --- User found but blocked
-        int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO, request);
+        int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO);
         if (res == -2) {
             apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
         } else if (res == -1) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User not found");
         } else if (res == 0) {
+            if (!redisUsernameService.CheckUsernameExistsCache(userLoginDTO.getUsername())) {
+                userVerificationService.SetUserLoginVerificationToken(userLoginDTO.getUsername(), request);
+            }
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but not verified, verification email has been sent out, please check your email");
         } else if (res == 2) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but blocked");
@@ -129,7 +129,7 @@ public class UsersController {
     }
 
 
-    @PostMapping("/user/logout")
+    @PostMapping("/logout")
     public ResponseEntity UserLogout(HttpServletRequest request) {
         logger.info("Logging out");
         request.getSession().invalidate();

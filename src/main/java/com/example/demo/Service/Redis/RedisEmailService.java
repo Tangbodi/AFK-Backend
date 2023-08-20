@@ -16,19 +16,19 @@ public class RedisEmailService {
     @Autowired
     private JedisPool jedisPool;
 
-    private static String GenerateEmailToken() {
-        logger.info("Generating email token: {}");
-        String token = UUIDCreator.CreateUUID();
-        logger.info("Email token generated: {}" + token);
-        return token;
-    }
+//    private static String GenerateEmailToken() {
+//        logger.info("Generating email token: {}");
+//        String token = UUIDCreator.CreateUUID();
+//        logger.info("Email token generated: {}" + token);
+//        return token;
+//    }
 
     public String SetUpdateEmailCache(String newEmail) {
         logger.info("Setting up redis cache for email update: {}" + newEmail);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            String token = GenerateEmailToken();
+            String token = UUIDCreator.CreateUUID();
             jedis.set(token, newEmail);
             jedis.expire(token, 180);
             logger.info("Redis cache for email update set up successfully: {}" + newEmail);
@@ -43,8 +43,25 @@ public class RedisEmailService {
             }
         }
     }
+    public void SetEmailByToken(String token, String email) {
+        logger.info("Setting email by token: {}" + token);
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.set(token, email);
+            jedis.expire(token, 180);
+            logger.info("Email set by token successfully: {}" + token);
+        } catch (Exception e) {
+            logger.error("Failed to set email by token: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
 
-    public boolean CheckUpdateEmailCache(String token) {
+    public boolean CheckEmailCache(String token) {
         logger.info("Checking redis cache for email update: {}" + token);
         Jedis jedis = null;
         try {
