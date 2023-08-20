@@ -55,4 +55,22 @@ public class RedisGameIconService {
         }
         return null;
     }
+    public boolean CheckAllGameIconsCache(){
+        logger.info("Checking all game icons cache: {}");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            boolean existsInCache = jedis.exists(ALL_GAME_ICON_KEY);
+            return existsInCache;
+        } catch (Exception e) {
+            logger.error("Failed to check all game icons cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+        return false;
+    }
+
 }

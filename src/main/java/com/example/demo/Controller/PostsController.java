@@ -72,9 +72,10 @@ public class PostsController {
     private GameIconService gameIconService;
 
     @GetMapping("/posts")
-    public ResponseEntity ShowAllPostsInOneGame(@ValidGameId @RequestParam(value = "game") Short gameId,
-                                                @ValidGenreId @RequestParam(value = "genre") Byte genreId,
-                                                @RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
+    public ResponseEntity ShowAllPostsInOneGame(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                                @RequestParam(value = "genre")  @ValidGenreId Byte genreId,
+                                                @RequestParam(value = "page") int page,
+                                                @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);

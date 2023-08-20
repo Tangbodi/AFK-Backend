@@ -44,15 +44,11 @@ public class GamesController {
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired
     private GameGenreMapService gameGenreMapService;
-
-
     @GetMapping("/")
     public ResponseEntity GetAllGameIcons() throws JsonProcessingException {
         ApiResponse apiResponse;
         List<GameIconVO> gameIconVOList;
-        Jedis jedis = new Jedis("localhost");
-        boolean existsInCache = jedis.exists(ALL_GAME_ICON_KEY);
-        if (existsInCache) {
+        if (redisGameIconService.CheckAllGameIconsCache()) {
             logger.info("ALL_GAME_ICONS exists in Redis cache");
             gameIconVOList = redisGameIconService.GetAllGameIconsCache();
         } else {
@@ -72,13 +68,11 @@ public class GamesController {
 //    }
 
     @PostMapping("/save-game")
-    public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session, BindingResult bindingResult) {
+    public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access games that you’ve liked or saved");
-        } else if (bindingResult.hasErrors()) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId()) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
