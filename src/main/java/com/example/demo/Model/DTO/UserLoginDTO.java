@@ -1,6 +1,5 @@
 package com.example.demo.Model.DTO;
 
-import com.example.demo.Annotation.FixedLength;
 import com.example.demo.Annotation.ValidPassword;
 import com.example.demo.Annotation.ValidUsername;
 import lombok.Data;

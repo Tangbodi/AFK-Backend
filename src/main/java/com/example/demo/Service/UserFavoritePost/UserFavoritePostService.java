@@ -1,7 +1,7 @@
 package com.example.demo.Service.UserFavoritePost;
 
 import com.example.demo.Mapper.Repository.UserFavoritePostRepository;
-import com.example.demo.Model.DTO.UserFavoritePostDTO;
+import com.example.demo.Model.DTO.UserLikesSavesPostDTO;
 import com.example.demo.Model.Entity.UsersFavoritePost;
 import com.example.demo.Model.Entity.UsersFavoritePostId;
 import com.example.demo.Model.VO.UserFavoritePostVO;
@@ -19,19 +19,19 @@ public class UserFavoritePostService {
     @Autowired
     private UserFavoritePostRepository userFavoritePostRepository;
     @Transactional
-    public boolean SetUserLikePost(UserFavoritePostDTO userFavoritePostDTO) {
-        logger.info("Setting user like post for user ID: {}, post ID: {}", userFavoritePostDTO.getUserId(), userFavoritePostDTO.getPostId());
+    public boolean SetUserLikePost(UserLikesSavesPostDTO userLikesSavesPostDTO) {
+        logger.info("Setting user like post for user ID: {}, post ID: {}", userLikesSavesPostDTO.getUserId(), userLikesSavesPostDTO.getPostId());
         try {
             UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-            usersFavoritePostId.setPostId(userFavoritePostDTO.getPostId());
-            usersFavoritePostId.setUserId(userFavoritePostDTO.getUserId());
+            usersFavoritePostId.setPostId(userLikesSavesPostDTO.getPostId());
+            usersFavoritePostId.setUserId(userLikesSavesPostDTO.getUserId());
 
             UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
                     .orElseGet(() -> CreateUserFavoritePost(usersFavoritePostId));
             usersFavoritePost.setLikeStatus(!usersFavoritePost.getLikeStatus());
             usersFavoritePost.setModifiedAt(Instant.now());
             userFavoritePostRepository.save(usersFavoritePost);
-            logger.info("User like post saved successfully for user ID: {}, post ID: {}", userFavoritePostDTO.getUserId(), userFavoritePostDTO.getPostId());
+            logger.info("User like post saved successfully for user ID: {}, post ID: {}", userLikesSavesPostDTO.getUserId(), userLikesSavesPostDTO.getPostId());
             return usersFavoritePost.getLikeStatus();
         } catch (Exception e) {
             logger.error("Error setting user like post: {}", e.getMessage(), e);
@@ -51,19 +51,19 @@ public class UserFavoritePostService {
         return usersFavoritePost;
     }
     @Transactional
-    public boolean SetUserSavePost(UserFavoritePostDTO userFavoritePostDTO) {
-        logger.info("Setting user like post for user ID: {}, post ID: {}", userFavoritePostDTO.getUserId(), userFavoritePostDTO.getPostId());
+    public boolean SetUserSavePost(UserLikesSavesPostDTO userLikesSavesPostDTO) {
+        logger.info("Setting user like post for user ID: {}, post ID: {}", userLikesSavesPostDTO.getUserId(), userLikesSavesPostDTO.getPostId());
         try {
             UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-            usersFavoritePostId.setPostId(userFavoritePostDTO.getPostId());
-            usersFavoritePostId.setUserId(userFavoritePostDTO.getUserId());
+            usersFavoritePostId.setPostId(userLikesSavesPostDTO.getPostId());
+            usersFavoritePostId.setUserId(userLikesSavesPostDTO.getUserId());
 
             UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
                     .orElseGet(() -> CreateUserSavePost(usersFavoritePostId));
             usersFavoritePost.setSaveStatus(!usersFavoritePost.getSaveStatus());
             usersFavoritePost.setModifiedAt(Instant.now());
             userFavoritePostRepository.save(usersFavoritePost);
-            logger.info("User like post saved successfully for user ID: {}, post ID: {}", userFavoritePostDTO.getUserId(), userFavoritePostDTO.getPostId());
+            logger.info("User like post saved successfully for user ID: {}, post ID: {}", userLikesSavesPostDTO.getUserId(), userLikesSavesPostDTO.getPostId());
             return usersFavoritePost.getSaveStatus();
         } catch (Exception e) {
             logger.error("Error setting user like post: {}", e.getMessage(), e);
@@ -81,12 +81,12 @@ public class UserFavoritePostService {
         logger.info("Created user favorite post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
         return usersFavoritePost;
     }
-    public UserFavoritePostVO GetUserFavoritePostStatus(UserFavoritePostDTO userFavoritePostDTO){
-        logger.info("Getting user favorite post status for user ID: {}, post ID: {}", userFavoritePostDTO.getUserId(), userFavoritePostDTO.getPostId());
+    public UserFavoritePostVO GetUserFavoritePostStatus(UserLikesSavesPostDTO userLikesSavesPostDTO){
+        logger.info("Getting user favorite post status for user ID: {}, post ID: {}", userLikesSavesPostDTO.getUserId(), userLikesSavesPostDTO.getPostId());
         try{
             UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-            usersFavoritePostId.setPostId(userFavoritePostDTO.getPostId());
-            usersFavoritePostId.setUserId(userFavoritePostDTO.getUserId());
+            usersFavoritePostId.setPostId(userLikesSavesPostDTO.getPostId());
+            usersFavoritePostId.setUserId(userLikesSavesPostDTO.getUserId());
             UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId).orElse(null);
             if (usersFavoritePost != null) {
                 logger.info("User favorite post status found for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());

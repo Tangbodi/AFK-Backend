@@ -1,6 +1,5 @@
 package com.example.demo.Service.Redis;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,9 @@ import redis.clients.jedis.JedisPool;
 @Service
 public class RedisUsernameService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUsernameService.class);
+    private static final String USER_EXISTS_KEY = "EXISTS:";
+    private static final String EMAIL_VALIDATION = "EMAIL_VALIDATION:";
+
     @Autowired
     private JedisPool jedisPool;
 
@@ -19,12 +21,12 @@ public class RedisUsernameService {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.set(username, "true");
-            jedis.expire(username, 180);
+            jedis.set(USER_EXISTS_KEY + username, "true");
+            jedis.expire(USER_EXISTS_KEY + username, 180);
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
-            if (null != jedis){
+            if (null != jedis) {
                 logger.info("Closing the jedis connection:::");
                 jedis.close();
             }
@@ -36,7 +38,7 @@ public class RedisUsernameService {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            if (jedis.exists(username)) {
+            if (jedis.exists(USER_EXISTS_KEY + username)) {
                 logger.info("Username cache exists: {}");
                 return true;
             } else {
@@ -46,11 +48,66 @@ public class RedisUsernameService {
         } catch (Exception e) {
             logger.error("Failed to check username exists cache: {}", e.getMessage(), e);
         } finally {
-            if (null != jedis){
+            if (null != jedis) {
                 logger.info("Closing the jedis connection:::");
                 jedis.close();
             }
         }
         return false;
+    }
+    public void SetUserEmailValidationCache(String username) {
+        logger.info("Setting up user email validation cache: {}");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.set(EMAIL_VALIDATION + username, "true");
+            jedis.expire(EMAIL_VALIDATION + username, 180);
+        } catch (Exception e) {
+            logger.error("Failed to set user email validation cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
+    public boolean CheckEmailValidationCacheByUsername(String username) {
+        logger.info("Checking user email validation cache: {}");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            if (jedis.exists(EMAIL_VALIDATION + username)) {
+                logger.info("User email validation cache exists: {}");
+                return true;
+            } else {
+                logger.info("User email validation cache doesn't exist: {}");
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to check user email validation cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+        return false;
+    }
+    public void DeleteEmailValidationCacheByUsername(String username) {
+        logger.info("Deleting user email validation cache: {}" + username);
+        Jedis jedis = jedisPool.getResource();
+        try {
+            jedis = jedisPool.getResource();
+            jedis.del(EMAIL_VALIDATION + username); // Delete the token-email pair from Redis
+            logger.info("Email deleted by token: {}" + username);
+        } catch (Exception e) {
+            logger.error("Failed to delete email by token: {}", e.getMessage(), e);
+            // Handle exceptions
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
     }
 }

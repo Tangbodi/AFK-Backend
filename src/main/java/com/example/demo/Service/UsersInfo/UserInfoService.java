@@ -130,26 +130,26 @@ public class UserInfoService {
         return null;
     }
 
-    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
-        logger.info("Creating redis cache for update email: {}" + newEmail);
-        try {
-            String token = redisEmailService.SetUpdateEmailCache(newEmail);
-            userVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
-        } catch (Exception e) {
-            logger.error("Failed to create redis cache for update email: {}", e.getMessage(),e);
-        }
-    }
+//    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
+//        logger.info("Creating redis cache for update email: {}" + newEmail);
+//        try {
+//            String token = redisEmailService.SetUpdateEmailCache(newEmail);
+//            userVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
+//        } catch (Exception e) {
+//            logger.error("Failed to create redis cache for update email: {}", e.getMessage(),e);
+//        }
+//    }
 
     @Transactional
-    public boolean UpdateUserEmail(String userId, String email) {
-        logger.info("Updating email: {}" + userId + "::::::" + email);
+    public boolean UpdateUserEmail(String userId, String newEmail) {
+        logger.info("Updating email: {}" + userId + "::::::" + newEmail);
         try {
             UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
                 logger.info("Old email: {}" + usersInfo.getEmail());
-                usersInfo.setEmail(email);
-                logger.info("New email: {}" + email);
+                usersInfo.setEmail(newEmail);
+                logger.info("New email: {}" + newEmail);
                 usersInfo.setModifiedAt(Instant.now());
                 userInfoRepository.save(usersInfo);
                 logger.info("Updated email successfully: {}");

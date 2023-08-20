@@ -1,18 +1,13 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
-import com.example.demo.Model.DTO.UserFavoritePostDTO;
 import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
-import com.example.demo.Model.VO.PostInfoVO;
-import com.example.demo.Model.VO.UserFavoritePostVO;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
-import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisUsernameService;
-import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
@@ -23,9 +18,7 @@ import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
@@ -33,7 +26,6 @@ import org.springframework.web.util.HtmlUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @Validated
@@ -107,8 +99,10 @@ public class UsersController {
         } else if (res == -1) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User not found");
         } else if (res == 0) {
-            if (!redisUsernameService.CheckUsernameExistsCache(userLoginDTO.getUsername())) {
+            if (!redisUsernameService.CheckEmailValidationCacheByUsername(userLoginDTO.getUsername())) {
                 userVerificationService.SetUserLoginVerificationToken(userLoginDTO.getUsername(), request);
+            } else {
+                //
             }
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but not verified, verification email has been sent out, please check your email");
         } else if (res == 2) {

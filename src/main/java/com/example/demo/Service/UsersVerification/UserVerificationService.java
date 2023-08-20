@@ -62,13 +62,10 @@ public class UserVerificationService {
     }
 
 
-    @Async("MultiExecutor")
+
     @Transactional
     public void SetUserLoginVerificationToken(String username, HttpServletRequest request) {
-        logger.info("request:::"+request.getRequestURL().toString());
         logger.info("Setting UserVerificationToken");
-        String siteURL = request.getRequestURL().toString();
-        siteURL.replace(request.getServletPath(), "");
         try {
             logger.info("Finding UsersVerificationToken via username: {}", username);
             UsersVerificationToken usersVerificationToken = userVerificationRepository.findByUsername(username);
@@ -81,8 +78,7 @@ public class UserVerificationService {
 //                String siteURL = request.getRequestURL().toString();
 //                siteURL.replace(request.getServletPath(), "");
                 logger.info("Saved UserVerificationToken successfully");
-                logger.info( usersVerificationToken.getEmail() + "::::::" + token);
-                processEmailService.ProcessLoginEmailValidation(siteURL, usersVerificationToken.getEmail(), token, username);
+                processEmailService.ProcessLoginEmailValidation(request, usersVerificationToken.getEmail(), token, username);
             } else {
                 logger.info("User not found: {}", username);
             }
@@ -92,56 +88,51 @@ public class UserVerificationService {
     }
 
 
-    @Async("MultiExecutor")
-    public boolean GetByToken(String token) {
+
+    public void FindUserVerificationByToken(String token) {
         logger.info("Getting UsersVerificationToken: {}", token);
         try {
            UsersVerificationToken usersVerificationToken = userVerificationRepository.findByToken(token);
             if (usersVerificationToken != null) {
                 logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getUserId());
                 userAuthService.UpdateUserAuth(usersVerificationToken.getUserId());
-                redisEmailService.DeleteEmailByToken(token);
                 RemoveToken(usersVerificationToken);
-                return true;
             } else {
-                return false;
+
             }
         } catch (Exception e) {
             logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(), e);
         }
-        return false;
     }
 
     @Transactional
-    public boolean RemoveToken(UsersVerificationToken usersVerificationToken) {
+    public void RemoveToken(UsersVerificationToken usersVerificationToken) {
         logger.info("Removing token via UsersVerificationToken: {}", usersVerificationToken.getToken());
         try {
             usersVerificationToken.setToken(null);
             usersVerificationToken.setModifiedAt(Instant.now());
             userVerificationRepository.save(usersVerificationToken);
             logger.info("Removed token successfully");
-            return true;
+
         } catch (Exception e) {
             logger.error("Failed to remove token: {}", e.getMessage(), e);
-            return false;
+
         }
     }
 
 
     @Transactional
-    public void UpdateUserEmail(String userId, String email) {
-        logger.info("Updating Email for user: userId={}, email={}", userId, email);
+    public void UpdateUserEmail(String userId, String newEmail) {
+        logger.info("Updating Email for user: userId={}, email={}", userId, newEmail);
         try {
             UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
             if (usersVerificationToken != null) {
                 logger.info("Old email: {}", usersVerificationToken.getEmail());
-                logger.info("Updating email to: {}", email);
-
-                usersVerificationToken.setEmail(email);
+                logger.info("Updating email to: {}", newEmail);
+                usersVerificationToken.setEmail(newEmail);
                 usersVerificationToken.setToken(null);
                 usersVerificationToken.setModifiedAt(Instant.now());
                 userVerificationRepository.save(usersVerificationToken);
-
                 logger.info("Updated email successfully");
             } else {
                 logger.info("User not found: {}", userId);

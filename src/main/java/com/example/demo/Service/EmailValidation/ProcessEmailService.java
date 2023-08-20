@@ -42,8 +42,8 @@ public class ProcessEmailService {
                 String siteURL = request.getRequestURL().toString();
                 siteURL.replace(request.getServletPath(), "");
                 String emailValidationLink = siteURL + "/email-validation?token=" + token;
+                redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-                redisEmailService.SetEmailByToken(token, recipientEmail);
             } else {
                 logger.info("Failed to set user registration verification token");
             }
@@ -55,17 +55,17 @@ public class ProcessEmailService {
             throw new RuntimeException(e);
         }
     }
-    public void ProcessLoginEmailValidation( String siteURL, String email, String token,String username) {
+    public void ProcessLoginEmailValidation(HttpServletRequest request, String email, String token,String username) {
         logger.info("Processing login email validation: {}");
         try {
             String recipientEmail = email;
-//            String siteURL = request.getRequestURL().toString();
-//            siteURL.replace(request.getServletPath(), "");
-            String emailValidationLink = siteURL + "/email-validation?token=" + token;
+            String siteURL = request.getRequestURL().toString();
+            siteURL.replace(request.getServletPath(), "");
+            String emailValidationLink = siteURL + "/email-validation?token=" + token+"/username="+username;
             logger.info("emailValidationLink:::" + emailValidationLink);
+            redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
+            redisUsernameService.SetUserEmailValidationCache(username);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-            redisEmailService.SetEmailByToken(token, recipientEmail);
-            redisUsernameService.SetUsernameExistsCache(username);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         } catch (UnsupportedEncodingException e) {
@@ -73,13 +73,14 @@ public class ProcessEmailService {
         }
     }
 
-    public void ProcessUpdateEmailValidation(HttpServletRequest request, String token, String newEmail) {
+    public void ProcessUpdateEmailValidation(HttpServletRequest request, String userId, String newEmail) {
         logger.info("Processing update email validation: {}");
         try {
             String recipientEmail = newEmail;
             String siteURL = request.getRequestURL().toString();
             siteURL.replace(request.getServletPath(), "");
-            String emailValidationLink = siteURL + "/email-validation?token=" + token;
+            String emailValidationLink = siteURL + "/email-validation?token=" + userId;
+            redisEmailService.SetEmailValidationCacheByToken(userId,newEmail);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
         } catch (MessagingException e) {
             throw new RuntimeException(e);

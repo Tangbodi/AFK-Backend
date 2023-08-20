@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Service.Redis.RedisEmailService;
+import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import org.slf4j.Logger;
@@ -25,15 +26,17 @@ public class EmailVerificationController {
     private RedisEmailService redisEmailService;
     @Autowired
     private UserInfoService userInfoService;
-
+    @Autowired
+    private RedisUsernameService redisUsernameService;
     @GetMapping("/user/registration/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailCache(token)){
-            userVerificationService.GetByToken(token);
+        if(redisEmailService.CheckEmailValidationCacheByToken(token)){
+            userVerificationService.FindUserVerificationByToken(token);
+            redisEmailService.DeleteEmailValidationCacheByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
@@ -49,13 +52,16 @@ public class EmailVerificationController {
     }
 
     @GetMapping("/user/login/email-validation")
-    public void ShowEmailValidationPageViaLoginLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+    public void ShowEmailValidationPageViaLoginLink(HttpServletRequest request, @RequestParam(value = "token") String token,
+                                                    @RequestParam(value = "username") String username, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailCache(token)){
-            userVerificationService.GetByToken(token);
+        if(redisEmailService.CheckEmailValidationCacheByToken(token)){
+            userVerificationService.FindUserVerificationByToken(token);
+            redisEmailService.DeleteEmailValidationCacheByToken(token);
+            redisUsernameService.DeleteEmailValidationCacheByUsername(username);
             redirectURL = "https://www.nybing.com/email-verified";
         } else {
             redirectURL = "https://www.nybing.com/link-expired";
@@ -68,17 +74,19 @@ public class EmailVerificationController {
             response.sendRedirect(redirectURL);
         }
     }
-    @GetMapping("/user/{userId}/update-email/email-validation")
-    public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request, @PathVariable String userId, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+    @GetMapping("/user-info/username/update-email/email-validation")
+    public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request,@RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailCache(token)) {
+        if(redisEmailService.CheckEmailValidationCacheByToken(token)) {
             String newEmail = redisEmailService.GetEmailByToken(token);
-            userVerificationService.UpdateUserEmail(userId,newEmail);
-            userInfoService.UpdateUserEmail(userId,newEmail);
-            redisEmailService.DeleteEmailByToken(token);
+            //the token is userId
+            userVerificationService.UpdateUserEmail(token,newEmail);
+            userInfoService.UpdateUserEmail(token,newEmail);
+            redisEmailService.DeleteEmailValidationCacheByToken(token);
+            redisUsernameService.DeleteEmailValidationCacheByUsername(token);
             redirectURL = "https://www.nybing.com/email-verified";
         }else{
             redirectURL = "https://www.nybing.com/link-expired";

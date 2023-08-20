@@ -2,13 +2,14 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserEmailDTO;
-import com.example.demo.Model.DTO.UserFavoritePostDTO;
+import com.example.demo.Model.DTO.UserLikesSavesPostDTO;
 import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.VO.*;
+import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
-import com.example.demo.Service.Replies.ReplyService;
+import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -18,7 +19,6 @@ import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping("/user-info")
+@RequestMapping("/user-info/username")
 public class UsersInfoController {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoController.class);
     @Autowired
@@ -49,8 +49,12 @@ public class UsersInfoController {
     private UserFavoritePostService userFavoritePostService;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private RedisEmailService redisEmailService;
+    @Autowired
+    private ProcessEmailService processEmailService;
 
-    @GetMapping("/username")
+    @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
         logger.info("GetUserInfo:::session:::" + session);
         String userId = (String) session.getAttribute("userId");
@@ -66,32 +70,32 @@ public class UsersInfoController {
 
     }
 
-    @PutMapping("/username/update-email")
+    @PutMapping("/update-email")
     public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        } else{
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
+        } else {
             String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
             logger.info("Encoded email: {}", encodedEmail);
             if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC409.getCode(), "Email already exists");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email already exists");
             } else {
-                userEmailDTO.setEmail(encodedEmail);
-                //if email doesn't exist, create a token store token and email in redis(600s) and store token in mysql database
-                //send a verification email to user's new email address
-                //find token and email in redis once user click on verification link
-                //if token and email match, update user's email in mysql database(users verification table, users_info table)
-                userInfoService.CreateRedisCacheForUpdateEmail(userEmailDTO.getEmail(), userId, request);
-                apiResponse = ApiResponse.success(null);
+                if (!redisEmailService.CheckEmailValidationCacheByToken(userId)) {
+                    processEmailService.ProcessUpdateEmailValidation(request, userId, encodedEmail);
+                    redisEmailService.SetEmailValidationCacheByToken(userId, encodedEmail);
+                } else {
+                    //
+                }
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email validation has been sent out, please check your email");
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PutMapping("/username/update-mail-address")
-    public ResponseEntity UpdateUserMailAddress(@RequestBody UserMailDTO userMailDTO, HttpSession session) {
+    @PutMapping("/update-mail-address")
+    public ResponseEntity UpdateUserMailAddress(@Validated @RequestBody UserMailDTO userMailDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
@@ -104,7 +108,7 @@ public class UsersInfoController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/username/mail-address")
+    @GetMapping("/mail-address")
     public ResponseEntity GetMailAddress(HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
@@ -129,20 +133,22 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @PostMapping("/favorite-post")
-    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
+    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
-            userFavoritePostDTO.setUserId(userId);
-            UserFavoritePostVO userFavoritePostVO = userFavoritePostService.GetUserFavoritePostStatus(userFavoritePostDTO);
+            userLikesSavesPostDTO.setUserId(userId);
+            UserFavoritePostVO userFavoritePostVO = userFavoritePostService.GetUserFavoritePostStatus(userLikesSavesPostDTO);
             apiResponse = ApiResponse.success(userFavoritePostVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @GetMapping("/unread-message")
     public ResponseEntity GetUnreadMessages(HttpSession session) {
         ApiResponse apiResponse;

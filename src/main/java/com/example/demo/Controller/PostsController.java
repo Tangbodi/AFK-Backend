@@ -1,5 +1,8 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.ValidGameId;
+import com.example.demo.Annotation.ValidGenreId;
+import com.example.demo.Annotation.ValidPostId;
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.*;
@@ -15,7 +18,9 @@ import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
-import com.example.demo.Util.*;
+import com.example.demo.Util.ApiResponse;
+import com.example.demo.Util.GameIdValidator;
+import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,16 +72,15 @@ public class PostsController {
     private GameIconService gameIconService;
 
     @GetMapping("/posts")
-    public ResponseEntity ShowAllPostsInOneGame(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId,
+    public ResponseEntity ShowAllPostsInOneGame(@ValidGameId @RequestParam(value = "game") Short gameId,
+                                                @ValidGenreId @RequestParam(value = "genre") Byte genreId,
                                                 @RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
         page = page - 1;
-        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (page < 0 || size <= 0) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid page or size");
@@ -93,15 +98,15 @@ public class PostsController {
     }
 
     @GetMapping("/post-body")
-    public ResponseEntity ShowPostBody(HttpServletRequest request, @RequestParam(value = "game") Short gameId,
-                                          @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
+    public ResponseEntity ShowPostBody(HttpServletRequest request,
+                                       @RequestParam(value = "game") @ValidGameId Short gameId,
+                                       @RequestParam(value = "genre") @ValidGenreId Byte genreId,
+                                       @RequestParam(value = "post") @ValidPostId String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
-        if (!PostIdValidator.CheckPostId(postId) || !GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
             GetPostDTO getPostDTO = new GetPostDTO();
@@ -119,14 +124,14 @@ public class PostsController {
     }
 
     @GetMapping("/comments-replies")
-    public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId, @RequestParam(value = "post") String postId) {
+    public ResponseEntity ShowAllCommentsAndReplies( @RequestParam(value = "game") @ValidGameId Short gameId,
+                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
+                                                     @RequestParam(value = "post") @ValidPostId String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
-        if (!PostIdValidator.CheckPostId(postId) || !GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
             GetPostDTO getPostDTO = new GetPostDTO();
@@ -146,13 +151,12 @@ public class PostsController {
     }
 
     @PostMapping(value = "/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public ResponseEntity SetPostInCache(HttpServletRequest request, @Validated @RequestBody PostDTO postDTO, HttpSession session) {
+    public ResponseEntity SetPostInCache(HttpServletRequest request,
+                                         @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your game experience");
-        } else if (!GameIdValidator.CheckGameId(postDTO.getGameId()) || !GenreIdValidator.CheckGenreId(postDTO.getGenreId())) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (gameGenreMapService.FindGamesGenresMapById(postDTO.getGenreId(), postDTO.getGameId()) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
@@ -227,22 +231,22 @@ public class PostsController {
     }
 
     @PostMapping("/genre/like-save-post")
-    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserFavoritePostDTO userFavoritePostDTO, HttpSession session) {
+    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to make your opinion count");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
-            userFavoritePostDTO.setUserId(userId);
+            userLikesSavesPostDTO.setUserId(userId);
             boolean status = false;
-            switch (userFavoritePostDTO.getType()) {
+            switch (userLikesSavesPostDTO.getType()) {
                 case "like":
-                    status = userFavoritePostService.SetUserLikePost(userFavoritePostDTO);
+                    status = userFavoritePostService.SetUserLikePost(userLikesSavesPostDTO);
                     apiResponse = ApiResponse.success(status);
                     break;
                 case "save":
-                    status = userFavoritePostService.SetUserSavePost(userFavoritePostDTO);
+                    status = userFavoritePostService.SetUserSavePost(userLikesSavesPostDTO);
                     apiResponse = ApiResponse.success(status);
                     break;
                 default:
@@ -251,12 +255,12 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @PostMapping("/posts")
-    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") Short gameId, @RequestParam(value = "genre") Byte genreId) {
+    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                             @RequestParam(value = "genre") @ValidGenreId Byte genreId) {
         ApiResponse apiResponse;
-        if (!GameIdValidator.CheckGameId(gameId) || !GenreIdValidator.CheckGenreId(genreId)) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
             GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
