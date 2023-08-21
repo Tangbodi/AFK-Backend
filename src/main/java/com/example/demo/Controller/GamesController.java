@@ -60,6 +60,7 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
+
 //    @GetMapping("/all-games-genres")
 //    public ResponseEntity GetAllGameGenres() {
 //        List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();

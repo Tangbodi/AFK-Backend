@@ -97,7 +97,21 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
+    @GetMapping("/game-info")
+    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                             @RequestParam(value = "genre") @ValidGenreId Byte genreId) {
+        ApiResponse apiResponse;
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else {
+            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
+            gameGenreMapIdDTO.setGameId(gameId);
+            gameGenreMapIdDTO.setGenreId(genreId);
+            GameIconVO gameIconVO = gameIconService.GetOneGameIcon(gameGenreMapIdDTO);
+            apiResponse = ApiResponse.success(gameIconVO);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
     @GetMapping("/post-body")
     public ResponseEntity ShowPostBody(HttpServletRequest request,
                                        @RequestParam(value = "game") @ValidGameId Short gameId,
@@ -257,21 +271,6 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/posts")
-    public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") @ValidGameId Short gameId,
-                                             @RequestParam(value = "genre") @ValidGenreId Byte genreId) {
-        ApiResponse apiResponse;
-        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
-        } else {
-            GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
-            gameGenreMapIdDTO.setGameId(gameId);
-            gameGenreMapIdDTO.setGenreId(genreId);
-            GameIconVO gameIconVO = gameIconService.GetOneGameIcon(gameGenreMapIdDTO);
-            apiResponse = ApiResponse.success(gameIconVO);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 
 //    @GetMapping("/all-games-genres/genre/latest-posts")
 //    public ResponseEntity ShowLatestPosts() {

@@ -4,6 +4,7 @@ import com.example.demo.Util.GenreIdValidator;
 import com.example.demo.Util.PasswordValidator;
 
 import javax.validation.Constraint;
+import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
@@ -13,5 +14,5 @@ import java.lang.annotation.*;
 public @interface ValidGenreId {
     String message() default "Game not found";
     Class<?>[] groups() default {};
-    Class<?>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 }
