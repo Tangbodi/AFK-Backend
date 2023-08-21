@@ -19,7 +19,6 @@ import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.ApiResponse;
-import com.example.demo.Util.GameIdValidator;
 import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +28,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.validation.constraints.Max;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +71,7 @@ public class PostsController {
 
     @GetMapping("/posts")
     public ResponseEntity ShowAllPostsInOneGame(@RequestParam(value = "game") @ValidGameId Short gameId,
-                                                @RequestParam(value = "genre")  @ValidGenreId Byte genreId,
+                                                @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                                 @RequestParam(value = "page") int page,
                                                 @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
@@ -85,19 +82,23 @@ public class PostsController {
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (page < 0 || size <= 0) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid page or size");
+            apiResponse = ApiResponse.success(null);
         } else {
-            Pageable pageable = PageRequest.of(page, size);
             List<PostInfoVO> showPostVOList = postInfoService.GetAllPostInfoInOneGame(gameGenreMapIdDTO);
-            int startIdx = (int) pageable.getOffset();
-            int endIdx = Math.min((startIdx + pageable.getPageSize()), showPostVOList.size());
-            List<PostInfoVO> currentPageItems = showPostVOList.subList(startIdx, endIdx);
-            Page<PostInfoVO> currentPage = new PageImpl<>(currentPageItems, pageable, showPostVOList.size());
-
-            apiResponse = ApiResponse.success(currentPage);
+            if (!showPostVOList.isEmpty()) {
+                Pageable pageable = PageRequest.of(page, size);
+                int startIdx = (int) pageable.getOffset();
+                int endIdx = Math.min((startIdx + pageable.getPageSize()), showPostVOList.size());
+                List<PostInfoVO> currentPageItems = showPostVOList.subList(startIdx, endIdx);
+                Page<PostInfoVO> currentPage = new PageImpl<>(currentPageItems, pageable, showPostVOList.size());
+                apiResponse = ApiResponse.success(currentPage);
+            } else {
+                apiResponse = ApiResponse.success(showPostVOList);
+            }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @GetMapping("/game-info")
     public ResponseEntity GetOneGameIconInfo(@RequestParam(value = "game") @ValidGameId Short gameId,
                                              @RequestParam(value = "genre") @ValidGenreId Byte genreId) {
@@ -113,6 +114,7 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @GetMapping("/post-body")
     public ResponseEntity ShowPostBody(HttpServletRequest request,
                                        @RequestParam(value = "game") @ValidGameId Short gameId,
@@ -140,9 +142,9 @@ public class PostsController {
     }
 
     @GetMapping("/comments-replies")
-    public ResponseEntity ShowAllCommentsAndReplies( @RequestParam(value = "game") @ValidGameId Short gameId,
-                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                                     @RequestParam(value = "post") @ValidPostId String postId) {
+    public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                                    @RequestParam(value = "genre") @ValidGenreId Byte genreId,
+                                                    @RequestParam(value = "post") @ValidPostId String postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -205,14 +207,15 @@ public class PostsController {
     }
 
     @PostMapping("/save-post")
-    public ResponseEntity SavePost(@RequestParam("imageFiles") @Max(9) List<MultipartFile> imageFiles, HttpSession session) throws IOException {
+    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
-            PostSavedVO postSavedVO = postService.SavePost(userId);
+            logger.info("imageFiles:::" + imageFiles);
+            PostSavedVO postSavedVO = postService.SavePost(userId, imageFiles);
             if (postSavedVO != null) {
                 //handle imageFiles??????
 
@@ -256,7 +259,7 @@ public class PostsController {
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
             userLikesSavesPostDTO.setUserId(userId);
-            boolean status = false;
+            boolean status;
             switch (userLikesSavesPostDTO.getType()) {
                 case "like":
                     status = userFavoritePostService.SetUserLikePost(userLikesSavesPostDTO);

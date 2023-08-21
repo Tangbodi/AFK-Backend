@@ -20,7 +20,9 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
@@ -63,7 +65,7 @@ public class PostService {
     }
 
 
-    public PostSavedVO SavePost(String userId) {
+    public PostSavedVO SavePost(String userId, List<MultipartFile> imageFiles) {
         logger.info("Saving post");
         try {
             PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
@@ -84,12 +86,8 @@ public class PostService {
                 post.setModifiedAt(postDTO.getCreatedAt());
                 if (postRepository.save(post) != null) {
                     logger.info("Post saved successfully");
-                    IpAddressDTO ipAddressDTO = new IpAddressDTO();
-                    ipAddressDTO.setId(postDTO.getPostId());
-                    ipAddressDTO.setIpvFour(postDTO.getIpvFour());
-                    ipAddressDTO.setIpvSix(postDTO.getIpvSix());
-                    ipAddressDTO.setCreatedAt(postDTO.getCreatedAt());
-                    ipAddressService.SetIpAddress(ipAddressDTO);
+                    postImageService.SavePostImage(imageFiles, postDTO);
+                    ipAddressService.SetPostIpAddress(postDTO);
                     SetPostInfo(postDTO);
                     SetPostUserMap(postDTO);
                     SetPostGameMap(postDTO);
@@ -108,6 +106,7 @@ public class PostService {
         return null;
     }
 
+    @Async("MultiExecutor")
     @Transactional
     public void SetPostInfo(PostDTO postDTO) {
         logger.info("Setting post info: {}");
@@ -127,7 +126,7 @@ public class PostService {
             logger.error("Failed to set post info: {}", e.getMessage(), e);
         }
     }
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetPostUserMap(PostDTO postDTO) {
         logger.info("Setting post user map: {}");
@@ -140,7 +139,7 @@ public class PostService {
             postsUsersMap.setCreatedAt(postDTO.getCreatedAt());
             postsUsersMap.setModifiedAt(postDTO.getCreatedAt());
             if (postUserMapRepository.save(postsUsersMap) != null) {
-                logger.info("Post info saved successfully: {}");
+                logger.info("Post user map saved successfully: {}");
             } else {
                 logger.info("Failed to save post user map: {}");
             }
@@ -148,20 +147,7 @@ public class PostService {
             logger.error("Failed to set post user map: {}", e.getMessage(), e);
         }
     }
-
-    private PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
-        logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
-        try {
-            PostSavedVO postSavedVO = new PostSavedVO();
-            postSavedVO.setPostId(postDTO.getPostId());
-            postSavedVO.setCreatedAt(postDTO.getCreatedAt());
-            return postSavedVO;
-        } catch (Exception e) {
-            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
-        }
-        return null;
-    }
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetPostGameMap(PostDTO postDTO) {
         logger.info("Setting post game map: {}");
@@ -181,6 +167,18 @@ public class PostService {
             logger.error("Failed to set post game map: {}", e.getMessage(), e);
         }
     }
+    private PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
+        logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
+        try {
+            PostSavedVO postSavedVO = new PostSavedVO();
+            postSavedVO.setPostId(postDTO.getPostId());
+            postSavedVO.setCreatedAt(postDTO.getCreatedAt());
+            return postSavedVO;
+        } catch (Exception e) {
+            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
+        }
+        return null;
+    }
 
 
     public ShowPostBodyVO GetPost(GetPostDTO getPostDTO) {
@@ -192,8 +190,8 @@ public class PostService {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
             } else {
-
-                return TransferToShowPostVO(post);
+                List<Map<Short,Object>> postImageList = postImageService.findAllImageURLByPostId(getPostDTO);
+                return TransferToShowPostVO(post,postImageList);
             }
         } catch (PostNotFoundException e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
@@ -204,7 +202,7 @@ public class PostService {
         }
     }
 
-    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short,Object>> post) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short,Object>> post, List<Map<Short,Object>> postImageList) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
@@ -217,16 +215,17 @@ public class PostService {
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
+            List<String> ImageURLList = new ArrayList<>();
+            for(Map<Short,Object> map : postImageList){
+                ImageURLList.add((String) map.get("image_url"));
+            }
+            showPostBodyVO.setImageURL(ImageURLList);
             logger.info("Transferred post to VO successfully for post ID: {}", showPostBodyVO.getPostId());
             return showPostBodyVO;
-        } catch (PostNotFoundException | UserNotFoundException e) {
-            logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
-            throw e; // Re-throw the custom exceptions to be handled at the controller level
-        } catch (Exception e) {
+            }catch (Exception e){
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
         }
-
-        return null;
+            return null;
     }
 
 

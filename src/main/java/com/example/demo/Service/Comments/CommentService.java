@@ -46,12 +46,7 @@ public class CommentService {
             PostComment savedComment = commentRepository.save(postComment);
             if (savedComment != null) {
                 logger.info("Comment saved successfully: {}", savedComment);
-                IpAddressDTO ipAddressDTO = new IpAddressDTO();
-                ipAddressDTO.setId(commentReplyDTO.getCommentId());
-                ipAddressDTO.setIpvFour(commentReplyDTO.getIpvFour());
-                ipAddressDTO.setIpvSix(commentReplyDTO.getIpvSix());
-                ipAddressDTO.setCreatedAt(commentReplyDTO.getCreatedAt());
-                ipAddressService.SetIpAddress(ipAddressDTO);
+                ipAddressService.SetCommentReplyIpAddress(commentReplyDTO);
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Comment not saved: {}");

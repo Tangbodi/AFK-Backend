@@ -42,12 +42,7 @@ public class ReplyService {
             PostReply savedReply = replyRepository.save(postReply);
             if (savedReply != null) {
                 logger.info("Reply saved successfully");
-                IpAddressDTO ipAddressDTO = new IpAddressDTO();
-                ipAddressDTO.setId(commentReplyDTO.getReplyId());
-                ipAddressDTO.setIpvFour(commentReplyDTO.getIpvFour());
-                ipAddressDTO.setIpvSix(commentReplyDTO.getIpvSix());
-                ipAddressDTO.setCreatedAt(commentReplyDTO.getCreatedAt());
-                ipAddressService.SetIpAddress(ipAddressDTO);
+                ipAddressService.SetCommentReplyIpAddress(commentReplyDTO);
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Failed to save reply");

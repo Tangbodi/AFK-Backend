@@ -13,6 +13,6 @@ public class ShowPostBodyVO {
     private String userName;
     private String title;
     private String textRender;
-    private List<String> imageURL = new ArrayList<>();
+    private List<String> imageURL;
     private Instant createdAt;
 }

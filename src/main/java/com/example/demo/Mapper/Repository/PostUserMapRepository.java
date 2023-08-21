@@ -20,6 +20,6 @@ public interface PostUserMapRepository extends JpaRepository<PostsUsersMap, Post
             "JOIN afk.posts_info pi ON pum.post_id = pi.post_id\n" +
             "JOIN afk.posts p ON pum.post_id = p.post_id\n" +
             "JOIN afk.users_info ui ON pum.user_id = ui.user_id\n" +
-            "WHERE pum.user_id = :userId",nativeQuery = true)
+            "WHERE pum.user_id = :userId ORDER BY pum.created_at DESC",nativeQuery = true)
     List<Map<Short, Object>> findPostUserMapByUserId(@Param("userId") String userId);
 }

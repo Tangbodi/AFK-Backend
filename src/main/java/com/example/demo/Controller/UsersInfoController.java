@@ -2,8 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserEmailDTO;
-import com.example.demo.Model.DTO.UserLikesSavesPostDTO;
 import com.example.demo.Model.DTO.UserInfoDTO;
+import com.example.demo.Model.DTO.UserLikesSavesPostDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
@@ -19,6 +19,10 @@ import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -122,17 +126,32 @@ public class UsersInfoController {
     }
 
     @GetMapping("/post-history")
-    public ResponseEntity GetUserPostHistory(HttpServletRequest request, HttpSession session) {
+    public ResponseEntity GetUserPostHistory(HttpSession session,
+                                             @RequestParam(value = "page") int page,
+                                             @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
+        page = page - 1;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post history isn't viewable when signed out");
+        } else if (page < 0 || size <= 0) {
+            apiResponse = ApiResponse.success(null);
         } else {
             List<PostInfoVO> postHistoryVOList = postService.FindUserPostHistory(userId);
-            apiResponse = ApiResponse.success(postHistoryVOList);
+            if (!postHistoryVOList.isEmpty()) {
+                Pageable pageable = PageRequest.of(page, size);
+                int startIdx = (int) pageable.getOffset();
+                int endIdx = Math.min((startIdx + pageable.getPageSize()), postHistoryVOList.size());
+                List<PostInfoVO> currentPageItems = postHistoryVOList.subList(startIdx, endIdx);
+                Page<PostInfoVO> currentPage = new PageImpl<>(currentPageItems, pageable, postHistoryVOList.size());
+                apiResponse = ApiResponse.success(currentPage);
+            } else {
+                apiResponse = ApiResponse.success(postHistoryVOList);
+            }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
 
     @PostMapping("/favorite-post")
     public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
