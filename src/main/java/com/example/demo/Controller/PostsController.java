@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.validation.constraints.Max;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -204,16 +205,17 @@ public class PostsController {
     }
 
     @PostMapping("/save-post")
-    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
+    public ResponseEntity SavePost(@RequestParam("imageFiles") @Max(9) List<MultipartFile> imageFiles, HttpSession session) throws IOException {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue saving post");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
             PostSavedVO postSavedVO = postService.SavePost(userId);
             if (postSavedVO != null) {
                 //handle imageFiles??????
+
                 apiResponse = ApiResponse.success(postSavedVO);
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Request timeout, failed to save post, please try again");

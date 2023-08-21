@@ -36,7 +36,9 @@ public class PostImageService {
     public void SavePostImage(List<MultipartFile> imageFiles, PostDTO postDTO) throws IOException {
         logger.info("Setting up PostImage: {}");
         try {
+            //traverse imageFiles
             for (MultipartFile imageFile : imageFiles) {
+                //create image id for each image
                 String imageId = TimestampCreator.CreateTimestamp();
                 PostImage postImage = new PostImage();
                 postImage.setId(imageId);

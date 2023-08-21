@@ -8,6 +8,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class TypeDTO {
     @NotBlank(message = "Type cannot be blank")
-    @Length(min = 1, max = 6, message = "Invalid type")
+    @Length(min = 1, max = 7, message = "Invalid type")
     private String type;
 }
