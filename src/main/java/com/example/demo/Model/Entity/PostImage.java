@@ -17,12 +17,13 @@ import java.time.Instant;
 @Table(name = "post_images")
 public class PostImage {
     @Id
-    @Size(max = 36)
-    @Column(name = "image_id", nullable = false, length = 36)
+    @Size(max = 17)
+    @Column(name = "image_id", nullable = false, length = 17)
     private String id;
 
-    @Size(max = 36)
-    @Column(name = "post_id", length = 36)
+    @Size(max = 32)
+    @NotNull
+    @Column(name = "post_id", nullable = false, length = 32)
     private String postId;
 
     @Size(max = 31)
@@ -30,11 +31,13 @@ public class PostImage {
     private String imageType;
 
     @Size(max = 127)
-    @Column(name = "image_path", length = 127)
+    @NotNull
+    @Column(name = "image_path", nullable = false, length = 127)
     private String imagePath;
 
     @Size(max = 63)
-    @Column(name = "image_url", length = 63)
+    @NotNull
+    @Column(name = "image_url", nullable = false, length = 63)
     private String imageUrl;
 
     @NotNull
@@ -44,8 +47,5 @@ public class PostImage {
     @NotNull
     @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
-
-    @Column(name = "imagedata")
-    private byte[] imagedata;
 
 }
