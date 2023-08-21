@@ -11,8 +11,7 @@ public class UserLikesSavesPostDTO {
     @NotBlank(message = "postId is required")
     @ValidPostId
     private String postId;
-    @NotBlank(message = "userId is required")
-    @ValidUserId
+
     private String userId;
     private String type;
 }
