@@ -21,7 +21,7 @@ public class UserPostSettingService {
         logger.info("Setting up UsersPostsSetting: {}");
         try {
             UsersPostsSetting usersPostsSetting = new UsersPostsSetting();
-            usersPostsSetting.setUserId(userRegisterDTO.getUserId());
+            usersPostsSetting.setId(userRegisterDTO.getUserId());
             usersPostsSetting.setMentionOn(true);
             usersPostsSetting.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersPostsSetting.setModifiedAt(userRegisterDTO.getCreatedAt());

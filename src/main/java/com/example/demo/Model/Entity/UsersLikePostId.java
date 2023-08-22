@@ -1,36 +1,27 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Embeddable
 public class UsersLikePostId implements Serializable {
-    private static final long serialVersionUID = 3810645317300726824L;
-    @Column(name = "post_id", nullable = false, length = 36)
-    private String postId;
+    private static final long serialVersionUID = 6727318751602331901L;
+    @NotNull
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
-
-    public String getPostId() {
-        return postId;
-    }
-
-    public void setPostId(String postId) {
-        this.postId = postId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    @NotNull
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Override
     public boolean equals(Object o) {

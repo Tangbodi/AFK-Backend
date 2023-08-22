@@ -1,34 +1,27 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "games")
 public class Game {
     @Id
-    @Column(name = "game_id", nullable = false)
-    private Short id;
+    @Column(name = "game_id", columnDefinition = "SMALLINT UNSIGNED not null")
+    private Integer id;
 
+    @Size(max = 127)
+    @NotNull
     @Column(name = "game_name", nullable = false, length = 127)
     private String gameName;
-
-    public Short getId() {
-        return id;
-    }
-
-    public void setId(Short id) {
-        this.id = id;
-    }
-
-    public String getGameName() {
-        return gameName;
-    }
-
-    public void setGameName(String gameName) {
-        this.gameName = gameName;
-    }
 
 }

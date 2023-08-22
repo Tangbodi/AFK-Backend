@@ -1,36 +1,29 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Embeddable
 public class GameSubscriptionId implements Serializable {
     private static final long serialVersionUID = 4144632332609329552L;
+    @NotNull
     @Column(name = "game_id", nullable = false)
     private Integer gameId;
 
-    @Column(name = "user_id", nullable = false, length = 36)
+    @Size(max = 32)
+    @NotNull
+    @Column(name = "user_id", nullable = false, length = 32)
     private String userId;
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -6,9 +6,9 @@ import java.time.Instant;
 
 @Data
 public class ReplyVO {
-    private String replyId;
-    private String commentId;
-    private String toReplyId;
-    private String toUid;
+    private Long replyId;
+    private Long commentId;
+    private Long toReplyId;
+    private Long toUid;
     private Instant createdAt;
 }

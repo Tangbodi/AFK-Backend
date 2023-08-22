@@ -2,20 +2,19 @@ package com.example.demo.Service.Comments;
 
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentVO;
 import com.example.demo.Model.VO.NewestCommentVO;
 import com.example.demo.Service.IP.IpAddressService;
-import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Replies.ReplyService;
-import com.example.demo.Util.UUIDCreator;
+import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -29,15 +28,16 @@ public class CommentService {
     private ReplyService replyService;
     @Autowired
     private IpAddressService ipAddressService;
+
     @Transactional
     public CommentVO SetComment(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting comment: {}");
         try {
-            String uuid = UUIDCreator.CreateUUID();
-            commentReplyDTO.setCommentId(uuid);
+            long commentId = Snowflake.generateUniqueId();
+            commentReplyDTO.setCommentId(commentId);
             commentReplyDTO.setCreatedAt(Instant.now());
             PostComment postComment = new PostComment();
-            postComment.setId(uuid);
+            postComment.setId(commentId);
             postComment.setContent(commentReplyDTO.getContent());
             postComment.setFromUid(commentReplyDTO.getFromUid());
             postComment.setPostId(commentReplyDTO.getPostId());
@@ -65,40 +65,43 @@ public class CommentService {
         return commentVO;
     }
 
-    public List<Map<Short, Object>> GetAllCommentsByPostId(String postId) {
+    public List<Map<Short, Object>> GetAllCommentsByPostId(Long postId) {
+        logger.info("Getting all comments by post id: {}", postId);
         return commentRepository.findCommentsByPostId(postId);
     }
-    public List<List<Object>> GetAllCommentsAndReplies(String postId){
+
+    public List<List<Object>> GetAllCommentsAndReplies(Long postId) {
+        logger.info("Getting all comments and replies");
         List<Map<Short, Object>> commentsList = GetAllCommentsByPostId(postId);
-        List<String> commentIds = new ArrayList<>();
-        for (Map<Short, Object> row : commentsList) {
-            commentIds.add((String) row.get("comment_id"));
+        List<Long> commentIds = new ArrayList<>();
+        for (Map<Short, Object> comment : commentsList) {
+            commentIds.add(((BigInteger) comment.get("comment_id")).longValue());
         }
-        List<Map<Short, Object>> replyList = replyService.GetRepliesByCommentId(commentIds);
+        List<Map<Short, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds);
         List<List<Object>> res = new ArrayList<>();
-        for (Map<Short, Object> commentRow : commentsList) {
-            String commentId = (String) commentRow.get("comment_id");
-            List<Map<String, String>> replies = new ArrayList<>();
-            for (Map<Short, Object> replyRow : replyList) {
-                Map<String, String> repliesMap = new HashMap<>();
-                String commentId2 = (String) replyRow.get("comment_id");
+        for (Map<Short, Object> comment : commentsList) {
+            Long commentId = ((BigInteger) comment.get("comment_id")).longValue();
+            List<Map<String, Object>> replies = new ArrayList<>();
+            for (Map<Short, Object> reply : repliesList) {
+                Map<String, Object> repliesMap = new HashMap<>();
+                Long commentId2 = ((BigInteger) reply.get("comment_id")).longValue();
                 if (commentId.equals(commentId2)) {
-                    repliesMap.put("reply_id", (String) replyRow.get("reply_id"));
-                    repliesMap.put("comment_id", (String) replyRow.get("comment_id"));
-                    repliesMap.put("from_uid", (String) replyRow.get("from_uid"));
-                    repliesMap.put("fmui_avatar_url", (String) replyRow.get("fmui_avatar_url"));
-                    repliesMap.put("from_username", (String) replyRow.get("from_username"));
-                    repliesMap.put("to_uid", (String) replyRow.get("to_uid"));
-                    repliesMap.put("to_username", (String) replyRow.get("to_username"));
-                    repliesMap.put("content", (String) replyRow.get("content"));
-                    repliesMap.put("created_at", replyRow.get("created_at").toString());
+                    repliesMap.put("reply_id", reply.get("reply_id"));
+                    repliesMap.put("comment_id", reply.get("comment_id"));
+                    repliesMap.put("from_uid", reply.get("from_uid"));
+                    repliesMap.put("fmui_avatar_url", reply.get("fmui_avatar_url"));
+                    repliesMap.put("from_username", reply.get("from_username"));
+                    repliesMap.put("to_uid", reply.get("to_uid"));
+                    repliesMap.put("to_username", reply.get("to_username"));
+                    repliesMap.put("content", reply.get("content"));
+                    repliesMap.put("created_at", reply.get("created_at").toString());
                     replies.add(repliesMap);
                 } else {
                     continue;
                 }
             }
             List<Object> combinedList = new ArrayList<>();
-            combinedList.add(commentRow);
+            combinedList.add(comment);
             combinedList.add(replies);
             res.add(combinedList);
         }
@@ -127,7 +130,7 @@ public class CommentService {
         for (Map<Short, Object> map : newestCommentsList) {
             try {
                 NewestCommentVO newestCommentVO = new NewestCommentVO();
-                newestCommentVO.setPostId((String) map.get("post_id"));
+                newestCommentVO.setPostId((Long) map.get("post_id"));
                 newestCommentVO.setContent((String) map.get("content"));
                 newestCommentVO.setGameName((String) map.get("game_name"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");

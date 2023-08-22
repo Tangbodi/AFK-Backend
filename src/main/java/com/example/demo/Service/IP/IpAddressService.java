@@ -2,7 +2,6 @@ package com.example.demo.Service.IP;
 
 import com.example.demo.Mapper.Repository.IpAddressRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.IpAddress;
 import org.slf4j.Logger;

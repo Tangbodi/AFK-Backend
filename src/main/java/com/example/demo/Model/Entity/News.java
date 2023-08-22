@@ -16,7 +16,7 @@ public class News {
     @Id
     @Size(max = 15)
     @Column(name = "news_id", nullable = false, length = 15)
-    private String Id;
+    private String id;
 
     @Size(max = 31)
     @NotNull

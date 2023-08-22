@@ -6,6 +6,6 @@ import java.time.Instant;
 
 @Data
 public class PostSavedVO {
-    private String postId;
+    private Long postId;
     private Instant createdAt;
 }

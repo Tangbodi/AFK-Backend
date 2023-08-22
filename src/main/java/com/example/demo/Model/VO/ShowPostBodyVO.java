@@ -8,8 +8,8 @@ import java.util.List;
 
 @Data
 public class ShowPostBodyVO {
-    private String postId;
-    private String userId;
+    private Long postId;
+    private Long userId;
     private String userName;
     private String title;
     private String textRender;

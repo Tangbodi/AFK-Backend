@@ -18,25 +18,22 @@ public class Message {
     @Column(name = "message_id", nullable = false)
     private Long id;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "cr_id", nullable = false, length = 32)
-    private String crId;
+    @Column(name = "cr_id", nullable = false)
+    private Long crId;
 
     @Size(max = 4095)
     @NotNull
     @Column(name = "content", nullable = false, length = 4095)
     private String content;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "from_uid", nullable = false, length = 32)
-    private String fromUid;
+    @Column(name = "from_uid", nullable = false)
+    private Long fromUid;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "to_uid", nullable = false, length = 32)
-    private String toUid;
+    @Column(name = "to_uid", nullable = false)
+    private Long toUid;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

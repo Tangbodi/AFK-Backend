@@ -9,15 +9,14 @@ import java.io.Serializable;
 
 @Data
 public class UserMailDTO{
-    @NotBlank(message = "UserId is required")
-    @ValidUserId
-    private String userId;
+
+
+    private Long userId;
     private String country;
     private String state;
     private String address;
     private String city;
     private String zip;
-    @ValidPhone
     private String phone;
 
 }

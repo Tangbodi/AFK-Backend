@@ -7,7 +7,6 @@ import org.hibernate.Hibernate;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,16 +14,14 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class PostsUsersMapId implements Serializable {
-    private static final long serialVersionUID = -3181350167747368376L;
-    @Size(max = 36)
+    private static final long serialVersionUID = -8924103125963296242L;
     @NotNull
-    @Column(name = "post_id", nullable = false, length = 36)
-    private String postId;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
-    @Size(max = 36)
     @NotNull
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Override
     public boolean equals(Object o) {

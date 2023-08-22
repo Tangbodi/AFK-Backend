@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class UserInfoDTO {
-    private String userId;
+    private Long userId;
     private String username;
     private String email;
     private String phone;

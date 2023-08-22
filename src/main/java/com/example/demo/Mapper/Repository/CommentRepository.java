@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface CommentRepository extends JpaRepository<PostComment, String> {
+public interface CommentRepository extends JpaRepository<PostComment, Long> {
     @Query(value = "SELECT p.post_id, pc.comment_id, ui.user_id, ui.username, ui.avatar_url, pc.content, pc.created_at FROM afk.posts p\n" +
             "JOIN afk.post_comments pc ON p.post_id = pc.post_id\n" +
             "JOIN afk.users_info ui ON pc.from_uid = ui.user_id\n" +
             "WHERE p.post_id = :postId ORDER BY pc.created_at ASC", nativeQuery = true)
-    List<Map<Short, Object>> findCommentsByPostId(@Param("postId") String postId);
+    List<Map<Short, Object>> findCommentsByPostId(@Param("postId") Long postId);
 
 
     @Query(value = "WITH RankedComments AS (\n" +

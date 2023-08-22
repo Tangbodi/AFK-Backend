@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class CommentVO {
-    private String commentId;
-    private String postId;
+    private Long commentId;
+    private Long postId;
     private Instant createdAt;
 }

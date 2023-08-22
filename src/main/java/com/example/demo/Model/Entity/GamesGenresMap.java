@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 @Getter
@@ -17,7 +18,8 @@ public class GamesGenresMap {
     @EmbeddedId
     private GamesGenresMapId id;
 
-    @Column(name = "created_at")
+    @NotNull
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
 }

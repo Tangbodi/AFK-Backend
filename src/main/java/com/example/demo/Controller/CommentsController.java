@@ -2,7 +2,6 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.Entity.Message;
 import com.example.demo.Model.VO.CommentVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
@@ -44,7 +43,7 @@ public class CommentsController {
     @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         logger.info("EditComment:::");
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your opinion");

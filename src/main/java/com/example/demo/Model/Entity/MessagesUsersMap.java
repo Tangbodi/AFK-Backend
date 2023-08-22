@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -21,10 +20,9 @@ public class MessagesUsersMap {
     @Column(name = "message_id", nullable = false)
     private Long messageId;
 
-    @Size(max = 36)
     @NotNull
-    @Column(name = "mentioned_uid", nullable = false, length = 36)
-    private String mentionedUid;
+    @Column(name = "mentioned_uid", nullable = false)
+    private Long mentionedUid;
 
     @NotNull
     @Column(name = "read_status", nullable = false)

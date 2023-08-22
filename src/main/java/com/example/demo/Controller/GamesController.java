@@ -71,7 +71,7 @@ public class GamesController {
     @PostMapping("/save-game")
     public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access games that you’ve liked or saved");
         } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId()) == null) {
@@ -87,7 +87,7 @@ public class GamesController {
     @GetMapping("/saved-games")
     public ResponseEntity GetSavedGames(HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         List<UserFavoriteGameVO> userFavoriteGameVOList;
         if (userId == null) {
             logger.info("User not logged in");

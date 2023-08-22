@@ -17,8 +17,8 @@ public class PostDTO {
     @NotNull(message = "GameId is required")
     @ValidGameId
     private Short gameId;
-    private String userId;
-    private String postId;
+    private Long userId;
+    private Long postId;
     @NotBlank(message = "Title is required")
     @Length(max = 255, message = "Title length not eligible")
     private String title;

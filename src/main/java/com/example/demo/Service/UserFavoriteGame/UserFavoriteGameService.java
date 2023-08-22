@@ -61,7 +61,7 @@ public class UserFavoriteGameService {
         return usersFavoriteGame;
     }
 
-    public List<UserFavoriteGameVO> GetUserFavoriteGames(String userId) {
+    public List<UserFavoriteGameVO> GetUserFavoriteGames(Long userId) {
         logger.info("Getting user favorite games for user ID: {}", userId);
 
         try {

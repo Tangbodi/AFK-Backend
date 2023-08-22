@@ -1,90 +1,46 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "user_avatars")
 public class UserAvatar {
     @Id
-    @Column(name = "avatar_id", nullable = false, length = 31)
-    private String id;
+    @Column(name = "user_id", nullable = false)
+    private Long id;
 
-    @Column(name = "user_id", nullable = false, length = 31)
-    private String userId;
-
+    @Size(max = 31)
+    @NotNull
     @Column(name = "avatar_type", nullable = false, length = 31)
     private String avatarType;
 
+    @Size(max = 127)
+    @NotNull
     @Column(name = "avatar_path", nullable = false, length = 127)
     private String avatarPath;
 
+    @Size(max = 63)
+    @NotNull
     @Column(name = "avatar_url", nullable = false, length = 63)
     private String avatarUrl;
 
+    @NotNull
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @NotNull
     @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
-
-    public String getAvatarId() {
-        return id;
-    }
-
-    public void setAvatarId(String avatarId) {
-        this.id = avatarId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getAvatarType() {
-        return avatarType;
-    }
-
-    public void setAvatarType(String avatarType) {
-        this.avatarType = avatarType;
-    }
-
-    public String getAvatarPath() {
-        return avatarPath;
-    }
-
-    public void setAvatarPath(String avatarPath) {
-        this.avatarPath = avatarPath;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getModifiedAt() {
-        return modifiedAt;
-    }
-
-    public void setModifiedAt(Instant modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
 
 }

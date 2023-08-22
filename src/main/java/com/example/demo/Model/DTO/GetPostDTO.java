@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class GetPostDTO {
-    private String postId;
+    private Long postId;
     private Short gameId;
     private Byte genreId;
 }

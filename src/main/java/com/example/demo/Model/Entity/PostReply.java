@@ -17,34 +17,28 @@ import java.time.Instant;
 @Table(name = "post_replies")
 public class PostReply {
     @Id
-    @Size(max = 32)
-    @Column(name = "reply_id", nullable = false, length = 32)
-    private String id;
+    @Column(name = "reply_id", nullable = false)
+    private Long id;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "comment_id", nullable = false, length = 32)
-    private String commentId;
+    @Column(name = "comment_id", nullable = false)
+    private Long commentId;
 
-    @Size(max = 32)
-    @Column(name = "to_reply_id", length = 32)
-    private String toReplyId;
-
+    @Column(name = "to_reply_id")
+    private Long toReplyId;
 
     @Size(max = 4095)
     @NotNull
     @Column(name = "content", nullable = false, length = 4095)
     private String content;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "from_uid", nullable = false, length = 32)
-    private String fromUid;
+    @Column(name = "from_uid", nullable = false)
+    private Long fromUid;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "to_uid", nullable = false, length = 32)
-    private String toUid;
+    @Column(name = "to_uid", nullable = false)
+    private Long toUid;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

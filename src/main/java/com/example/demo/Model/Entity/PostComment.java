@@ -17,24 +17,21 @@ import java.time.Instant;
 @Table(name = "post_comments")
 public class PostComment {
     @Id
-    @Size(max = 36)
-    @Column(name = "comment_id", nullable = false, length = 36)
-    private String id;
+    @Column(name = "comment_id", nullable = false)
+    private Long id;
 
-    @Size(max = 36)
     @NotNull
-    @Column(name = "post_id", nullable = false, length = 36)
-    private String postId;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
     @Size(max = 4095)
     @NotNull
     @Column(name = "content", nullable = false, length = 4095)
     private String content;
 
-    @Size(max = 36)
     @NotNull
-    @Column(name = "from_uid", nullable = false, length = 36)
-    private String fromUid;
+    @Column(name = "from_uid", nullable = false)
+    private Long fromUid;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

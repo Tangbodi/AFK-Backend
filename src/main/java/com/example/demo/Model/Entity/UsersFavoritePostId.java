@@ -7,7 +7,6 @@ import org.hibernate.Hibernate;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,16 +14,14 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class UsersFavoritePostId implements Serializable {
-    private static final long serialVersionUID = -8943037367897689524L;
-    @Size(max = 32)
+    private static final long serialVersionUID = -8055161487554654643L;
     @NotNull
-    @Column(name = "post_id", nullable = false, length = 32)
-    private String postId;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "user_id", nullable = false, length = 32)
-    private String userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Override
     public boolean equals(Object o) {

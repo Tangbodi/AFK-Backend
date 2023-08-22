@@ -18,18 +18,16 @@ public class CommentReplyDTO {
     @NotNull(message = "GameId is required")
     @ValidGameId
     private Short gameId;
-    @NotBlank(message = "PostId is required")
-    @ValidPostId
-    private String postId;
-    private String replyId;
-    private String toReplyId;
-    private String commentId;
+    @NotNull(message = "PostId is required")
+    private Long postId;
+    private Long replyId;
+    private Long toReplyId;
+    private Long commentId;
     @NotBlank(message = "Content is required")
     private String content;
-    private String fromUid;
-    @NotBlank(message = "ToUid is required")
-    @ValidUserId
-    private String toUid;
+    private Long fromUid;
+    @NotNull(message = "ToUid is required")
+    private Long toUid;
     private Long ipvFour;
     private String ipvSix;
     private Instant createdAt;

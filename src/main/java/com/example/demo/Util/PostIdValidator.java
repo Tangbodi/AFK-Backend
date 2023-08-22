@@ -8,12 +8,12 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.UUID;
 
 @Component
-public class PostIdValidator implements ConstraintValidator<ValidPostId, String> {
-    private static final Integer POST_LENGTH = 32;
+public class PostIdValidator implements ConstraintValidator<ValidPostId, Long> {
+    private static final Integer POST_LENGTH = 19;
 
     @Override
-    public boolean isValid(String postId, ConstraintValidatorContext constraintValidatorContext) {
-        if(postId.length()==POST_LENGTH){
+    public boolean isValid(Long postId, ConstraintValidatorContext constraintValidatorContext) {
+        if(postId.toString().length()==POST_LENGTH){
             return true;
         }else{
             return false;

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface PostsInfoRepository extends JpaRepository<PostsInfo, String> {
+public interface PostsInfoRepository extends JpaRepository<PostsInfo, Long> {
     @Query(value = "SELECT\n" +
             "    p.post_id,\n" +
             "    p.title,\n" +

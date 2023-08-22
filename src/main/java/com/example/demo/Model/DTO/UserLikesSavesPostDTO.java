@@ -5,13 +5,13 @@ import com.example.demo.Annotation.ValidUserId;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class UserLikesSavesPostDTO {
-    @NotBlank(message = "postId is required")
-    @ValidPostId
-    private String postId;
+    @NotNull(message = "postId is required")
+    private Long postId;
 
-    private String userId;
+    private Long userId;
     private String type;
 }

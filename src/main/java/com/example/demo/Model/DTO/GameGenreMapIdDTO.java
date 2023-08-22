@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class GameGenreMapIdDTO {
 
-    private String userId;
+    private Long userId;
     @NotNull(message = "GenreId is required")
     @ValidGenreId
     private Byte genreId;

@@ -13,7 +13,7 @@ import java.time.Instant;
 
 @Data
 public class UserRegisterDTO {
-    private String userId;
+    private Long userId;
     @NotBlank(message = "Username is required")
     @Length(min = 1, max = 30, message = "Username length not eligible")
     @ValidUsername

@@ -7,11 +7,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Component
-public class UserIdValidator implements ConstraintValidator<ValidUserId, String> {
-    private static final Integer USER_LENGTH = 32;
+public class UserIdValidator implements ConstraintValidator<ValidUserId, Long> {
+    private static final Integer USER_LENGTH = 19;
     @Override
-    public boolean isValid(String userId, ConstraintValidatorContext constraintValidatorContext) {
-        if(userId.length()==USER_LENGTH){
+    public boolean isValid(Long userId, ConstraintValidatorContext constraintValidatorContext) {
+        if(userId.toString().length()==USER_LENGTH){
             return true;
         }else{
             return false;

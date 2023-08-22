@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class UserFavoritePostVO {
-    private String postId;
-    private String userId;
+    private Long postId;
+    private Long userId;
     private boolean likeStatus;
     private boolean saveStatus;
 }

@@ -14,6 +14,7 @@ import com.example.demo.Model.VO.ShowPostBodyVO;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Redis.RedisPostService;
+import com.example.demo.Util.Snowflake;
 import com.example.demo.Util.UUIDCreator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public class PostService {
     public void SetPostCache(PostDTO postDTO) {
         logger.info("Setting post for userId: {}" + postDTO.getUserId());
         try {
-            String uuid = UUIDCreator.CreateUUID();
+            long uuid = Snowflake.generateUniqueId();
             postDTO.setPostId(uuid);
             redisPostService.SetPostCache(postDTO);
         } catch (Exception e) {
@@ -65,7 +67,7 @@ public class PostService {
     }
 
 
-    public PostSavedVO SavePost(String userId, List<MultipartFile> imageFiles) {
+    public PostSavedVO SavePost(Long userId, List<MultipartFile> imageFiles) {
         logger.info("Saving post");
         try {
             PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
@@ -112,7 +114,7 @@ public class PostService {
         logger.info("Setting post info: {}");
         try {
             PostsInfo postsInfo = new PostsInfo();
-            postsInfo.setPostId(postDTO.getPostId());
+            postsInfo.setId(postDTO.getPostId());
             postsInfo.setView(0);
             postsInfo.setComment(0);
             postsInfo.setLike(0);
@@ -190,6 +192,7 @@ public class PostService {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
             } else {
+                logger.info("Post found: " + getPostDTO.getPostId());
                 List<Map<Short,Object>> postImageList = postImageService.findAllImageURLByPostId(getPostDTO);
                 return TransferToShowPostVO(post,postImageList);
             }
@@ -207,8 +210,10 @@ public class PostService {
         try {
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
             for(Map<Short,Object> map : post){
-                showPostBodyVO.setPostId((String) map.get("post_id"));
-                showPostBodyVO.setUserId((String) map.get("user_id"));
+                showPostBodyVO.setPostId(((BigInteger) map.get("post_id")).longValue());
+                logger.info("Post ID: {}", showPostBodyVO.getPostId());
+                showPostBodyVO.setUserId(((BigInteger) map.get("user_id")).longValue());
+                logger.info("User ID: {}", showPostBodyVO.getUserId());
                 showPostBodyVO.setUserName((String) map.get("username"));
                 showPostBodyVO.setTitle((String) map.get("title"));
                 showPostBodyVO.setTextRender((String) map.get("text_render"));
@@ -254,7 +259,7 @@ public class PostService {
         }
     }
 
-    public List<PostInfoVO> FindUserPostHistory(String userId) {
+    public List<PostInfoVO> FindUserPostHistory(Long userId) {
         logger.info("Getting all posts by user ID");
         try {
             List<Map<Short, Object>> allPostsByUserId = postUserMapRepository.findPostUserMapByUserId(userId);
@@ -277,7 +282,7 @@ public class PostService {
         try {
             for (Map<Short, Object> map : allPostsByUserId) {
                 PostInfoVO postHistoryVO = new PostInfoVO();
-                postHistoryVO.setPostId((String) map.get("post_id"));
+                postHistoryVO.setPostId(((BigInteger) map.get("post_id")).longValue());
                 postHistoryVO.setTitle((String) map.get("title"));
                 postHistoryVO.setUsername((String) map.get("username"));
                 postHistoryVO.setView((Integer) map.get("view"));

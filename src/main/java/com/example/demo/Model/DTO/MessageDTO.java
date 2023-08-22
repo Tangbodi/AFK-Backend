@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class MessageDTO {
-    private Integer MessageId;
-    private String fromUid;
-    private String toUid;
+    private Long MessageId;
+    private Long fromUid;
+    private Long toUid;
     private Boolean readStatus;
 
 }

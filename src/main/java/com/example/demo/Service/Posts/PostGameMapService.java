@@ -43,7 +43,7 @@ public class PostGameMapService {
         for (Map<Short, Object> map : postsGamesMaps) {
             try {
                 LatestPostVO latestPostVO = new LatestPostVO();
-                latestPostVO.setPostId((String) map.get("post_id"));
+                latestPostVO.setPostId((Long) map.get("post_id"));
                 latestPostVO.setTitle((String) map.get("title"));
                 latestPostVO.setGameName((String) map.get("game_name"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");

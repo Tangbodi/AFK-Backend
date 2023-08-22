@@ -1,24 +1,33 @@
 package com.example.demo.Model.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "users_login")
 public class UsersLogin {
     @Id
-    @Column(name = "id", nullable = false, length = 36)
-    private String id;
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
+    @NotNull
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")
     private Long ipvFour;
 
+    @Size(max = 16)
     @Column(name = "ipv_six", length = 16)
     private String ipvSix;
 
@@ -27,53 +36,5 @@ public class UsersLogin {
 
     @Column(name = "logout_at")
     private Instant logoutAt;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public Long getIpvFour() {
-        return ipvFour;
-    }
-
-    public void setIpvFour(Long ipvFour) {
-        this.ipvFour = ipvFour;
-    }
-
-    public String getIpvSix() {
-        return ipvSix;
-    }
-
-    public void setIpvSix(String ipvSix) {
-        this.ipvSix = ipvSix;
-    }
-
-    public Instant getLoginAt() {
-        return loginAt;
-    }
-
-    public void setLoginAt(Instant loginAt) {
-        this.loginAt = loginAt;
-    }
-
-    public Instant getLogoutAt() {
-        return logoutAt;
-    }
-
-    public void setLogoutAt(Instant logoutAt) {
-        this.logoutAt = logoutAt;
-    }
 
 }

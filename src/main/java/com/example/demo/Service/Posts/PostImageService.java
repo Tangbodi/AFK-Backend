@@ -5,7 +5,7 @@ import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Service.Redis.RedisPostService;
-import com.example.demo.Util.TimestampCreator;
+import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +31,7 @@ public class PostImageService {
     @Autowired
     private RedisPostService redisPostService;
 
+
     @Transactional
     public void SavePostImage(List<MultipartFile> imageFiles, PostDTO postDTO) throws IOException {
         logger.info("Saving PostImage: {}");
@@ -42,7 +40,7 @@ public class PostImageService {
             for (int i=0; i< imageFiles.size(); i++) {
                 //create image id for each image
                 MultipartFile imageFile = imageFiles.get(i);
-                String imageId = TimestampCreator.CreateTimestamp();
+                long imageId = Snowflake.generateUniqueId();
                 logger.info("Created PostImage Id: {}", imageId);
                 PostImage postImage = new PostImage();
                 postImage.setId(imageId);
@@ -58,16 +56,16 @@ public class PostImageService {
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);
                 logger.info("Saved PostImage: {}", postImage);
-                logger.info("Saving PostImage to Tomcat and Nginx");
-                Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
-                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
-                fos_tomcat.write(imageData);
-                fos_nginx.write(imageData);
-                fos_tomcat.close();
-                fos_nginx.close();
-                logger.info("Saved PostImage to Tomcat and Nginx");
+//                logger.info("Saving PostImage to Tomcat and Nginx");
+//                Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+//                Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+//                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
+//                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+//                fos_tomcat.write(imageData);
+//                fos_nginx.write(imageData);
+//                fos_tomcat.close();
+//                fos_nginx.close();
+//                logger.info("Saved PostImage to Tomcat and Nginx");
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

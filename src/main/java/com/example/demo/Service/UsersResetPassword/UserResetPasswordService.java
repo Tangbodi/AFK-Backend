@@ -21,11 +21,11 @@ public class UserResetPasswordService {
     private UserResetPasswordRepository userResetPasswordRepository;
     @Async("MultiExecutor")
     @Transactional
-    public boolean SetUserResetPasswordToken(String token, String userId, UserRegisterDTO userRegisterDTO) {
+    public boolean SetUserResetPasswordToken(String token, Long userId, UserRegisterDTO userRegisterDTO) {
         logger.info("Setting UserResetPasswordToken: {}");
         try {
             UsersResetPasswordToken usersResetPasswordToken = new UsersResetPasswordToken();
-            usersResetPasswordToken.setUserId(userId);
+            usersResetPasswordToken.setId(userId);
             usersResetPasswordToken.setUsername(userRegisterDTO.getUsername());
             usersResetPasswordToken.setEmail(userRegisterDTO.getEmail());
             usersResetPasswordToken.setCreatedAt(Instant.now());
@@ -40,7 +40,7 @@ public class UserResetPasswordService {
     }
 
     @Transactional
-    public boolean UpdateUserEmail(String userId, String email) {
+    public boolean UpdateUserEmail(Long userId, String email) {
         logger.info("Updating Email: {}" + userId + "::::::" + email);
         try {
             UsersResetPasswordToken usersResetPasswordToken = userResetPasswordRepository.findById(userId).orElse(null);

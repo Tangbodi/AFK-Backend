@@ -71,7 +71,7 @@ public class UsersController {
             if (user != null) {
                 logger.info("User registered successfully");
                 //Setup email validation
-                userRegisterDTO.setUserId(user.getUserId());
+                userRegisterDTO.setUserId(user.getId());
                 userRegisterDTO.setCreatedAt(user.getCreatedAt());
                 processEmailService.ProcessRegistrationEmailValidation(request, userRegisterDTO);
                 apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");

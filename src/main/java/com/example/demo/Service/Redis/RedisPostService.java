@@ -1,7 +1,6 @@
 package com.example.demo.Service.Redis;
 
 import com.example.demo.Model.DTO.PostDTO;
-import com.example.demo.Model.Entity.Post;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +58,7 @@ public class RedisPostService {
 //        }
 //    }
 
-    public PostDTO GetPostDTOViaCache(String userId) {
+    public PostDTO GetPostDTOViaCache(Long userId) {
         logger.info("Getting the post via cache");
         Jedis jedis = null;
         try {
@@ -84,7 +83,7 @@ public class RedisPostService {
         }
     }
 
-    public boolean CheckPostCache(String userId) {
+    public boolean CheckPostCache(Long userId) {
         logger.info("Checking the post cache");
         Jedis jedis = null;
         boolean cacheExists = false;
@@ -108,7 +107,7 @@ public class RedisPostService {
         return cacheExists;
     }
 
-    public void DeletePostCache(String userId) {
+    public void DeletePostCache(Long userId) {
         logger.info("Deleting the post cache");
         Jedis jedis = null;
         try {

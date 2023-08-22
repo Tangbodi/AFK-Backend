@@ -60,7 +60,7 @@ public class UserMailAddressService {
         return newUsersMailAddress;
     }
 
-    public UserMailAddressVO GetUserMailAddress(String userId) {
+    public UserMailAddressVO GetUserMailAddress(Long userId) {
         logger.info("Getting user mail address for user ID: {}", userId);
 
         try {

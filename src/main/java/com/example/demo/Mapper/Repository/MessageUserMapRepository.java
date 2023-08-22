@@ -11,13 +11,13 @@ import java.util.Map;
 
 @Repository
 public interface MessageUserMapRepository extends JpaRepository<MessagesUsersMap,Long> {
-    @Query(value = "SELECT pr.reply_id, ui.username, pr.content FROM afk.messages_users_map mum \n" +
+    @Query(value = "SELECT pr.reply_id, ui.user_id, ui.username, pr.content FROM afk.messages_users_map mum \n" +
             "JOIN afk.messages m ON mum.message_id = m.message_id\n" +
             "JOIN afk.post_replies pr ON m.cr_id = pr.reply_id\n" +
             "JOIN afk.users_info ui ON m.from_uid = ui.user_id\n" +
             "WHERE mentioned_uid = :mentionedUid AND read_status = '0'", nativeQuery = true)
-    List<Map<Short, Object>> findUnreadMessages(@Param("mentionedUid") String mentionedUid);
+    List<Map<Short, Object>> findUnreadMessages(@Param("mentionedUid") Long mentionedUid);
 
     @Query(value = "SELECT * FROM afk.messages_users_map WHERE mentioned_uid = :mentionedUid AND read_status = '0'", nativeQuery = true)
-    List<MessagesUsersMap> findUnreadMessagesByMentionedUid(@Param("mentionedUid") String mentionedUid);
+    List<MessagesUsersMap> findUnreadMessagesByMentionedUid(@Param("mentionedUid") Long mentionedUid);
 }

@@ -17,14 +17,12 @@ import java.time.Instant;
 @Table(name = "post_images")
 public class PostImage {
     @Id
-    @Size(max = 17)
-    @Column(name = "image_id", nullable = false, length = 17)
-    private String id;
+    @Column(name = "image_id", nullable = false)
+    private Long id;
 
-    @Size(max = 32)
     @NotNull
-    @Column(name = "post_id", nullable = false, length = 32)
-    private String postId;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
     @Size(max = 31)
     @Column(name = "image_type", length = 31)

@@ -17,9 +17,8 @@ import java.time.Instant;
 @Table(name = "posts")
 public class Post {
     @Id
-    @Size(max = 36)
-    @Column(name = "post_id", nullable = false, length = 36)
-    private String id;
+    @Column(name = "post_id", nullable = false)
+    private Long id;
 
     @Size(max = 255)
     @NotNull

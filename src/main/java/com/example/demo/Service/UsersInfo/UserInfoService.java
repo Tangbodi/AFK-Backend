@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
 
@@ -99,7 +98,7 @@ public class UserInfoService {
         }
         return null;
     }
-    public UserInfoDTO GetUserInfoByUserId(String userId) {
+    public UserInfoDTO GetUserInfoByUserId(Long userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
             UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
@@ -144,7 +143,8 @@ public class UserInfoService {
     public boolean UpdateUserEmail(String userId, String newEmail) {
         logger.info("Updating email: {}" + userId + "::::::" + newEmail);
         try {
-            UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
+            Long userIdLong = Long.parseLong(userId);
+            UsersInfo usersInfo = userInfoRepository.findById(userIdLong).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
                 logger.info("Old email: {}" + usersInfo.getEmail());

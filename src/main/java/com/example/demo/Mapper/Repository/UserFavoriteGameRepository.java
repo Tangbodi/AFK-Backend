@@ -18,5 +18,5 @@ public interface UserFavoriteGameRepository extends JpaRepository<UsersFavoriteG
             "JOIN users_favorite_games uf ON gi.icon_id = uf.game_id\n" +
             "WHERE uf.user_id = :userId\n" +
             "AND uf.favorite_status = 1;", nativeQuery = true)
-    List<Map<Short, Object>> findByUserId(@Param("userId") String userId);
+    List<Map<Short, Object>> findByUserId(@Param("userId") Long userId);
 }

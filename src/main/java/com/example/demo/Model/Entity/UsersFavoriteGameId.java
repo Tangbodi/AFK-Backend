@@ -7,7 +7,6 @@ import org.hibernate.Hibernate;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,11 +14,10 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class UsersFavoriteGameId implements Serializable {
-    private static final long serialVersionUID = 6984699929252606365L;
-    @Size(max = 36)
+    private static final long serialVersionUID = -6299233076374055563L;
     @NotNull
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @NotNull
     @Column(name = "game_id", nullable = false)

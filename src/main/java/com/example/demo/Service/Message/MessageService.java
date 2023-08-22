@@ -6,7 +6,6 @@ import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.Message;
 import com.example.demo.Model.Entity.MessagesUsersMap;
 import com.example.demo.Model.VO.MessageVO;
-import com.example.demo.Service.News.NewsService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +67,7 @@ public class MessageService {
         }
     }
 
-    public List<MessageVO> GetUnreadMessageViaMessageUserMap(String userId) {
+    public List<MessageVO> GetUnreadMessageViaMessageUserMap(Long userId) {
         logger.info("Getting unread message");
         List<Map<Short, Object>> messagesUsersMapList;
         try {
@@ -78,8 +78,9 @@ public class MessageService {
                 List<MessageVO> messageVOList = new ArrayList<>();
                 for (Map<Short, Object> messagesUsersMap : messagesUsersMapList) {
                     MessageVO messageVO = new MessageVO();
-                    messageVO.setReplyId((String) messagesUsersMap.get("reply_id"));
-                    messageVO.setFromUid((String) messagesUsersMap.get("username"));
+                    messageVO.setCrId(((BigInteger) messagesUsersMap.get("reply_id")).longValue());
+                    messageVO.setFromUid(((BigInteger) messagesUsersMap.get("user_id")).longValue());
+                    messageVO.setFromUsername((String) messagesUsersMap.get("username"));
                     messageVO.setContent((String) messagesUsersMap.get("content"));
                     messageVOList.add(messageVO);
                 }
@@ -92,7 +93,7 @@ public class MessageService {
     }
 
     @Transactional
-    public void UpdateMessageUserMap(String userId) {
+    public void UpdateMessageUserMap(Long userId) {
         logger.info("Updating read status");
         List<MessagesUsersMap> messagesUsersMapList;
         try {

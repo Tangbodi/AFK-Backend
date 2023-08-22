@@ -46,7 +46,7 @@ public class RepliesController {
     @PostMapping("/edit-reply")
     public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to share your opinion");
         } else {

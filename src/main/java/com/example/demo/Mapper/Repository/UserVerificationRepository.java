@@ -6,10 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
-public interface UserVerificationRepository extends JpaRepository<UsersVerificationToken, String> {
+public interface UserVerificationRepository extends JpaRepository<UsersVerificationToken, Long> {
     @Query(value = "SELECT * FROM afk.users_verification_token WHERE token = :token", nativeQuery = true)
     UsersVerificationToken findByToken(@Param("token") String token);
 

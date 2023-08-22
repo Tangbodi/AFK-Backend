@@ -31,7 +31,7 @@ public class ProcessEmailService {
     private RedisEmailService redisEmailService;
     @Autowired
     private RedisUsernameService redisUsernameService;
-    @Async("MultiExecutor")
+
     public void ProcessRegistrationEmailValidation(HttpServletRequest request, UserRegisterDTO userRegisterDTO) {
         logger.info("Processing registration email validation: {}");
         try {

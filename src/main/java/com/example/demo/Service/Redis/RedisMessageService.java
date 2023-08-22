@@ -15,7 +15,7 @@ public class RedisMessageService {
     @Autowired
     private JedisPool jedisPool;
 
-    public void SetUserReadStatus(String userId) {
+    public void SetUserReadStatus(Long userId) {
         logger.info("Setting user read status: userId = {}", userId);
         Jedis jedis = null;
         try {
@@ -29,7 +29,7 @@ public class RedisMessageService {
             jedis.close();
         }
     }
-    public void DeleteUserReadStatus(String userId) {
+    public void DeleteUserReadStatus(Long userId) {
         logger.info("Deleting user read status: userId = {}", userId);
         Jedis jedis = null;
         try {

@@ -17,9 +17,8 @@ import java.time.Instant;
 @Table(name = "users_mail_address")
 public class UsersMailAddress {
     @Id
-    @Size(max = 36)
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String id;
+    @Column(name = "user_id", nullable = false)
+    private Long id;
 
     @Size(max = 63)
     @Column(name = "country", length = 63)

@@ -61,7 +61,7 @@ public class UsersInfoController {
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
         logger.info("GetUserInfo:::session:::" + session);
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
@@ -101,7 +101,7 @@ public class UsersInfoController {
     @PutMapping("/update-mail-address")
     public ResponseEntity UpdateUserMailAddress(@Validated @RequestBody UserMailDTO userMailDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -115,7 +115,7 @@ public class UsersInfoController {
     @GetMapping("/mail-address")
     public ResponseEntity GetMailAddress(HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -130,7 +130,7 @@ public class UsersInfoController {
                                              @RequestParam(value = "page") int page,
                                              @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         page = page - 1;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post history isn't viewable when signed out");
@@ -156,7 +156,7 @@ public class UsersInfoController {
     @PostMapping("/favorite-post")
     public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -171,7 +171,7 @@ public class UsersInfoController {
     @GetMapping("/unread-message")
     public ResponseEntity GetUnreadMessages(HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
@@ -186,7 +186,7 @@ public class UsersInfoController {
     @PutMapping("/mark-all-as-read")
     public ResponseEntity ReadMessages(HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to see unread messages");
         } else {

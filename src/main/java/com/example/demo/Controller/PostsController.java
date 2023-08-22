@@ -119,7 +119,7 @@ public class PostsController {
     public ResponseEntity ShowPostBody(HttpServletRequest request,
                                        @RequestParam(value = "game") @ValidGameId Short gameId,
                                        @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                       @RequestParam(value = "post") @ValidPostId String postId) {
+                                       @RequestParam(value = "post") @ValidPostId Long postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -144,7 +144,7 @@ public class PostsController {
     @GetMapping("/comments-replies")
     public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") @ValidGameId Short gameId,
                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                                    @RequestParam(value = "post") @ValidPostId String postId) {
+                                                    @RequestParam(value = "post") @ValidPostId Long postId) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -172,7 +172,7 @@ public class PostsController {
     public ResponseEntity SetPostInCache(HttpServletRequest request,
                                          @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your game experience");
         } else if (gameGenreMapService.FindGamesGenresMapById(postDTO.getGenreId(), postDTO.getGameId()) == null) {
@@ -209,7 +209,7 @@ public class PostsController {
     @PostMapping("/save-post")
     public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -253,7 +253,7 @@ public class PostsController {
     @PostMapping("/genre/like-save-post")
     public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to make your opinion count");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

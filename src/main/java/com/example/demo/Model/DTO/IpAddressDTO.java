@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class IpAddressDTO {
-    private String id;
+    private Long pcrId;
     private Long ipvFour;
     private String ipvSix;
     private Instant createdAt;

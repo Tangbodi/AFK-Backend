@@ -12,14 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserVerificationService {
@@ -44,7 +41,7 @@ public class UserVerificationService {
         logger.info("Setting UserRegistrationVerificationToken");
         try {
             UsersVerificationToken usersVerificationToken = new UsersVerificationToken();
-            usersVerificationToken.setUserId(userRegisterDTO.getUserId());
+            usersVerificationToken.setId(userRegisterDTO.getUserId());
             usersVerificationToken.setToken(token);
             usersVerificationToken.setUsername(userRegisterDTO.getUsername());
             usersVerificationToken.setEmail(userRegisterDTO.getEmail());
@@ -94,8 +91,8 @@ public class UserVerificationService {
         try {
            UsersVerificationToken usersVerificationToken = userVerificationRepository.findByToken(token);
             if (usersVerificationToken != null) {
-                logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getUserId());
-                userAuthService.UpdateUserAuth(usersVerificationToken.getUserId());
+                logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getId());
+                userAuthService.UpdateUserAuth(usersVerificationToken.getId());
                 RemoveToken(usersVerificationToken);
             } else {
 
@@ -125,7 +122,8 @@ public class UserVerificationService {
     public void UpdateUserEmail(String userId, String newEmail) {
         logger.info("Updating Email for user: userId={}, email={}", userId, newEmail);
         try {
-            UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
+            Long userIdLong = Long.parseLong(userId);
+            UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userIdLong).orElse(null);
             if (usersVerificationToken != null) {
                 logger.info("Old email: {}", usersVerificationToken.getEmail());
                 logger.info("Updating email to: {}", newEmail);
@@ -143,7 +141,7 @@ public class UserVerificationService {
     }
 
     @Transactional
-    public void UpdateTokenForUpdateEmail(String token, String userId, HttpServletRequest request) {
+    public void UpdateTokenForUpdateEmail(String token, Long userId, HttpServletRequest request) {
         logger.info("Updating token for update email: token={}, userId={}", token, userId);
         try {
             UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
