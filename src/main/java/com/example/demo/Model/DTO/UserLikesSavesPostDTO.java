@@ -10,8 +10,10 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UserLikesSavesPostDTO {
     @NotNull(message = "postId is required")
+    @ValidPostId
     private Long postId;
-
+    @NotNull(message = "userId is required")
+    @ValidUserId
     private Long userId;
     private String type;
 }

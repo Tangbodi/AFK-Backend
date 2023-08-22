@@ -14,7 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -56,16 +59,16 @@ public class PostImageService {
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);
                 logger.info("Saved PostImage: {}", postImage);
-//                logger.info("Saving PostImage to Tomcat and Nginx");
-//                Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-//                Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-//                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
-//                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
-//                fos_tomcat.write(imageData);
-//                fos_nginx.write(imageData);
-//                fos_tomcat.close();
-//                fos_nginx.close();
-//                logger.info("Saved PostImage to Tomcat and Nginx");
+                logger.info("Saving PostImage to Tomcat and Nginx");
+                Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+                Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
+                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+                fos_tomcat.write(imageData);
+                fos_nginx.write(imageData);
+                fos_tomcat.close();
+                fos_nginx.close();
+                logger.info("Saved PostImage to Tomcat and Nginx");
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

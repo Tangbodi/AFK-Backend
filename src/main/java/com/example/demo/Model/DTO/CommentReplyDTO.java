@@ -19,6 +19,7 @@ public class CommentReplyDTO {
     @ValidGameId
     private Short gameId;
     @NotNull(message = "PostId is required")
+    @ValidPostId
     private Long postId;
     private Long replyId;
     private Long toReplyId;
@@ -27,6 +28,7 @@ public class CommentReplyDTO {
     private String content;
     private Long fromUid;
     @NotNull(message = "ToUid is required")
+    @ValidUserId
     private Long toUid;
     private Long ipvFour;
     private String ipvSix;

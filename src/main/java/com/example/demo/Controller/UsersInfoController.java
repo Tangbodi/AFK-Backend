@@ -64,7 +64,7 @@ public class UsersInfoController {
         Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
         } else {
             UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
             UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
@@ -103,7 +103,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
         } else {
             userMailDTO.setUserId(userId);
             userMailAddressService.UpdateUserMailAddress(userMailDTO);
@@ -117,7 +117,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
         } else {
             UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
             apiResponse = ApiResponse.success(userMailAddressVO);

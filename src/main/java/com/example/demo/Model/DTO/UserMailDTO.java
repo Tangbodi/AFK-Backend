@@ -5,18 +5,21 @@ import com.example.demo.Annotation.ValidUserId;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
 public class UserMailDTO{
 
-
+    @NotNull(message = "UserId is required")
+    @ValidUserId
     private Long userId;
     private String country;
     private String state;
     private String address;
     private String city;
     private String zip;
+    @ValidPhone
     private String phone;
 
 }

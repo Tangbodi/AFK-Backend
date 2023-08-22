@@ -157,7 +157,6 @@ public class PostsController {
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
             ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
-
             if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {

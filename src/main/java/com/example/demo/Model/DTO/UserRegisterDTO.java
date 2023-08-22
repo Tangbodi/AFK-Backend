@@ -29,15 +29,4 @@ public class UserRegisterDTO {
     @ValidPassword
     private String confirmPassword;
     private Instant createdAt;
-    @java.lang.Override
-    public java.lang.String toString() {
-        return "UserRegisterDTO{" +
-                " userId='" + getUserId() + "'" +
-                " username='" + getUsername() + "'" +
-                " email='" + getEmail() + "'" +
-                " password='" + getPassword() + "'" +
-                " confirmPassword='" + getConfirmPassword() + "'" +
-                " createdAt='" + getCreatedAt() + "'" +
-                "}";
-    }
 }
