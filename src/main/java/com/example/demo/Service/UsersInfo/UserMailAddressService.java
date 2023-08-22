@@ -64,41 +64,39 @@ public class UserMailAddressService {
         logger.info("Getting user mail address for user ID: {}", userId);
 
         try {
-            UsersMailAddress usersMailAddress = userMailAddressRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-            logger.info("User mail address found: {}", usersMailAddress.getId());
-
-            UserMailAddressVO userMailAddressVO = new UserMailAddressVO();
-            userMailAddressVO.setCountry(usersMailAddress.getCountry());
-            userMailAddressVO.setState(usersMailAddress.getState());
-            userMailAddressVO.setAddress(usersMailAddress.getAddress());
-            userMailAddressVO.setCity(usersMailAddress.getCity());
-            userMailAddressVO.setZip(usersMailAddress.getZip());
-            userMailAddressVO.setPhone(usersMailAddress.getPhone());
-
-            return userMailAddressVO;
-        } catch (UserNotFoundException e) {
-            logger.info("User mail not found for user ID: {}", userId);
-            throw e; // Re-throw the custom exception to be handled at the controller level
-        } catch (Exception e) {
+            UsersMailAddress usersMailAddress = userMailAddressRepository.findById(userId).orElse(null);
+            if(usersMailAddress == null) {
+                logger.info("User mail address not found for user ID: {}", userId);
+                return null;
+            } else {
+                logger.info("Found user mail address for user ID: {}", userId);
+                UserMailAddressVO userMailAddressVO = new UserMailAddressVO();
+                userMailAddressVO.setCountry(usersMailAddress.getCountry());
+                userMailAddressVO.setState(usersMailAddress.getState());
+                userMailAddressVO.setAddress(usersMailAddress.getAddress());
+                userMailAddressVO.setCity(usersMailAddress.getCity());
+                userMailAddressVO.setZip(usersMailAddress.getZip());
+                userMailAddressVO.setPhone(usersMailAddress.getPhone());
+                return userMailAddressVO;
+            }
+        }catch (Exception e) {
             logger.error("Failed to get user mail address: {}", e.getMessage(), e);
-            return null;
         }
+        return null;
     }
-    public void SetUserMailAddress(UserRegisterDTO userRegisterDTO){
-        logger.info("Setting user mail address: {}");
-        try{
-            UsersMailAddress usersMailAddress = new UsersMailAddress();
-            usersMailAddress.setId(userRegisterDTO.getUserId());
-            usersMailAddress.setCreatedAt(userRegisterDTO.getCreatedAt());
-            usersMailAddress.setModifiedAt(userRegisterDTO.getCreatedAt());
-            userMailAddressRepository.save(usersMailAddress);
-            logger.info("Set user mail address: {}");
-        }catch (Exception e){
-            logger.error("Failed to set user mail address: {}",e.getMessage(),e);
-        }
-
-    }
+//    public void SetUserMailAddress(UserRegisterDTO userRegisterDTO){
+//        logger.info("Setting user mail address: {}");
+//        try{
+//            UsersMailAddress usersMailAddress = new UsersMailAddress();
+//            usersMailAddress.setId(userRegisterDTO.getUserId());
+//            usersMailAddress.setCreatedAt(userRegisterDTO.getCreatedAt());
+//            usersMailAddress.setModifiedAt(userRegisterDTO.getCreatedAt());
+//            userMailAddressRepository.save(usersMailAddress);
+//            logger.info("Set user mail address: {}");
+//        }catch (Exception e){
+//            logger.error("Failed to set user mail address: {}",e.getMessage(),e);
+//        }
+//
+//    }
 
 }
