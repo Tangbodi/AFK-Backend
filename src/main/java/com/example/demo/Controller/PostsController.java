@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -160,6 +161,7 @@ public class PostsController {
             if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
+                //need pagination
                 List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId);
                 apiResponse = ApiResponse.success(res);
             }
@@ -167,9 +169,11 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping(value = "/edit-post", produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
+    @PostMapping(value = "/edit-post",   consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE},
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity SetPostInCache(HttpServletRequest request,
-                                         @Validated @RequestBody PostDTO postDTO, HttpSession session) {
+                                         @RequestPart("data") PostDTO postDTO, @RequestPart("images") List<MultipartFile> imageFiles, HttpSession session) {
+        logger.info("imageFiles:::" + imageFiles.size());
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
@@ -199,32 +203,33 @@ public class PostsController {
             }
             //set userid
             postDTO.setUserId(userId);
-            postService.SetPostCache(postDTO);
+//            postService.SetPostCache(postDTO);
+            PostSavedVO postSavedVO = postService.SavePost(postDTO, imageFiles);
             apiResponse = ApiResponse.success("Set Post Cache Successfully");
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/save-post")
-    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
-        ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
-            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-        } else {
-            logger.info("imageFiles:::" + imageFiles);
-            PostSavedVO postSavedVO = postService.SavePost(userId, imageFiles);
-            if (postSavedVO != null) {
-                //handle imageFiles??????
-
-                apiResponse = ApiResponse.success(postSavedVO);
-            } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Request timeout, failed to save post, please try again");
-            }
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
+//    @PostMapping("/save-post")
+//    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
+//        ApiResponse apiResponse;
+//        Long userId = (Long) session.getAttribute("userId");
+//        if (userId == null) {
+//            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
+//            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//        } else {
+//            logger.info("imageFiles:::" + imageFiles);
+//            PostSavedVO postSavedVO = postService.SavePost(userId, imageFiles);
+//            if (postSavedVO != null) {
+//                //handle imageFiles??????
+//
+//                apiResponse = ApiResponse.success(postSavedVO);
+//            } else {
+//                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Request timeout, failed to save post, please try again");
+//            }
+//        }
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
 
     @PostMapping("/genre/latest-popular-newest")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {

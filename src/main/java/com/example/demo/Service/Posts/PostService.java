@@ -67,14 +67,16 @@ public class PostService {
     }
 
 
-    public PostSavedVO SavePost(Long userId, List<MultipartFile> imageFiles) {
+    public PostSavedVO SavePost(PostDTO postDTO, List<MultipartFile> imageFiles) {
         logger.info("Saving post");
         try {
-            PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
+//            PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
             if (postDTO != null) {
                 logger.info("Transfer postDTO to post");
                 postDTO.setCreatedAt(Instant.now());
                 Post post = new Post();
+                long postId = Snowflake.generateUniqueId();
+                postDTO.setPostId(postId);
                 post.setId(postDTO.getPostId());
                 post.setTitle(postDTO.getTitle());
                 Document document = Jsoup.parse(postDTO.getTextRender());
@@ -88,7 +90,11 @@ public class PostService {
                 post.setModifiedAt(postDTO.getCreatedAt());
                 if (postRepository.save(post) != null) {
                     logger.info("Post saved successfully");
-                    postImageService.SavePostImage(imageFiles, postDTO);
+                    if(!imageFiles.isEmpty()){
+                        postImageService.SavePostImage(imageFiles, postDTO);
+                    } else {
+                        logger.info("No image files found");
+                    }
                     ipAddressService.SetPostIpAddress(postDTO);
                     SetPostInfo(postDTO);
                     SetPostUserMap(postDTO);
@@ -100,7 +106,7 @@ public class PostService {
             } else {
                 return null;
             }
-            redisPostService.DeletePostCache(postDTO.getUserId());
+//            redisPostService.DeletePostCache(postDTO.getUserId());
             return TransferToPostSavedVO(postDTO);
         } catch (Exception e) {
             logger.error("Failed to save post: {}", e.getMessage(), e);
@@ -196,9 +202,6 @@ public class PostService {
                 List<Map<Short,Object>> postImageList = postImageService.findAllImageURLByPostId(getPostDTO);
                 return TransferToShowPostVO(post,postImageList);
             }
-        } catch (PostNotFoundException e) {
-            logger.error("Failed to get post: {}", e.getMessage(), e);
-            throw e; // Re-throw the custom exception to be handled at the controller level
         } catch (Exception e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
             return null;

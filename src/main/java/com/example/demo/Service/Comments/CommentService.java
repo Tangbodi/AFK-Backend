@@ -99,6 +99,10 @@ public class CommentService {
                 } else {
                     continue;
                 }
+                //          int startIdx = (int) pageable.getOffset();
+                //                int endIdx = Math.min((startIdx + pageable.getPageSize()), replies.size());
+                //                List<Map<String, Object>> currentReplyItems = replies.subList(startIdx, endIdx);
+                //                Page<Map<String, Object>> currentRepliesPage = new PageImpl<>(currentReplyItems, pageable, replies.size());
             }
             List<Object> combinedList = new ArrayList<>();
             combinedList.add(comment);
