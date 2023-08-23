@@ -204,7 +204,7 @@ public class PostsController {
             postDTO.setUserId(userId);
 //            postService.SetPostCache(postDTO);
             PostSavedVO postSavedVO = postService.SavePost(postDTO, imageFiles);
-            apiResponse = ApiResponse.success("Set Post Cache Successfully");
+            apiResponse = ApiResponse.success("Saved post successfully");
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
