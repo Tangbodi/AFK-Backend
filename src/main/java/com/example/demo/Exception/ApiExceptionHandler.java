@@ -1,9 +1,11 @@
 package com.example.demo.Exception;
 
 import com.example.demo.Util.ApiResponse;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
-    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ApiResponse<String>> HandleValidationException(Exception e) {
         ApiResponse<String> response = null;
         if (e instanceof MethodArgumentNotValidException) {
@@ -35,6 +37,11 @@ public class ApiExceptionHandler {
             response = ApiResponse.error(HttpStatus.BAD_REQUEST.value()
                     , exception.getBindingResult().getAllErrors().stream()
                             .map(ObjectError::getDefaultMessage).collect(Collectors.joining(";")));
+        }
+        else if (e instanceof HttpMessageNotReadableException) {
+            HttpMessageNotReadableException exception = (HttpMessageNotReadableException) e;
+            response = ApiResponse.error(HttpStatus.BAD_REQUEST.value()
+                    , "Neither genreId nor gameId is invalid, "+exception.getMessage());
         }
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

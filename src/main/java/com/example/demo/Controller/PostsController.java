@@ -169,10 +169,9 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping(value = "/edit-post",   consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE},
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/save-post")
     public ResponseEntity SetPostInCache(HttpServletRequest request,
-                                         @RequestPart("data") PostDTO postDTO, @RequestPart("images") List<MultipartFile> imageFiles, HttpSession session) {
+                                         @Validated @RequestPart("data") PostDTO postDTO, @RequestPart("images") List<MultipartFile> imageFiles, HttpSession session) {
         logger.info("imageFiles:::" + imageFiles.size());
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
