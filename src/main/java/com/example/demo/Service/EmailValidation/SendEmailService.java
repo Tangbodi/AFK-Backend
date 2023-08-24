@@ -39,6 +39,7 @@ public class SendEmailService {
 
         } catch (MessagingException e) {
             logger.error("Failed to send email validation link: {}", e.getMessage(),e);
+            throw new RuntimeException("Failed to send email validation link "+e);
         }
     }
 }

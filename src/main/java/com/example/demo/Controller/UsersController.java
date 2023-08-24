@@ -51,7 +51,7 @@ public class UsersController {
     private UserLoginService userLoginService;
 
     @PostMapping("/registration")
-    public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws IllegalAccessException, IOException {
+    public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws Exception {
         // Encode email for avoiding email scraping and spam bots
         ApiResponse apiResponse;
         String encodedEmail = HtmlUtils.htmlEscape(userRegisterDTO.getEmail());
@@ -67,17 +67,16 @@ public class UsersController {
         } else {
             // If all checks are passed, register user
             logger.info("User doesn't exist");
-            User user = userRegistrationService.RegisterUser(userRegisterDTO);
-            if (user != null) {
+            try{
+                User user = userRegistrationService.RegisterUser(userRegisterDTO);
                 logger.info("User registered successfully");
                 //Setup email validation
                 userRegisterDTO.setUserId(user.getId());
                 userRegisterDTO.setCreatedAt(user.getCreatedAt());
                 processEmailService.ProcessRegistrationEmailValidation(request, userRegisterDTO);
                 apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
-            } else {
-                logger.info("Failed to register user : {}");
-                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
+            } catch (Exception e){
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
             }
         }
 
@@ -109,10 +108,12 @@ public class UsersController {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but blocked");
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
-                UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
-                UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
-                logger.info("Set session attribute: {}" + "userId, " + userInfoDTO.getUserId());
-                session.setAttribute("userId", userInfoDTO.getUserId());
+                UserInfoVO userInfoVO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
+
+                logger.info("Set session attribute: {}" + "userId, " + userInfoVO.getUserId());
+                session.setAttribute("userId", userInfoVO.getUserId());
+                userInfoVO.setJSESSIONID(session.getId());
+                logger.info("JSESSIONID: {}" + session.getId());
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
             } else {

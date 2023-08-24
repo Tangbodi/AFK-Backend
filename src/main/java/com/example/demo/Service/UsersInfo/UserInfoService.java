@@ -75,7 +75,7 @@ public class UserInfoService {
         }
     }
 
-    public UserInfoDTO GetUserInfoByUsername(String username) {
+    public UserInfoVO GetUserInfoByUsername(String username) {
         logger.info("Getting UsersInfo: {}" + username);
         try {
             UsersInfo usersInfo = userInfoRepository.findByUsername(username).orElse(null);
@@ -88,7 +88,7 @@ public class UserInfoService {
                 userInfoDTO.setAvatarUrl(usersInfo.getAvatarUrl());
                 userInfoDTO.setCreatedAt(usersInfo.getCreatedAt());
                 userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
-                return userInfoDTO;
+                return TransferToVO(userInfoDTO);
             } else {
                 logger.info("UserInfo does not exist: {}" );
             }
@@ -98,19 +98,12 @@ public class UserInfoService {
         }
         return null;
     }
-    public UserInfoDTO GetUserInfoByUserId(Long userId) {
+    public UserInfoVO GetUserInfoByUserId(Long userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
             UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
             if (usersInfo != null) {
                 logger.info("UsersInfo: {}" + usersInfo.getUsername());
-//                UserInfoVO userInfoVO = new UserInfoVO();
-//                userInfoVO.setUsername(usersInfo.getUsername());
-//                userInfoVO.setEmail(usersInfo.getEmail());
-//                userInfoVO.setAvatar_url(usersInfo.getAvatarUrl());
-//                userInfoVO.setCreatedAt(usersInfo.getCreatedAt());
-//                userInfoVO.setModifiedAt(usersInfo.getModifiedAt());
-//                return userInfoVO;
                 UserInfoDTO userInfoDTO = new UserInfoDTO();
                 userInfoDTO.setUserId(usersInfo.getId());
                 userInfoDTO.setUsername(usersInfo.getUsername());
@@ -118,7 +111,7 @@ public class UserInfoService {
                 userInfoDTO.setAvatarUrl(usersInfo.getAvatarUrl());
                 userInfoDTO.setCreatedAt(usersInfo.getCreatedAt());
                 userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
-                return userInfoDTO;
+                return TransferToVO(userInfoDTO);
             } else {
                 logger.info("UserInfo does not exist: {}" );
             }
@@ -127,6 +120,16 @@ public class UserInfoService {
             logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
         }
         return null;
+    }
+    public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO){
+        UserInfoVO userInfoVO = new UserInfoVO();
+        userInfoVO.setUserId(userInfoDTO.getUserId());
+        userInfoVO.setUsername(userInfoDTO.getUsername());
+        userInfoVO.setEmail(userInfoDTO.getEmail());
+        userInfoVO.setAvatarUrl(userInfoDTO.getAvatarUrl());
+        userInfoVO.setCreatedAt(userInfoDTO.getCreatedAt());
+        userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
+        return userInfoVO;
     }
 
 //    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
@@ -161,14 +164,5 @@ public class UserInfoService {
             logger.error("Failed to update UsersInfo: {}", e.getMessage(),e);
         }
         return false;
-    }
-    public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO){
-        UserInfoVO userInfoVO = new UserInfoVO();
-        userInfoVO.setUsername(userInfoDTO.getUsername());
-        userInfoVO.setEmail(userInfoDTO.getEmail());
-        userInfoVO.setAvatarUrl(userInfoDTO.getAvatarUrl());
-        userInfoVO.setCreatedAt(userInfoDTO.getCreatedAt());
-        userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
-        return userInfoVO;
     }
 }

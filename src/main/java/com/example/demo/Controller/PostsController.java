@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -170,13 +168,12 @@ public class PostsController {
     }
 
     @PostMapping(value = "/save-post")
-    public ResponseEntity SetPostInCache(HttpServletRequest request,
-                                         @Validated @RequestPart("data") PostDTO postDTO, @RequestPart("images") List<MultipartFile> imageFiles, HttpSession session) {
-        logger.info("imageFiles:::" + imageFiles.size());
+    public ResponseEntity SavePost(HttpServletRequest request,
+                                   @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your game experience");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your game experience");
         } else if (gameGenreMapService.FindGamesGenresMapById(postDTO.getGenreId(), postDTO.getGameId()) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
@@ -197,34 +194,57 @@ public class PostsController {
                 logger.info("ipvS:::" + Arrays.toString(ip));
                 postDTO.setIpvSix(ip.toString());
             } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             //set userid
             postDTO.setUserId(userId);
-//            postService.SetPostCache(postDTO);
-            PostSavedVO postSavedVO = postService.SavePost(postDTO, imageFiles);
-            apiResponse = ApiResponse.success("Saved post successfully");
+            try {
+                PostSavedVO postSavedVO = postService.SavePost(postDTO);
+                apiResponse = ApiResponse.success(postSavedVO);
+            } catch (Exception e) {
+                logger.error("Failed to save post", e.getMessage(), e);
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
+            }
+
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @PostMapping(value = "/save-post-image")
+    public ResponseEntity SavePostImage(HttpServletRequest request, @RequestParam("images") List<MultipartFile> images, HttpSession session) {
+        ApiResponse apiResponse;
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your images");
+        } else if (!images.isEmpty() && images.size() <= 3) {
+            try {
+                List<String> postImageNameList = postImageService.SavePostImageToServer(images);
+                apiResponse = ApiResponse.success(postImageNameList);
+            } catch (Exception e) {
+                logger.error("Failed to save post image", e.getMessage(), e);
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
+            }
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "You can upload a maximum of 3 images");
+
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
 //    @PostMapping("/save-post")
-//    public ResponseEntity SavePost(@RequestParam("imageFiles") List<MultipartFile> imageFiles, HttpSession session) throws IOException {
+//    public ResponseEntity SavePost(@RequestBody PostDTO postDTO, HttpSession session) throws IOException {
 //        ApiResponse apiResponse;
 //        Long userId = (Long) session.getAttribute("userId");
 //        if (userId == null) {
-//            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to continue to save post");
+//            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to continue to save post");
 //            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
 //        } else {
-//            logger.info("imageFiles:::" + imageFiles);
-//            PostSavedVO postSavedVO = postService.SavePost(userId, imageFiles);
+//            PostSavedVO postSavedVO = postService.SavePost(postDTO);
 //            if (postSavedVO != null) {
-//                //handle imageFiles??????
-//
 //                apiResponse = ApiResponse.success(postSavedVO);
 //            } else {
-//                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Request timeout, failed to save post, please try again");
+//                apiResponse = ApiResponse.error(ReturnCode.RC408.getCode(), "Request timeout, failed to save post, please try again");
 //            }
 //        }
 //        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -258,7 +278,7 @@ public class PostsController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to make your opinion count");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
             userLikesSavesPostDTO.setUserId(userId);
@@ -278,33 +298,4 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
-
-//    @GetMapping("/all-games-genres/genre/latest-posts")
-//    public ResponseEntity ShowLatestPosts() {
-//        ApiResponse apiResponse;
-//        List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
-//        apiResponse = ApiResponse.success(latestPosts);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-//
-//    @GetMapping("/all-games-genres/genre/popular-posts")
-//    public ResponseEntity ShowPopularPosts() {
-//        ApiResponse apiResponse;
-//        List<PopularPostVO> popularPosts = postInfoService.GetMostPopularPosts();
-//        apiResponse = ApiResponse.success(popularPosts);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-//    @GetMapping("/all-games-genres/genre/newest-comment")
-//    public ResponseEntity ShowNewestComment() {
-//        ApiResponse apiResponse;
-//        List<NewestCommentVO> newestCommentVOList = postCommentService.GetNewestComments();
-//        if (!newestCommentVOList.isEmpty()) {
-//            apiResponse = ApiResponse.success(newestCommentVOList);
-//        } else {
-//            apiResponse = ApiResponse.error(ReturnCode.RC404.getCode(), "No Comment Found");
-//        }
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-
 }

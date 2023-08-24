@@ -64,10 +64,9 @@ public class UsersInfoController {
         Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            UserInfoDTO userInfoDTO = userInfoService.GetUserInfoByUserId(userId);
-            UserInfoVO userInfoVO = userInfoService.TransferToVO(userInfoDTO);
+            UserInfoVO userInfoVO = userInfoService.GetUserInfoByUserId(userId);
             apiResponse = ApiResponse.success(userInfoVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -79,7 +78,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
             String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
             logger.info("Encoded email: {}", encodedEmail);
@@ -103,7 +102,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
             userMailDTO.setUserId(userId);
             userMailAddressService.UpdateUserMailAddress(userMailDTO);
@@ -117,7 +116,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to access this page");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
             UserMailAddressVO userMailAddressVO = userMailAddressService.GetUserMailAddress(userId);
             apiResponse = ApiResponse.success(userMailAddressVO);
@@ -133,7 +132,7 @@ public class UsersInfoController {
         Long userId = (Long) session.getAttribute("userId");
         page = page - 1;
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post history isn't viewable when signed out");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Post history isn't viewable when signed out");
         } else if (page < 0 || size <= 0) {
             apiResponse = ApiResponse.success(null);
         } else {
@@ -158,7 +157,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access posts that you’ve liked or saved");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
             userLikesSavesPostDTO.setUserId(userId);
@@ -188,7 +187,7 @@ public class UsersInfoController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to see unread messages");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to see unread messages");
         } else {
             messageService.UpdateMessageUserMap(userId);
             apiResponse = ApiResponse.success(null);

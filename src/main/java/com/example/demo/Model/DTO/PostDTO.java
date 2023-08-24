@@ -7,7 +7,9 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 public class PostDTO {
@@ -25,7 +27,8 @@ public class PostDTO {
     @NotBlank(message = "Content is required")
     @Length(max = 4095, message = "Text length not eligible")
     private String textRender;
-
+    @Size(max = 3, message = "Image length not eligible")
+    private List<String> postImageNameList;
     private Long ipvFour;
     private String ipvSix;
     private Instant createdAt;

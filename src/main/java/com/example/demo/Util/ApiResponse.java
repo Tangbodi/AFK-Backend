@@ -11,6 +11,7 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private String error;
+    private Long JSESSIONID;
     private long timestamp;
 
     public ApiResponse() {

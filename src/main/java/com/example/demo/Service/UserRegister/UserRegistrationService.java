@@ -46,8 +46,8 @@ public class UserRegistrationService {
         return usersInfo;
     }
 
-    @Transactional
-    public User RegisterUser(UserRegisterDTO userRegisterDTO) {
+    @Transactional(rollbackOn = Exception.class)
+    public User RegisterUser(UserRegisterDTO userRegisterDTO){
         logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
@@ -69,7 +69,7 @@ public class UserRegistrationService {
             return userRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);
+            throw new RuntimeException("Failed to register user "+e);
         }
-        return null;
     }
 }

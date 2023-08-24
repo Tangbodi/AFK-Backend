@@ -47,12 +47,9 @@ public class ProcessEmailService {
             } else {
                 logger.info("Failed to set user registration verification token");
             }
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to set user registration verification token "+e);
+            // throw new Exception("NullPointerException");
         }
     }
     public void ProcessLoginEmailValidation(HttpServletRequest request, String email, String token,String username) {
@@ -66,10 +63,9 @@ public class ProcessEmailService {
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
             redisUsernameService.SetUserEmailValidationCache(username);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            logger.error("Failed to process login email validation: {}", e.getMessage(),e);
+            throw new RuntimeException("Failed to process login email validation "+e);
         }
     }
 
@@ -82,10 +78,9 @@ public class ProcessEmailService {
             String emailValidationLink = siteURL + "/email-validation?token=" + userId;
             redisEmailService.SetEmailValidationCacheByToken(userId,newEmail);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            logger.error("Failed to process update email validation: {}", e.getMessage(),e);
+            throw new RuntimeException("Failed to process update email validation "+e);
         }
     }
 }

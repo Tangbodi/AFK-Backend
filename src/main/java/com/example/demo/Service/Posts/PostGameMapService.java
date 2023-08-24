@@ -32,7 +32,7 @@ public class PostGameMapService {
                 logger.info("No latest posts found");
             }
         } catch (Exception e) {
-            logger.error("Failed to show latest posts", e);
+            logger.error("Failed to show latest posts", e.getMessage(), e);
         }
         return Collections.emptyList();
     }
@@ -50,7 +50,7 @@ public class PostGameMapService {
                 latestPostVO.setCreatedAt(timestamp.toInstant());
                 latestPostVOList.add(latestPostVO);
             } catch (Exception e) {
-                logger.error("Failed to transfer to latest post VO", e);
+                logger.error("Failed to transfer to latest post VO",  e.getMessage(), e);
             }
         }
         return latestPostVOList;

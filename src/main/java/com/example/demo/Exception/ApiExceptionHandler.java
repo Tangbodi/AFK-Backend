@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
-    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<ApiResponse<String>> HandleValidationException(Exception e) {
         ApiResponse<String> response = null;
         if (e instanceof MethodArgumentNotValidException) {
@@ -38,11 +38,11 @@ public class ApiExceptionHandler {
                     , exception.getBindingResult().getAllErrors().stream()
                             .map(ObjectError::getDefaultMessage).collect(Collectors.joining(";")));
         }
-        else if (e instanceof HttpMessageNotReadableException) {
-            HttpMessageNotReadableException exception = (HttpMessageNotReadableException) e;
-            response = ApiResponse.error(HttpStatus.BAD_REQUEST.value()
-                    , "Neither genreId nor gameId is invalid, "+exception.getMessage());
-        }
+//        else if (e instanceof HttpMessageNotReadableException) {
+//            HttpMessageNotReadableException exception = (HttpMessageNotReadableException) e;
+//            response = ApiResponse.error(HttpStatus.BAD_REQUEST.value()
+//                    , "Neither genreId nor gameId is invalid, "+exception.getMessage());
+//        }
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

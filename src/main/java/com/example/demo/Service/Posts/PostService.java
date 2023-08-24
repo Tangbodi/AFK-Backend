@@ -1,10 +1,7 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Exception.PostNotFoundException;
-import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.GetPostDTO;
-import com.example.demo.Model.DTO.IpAddressDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.*;
 import com.example.demo.Model.VO.PostInfoVO;
@@ -12,10 +9,8 @@ import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.SearchPostVO;
 import com.example.demo.Model.VO.ShowPostBodyVO;
 import com.example.demo.Service.IP.IpAddressService;
-import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Util.Snowflake;
-import com.example.demo.Util.UUIDCreator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -23,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.math.BigInteger;
@@ -55,19 +49,19 @@ public class PostService {
     @Autowired
     private IpAddressService ipAddressService;
 
-    public void SetPostCache(PostDTO postDTO) {
-        logger.info("Setting post for userId: {}" + postDTO.getUserId());
-        try {
-            long uuid = Snowflake.generateUniqueId();
-            postDTO.setPostId(uuid);
-            redisPostService.SetPostCache(postDTO);
-        } catch (Exception e) {
-            logger.error("Failed to set post: {}", e.getMessage(), e);
-        }
-    }
+//    public void SetPostCache(PostDTO postDTO) {
+//        logger.info("Setting post for userId: {}" + postDTO.getUserId());
+//        try {
+//            long uuid = Snowflake.generateUniqueId();
+//            postDTO.setPostId(uuid);
+//            redisPostService.SetPostCache(postDTO);
+//        } catch (Exception e) {
+//            logger.error("Failed to set post: {}", e.getMessage(), e);
+//        }
+//    }
 
-
-    public PostSavedVO SavePost(PostDTO postDTO, List<MultipartFile> imageFiles) {
+    @Transactional(rollbackOn = Exception.class)
+    public PostSavedVO SavePost(PostDTO postDTO) throws Exception {
         logger.info("Saving post");
         try {
 //            PostDTO postDTO = redisPostService.GetPostDTOViaCache(userId);
@@ -88,21 +82,17 @@ public class PostService {
                 post.setTextRender(textHTML);
                 post.setCreatedAt(postDTO.getCreatedAt());
                 post.setModifiedAt(postDTO.getCreatedAt());
-                if (postRepository.save(post) != null) {
-                    logger.info("Post saved successfully");
-                    if(!imageFiles.isEmpty()){
-                        postImageService.SavePostImage(imageFiles, postDTO);
-                    } else {
-                        logger.info("No image files found");
-                    }
-                    ipAddressService.SetPostIpAddress(postDTO);
-                    SetPostInfo(postDTO);
-                    SetPostUserMap(postDTO);
-                    SetPostGameMap(postDTO);
+                postRepository.save(post);
+                logger.info("Post saved successfully");
+                if (!postDTO.getPostImageNameList().isEmpty()) {
+                    postImageService.SavePostImage(postDTO);
                 } else {
-                    logger.info("Failed to save post");
-                    return null;
+                    logger.info("No image found in postDTO");
                 }
+                ipAddressService.SetPostIpAddress(postDTO);
+                SetPostInfo(postDTO);
+                SetPostUserMap(postDTO);
+                SetPostGameMap(postDTO);
             } else {
                 return null;
             }
@@ -110,12 +100,12 @@ public class PostService {
             return TransferToPostSavedVO(postDTO);
         } catch (Exception e) {
             logger.error("Failed to save post: {}", e.getMessage(), e);
+            throw new Exception("Failed to save post " +e); // Rethrow the exception to trigger rollback
         }
-        return null;
     }
 
     @Async("MultiExecutor")
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void SetPostInfo(PostDTO postDTO) {
         logger.info("Setting post info: {}");
         try {
@@ -125,17 +115,16 @@ public class PostService {
             postsInfo.setComment(0);
             postsInfo.setLike(0);
             postsInfo.setSave(0);
-            if (postsInfoRepository.save(postsInfo) != null) {
-                logger.info("Post info saved successfully: {}");
-            } else {
-                logger.info("Failed to save post info: {}");
-            }
+            postsInfoRepository.save(postsInfo); // This will automatically be transactional
+            logger.info("Post info saved successfully: {}");
         } catch (Exception e) {
             logger.error("Failed to set post info: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to set post info " +e); // Rethrow the exception to trigger rollback
         }
     }
+
     @Async("MultiExecutor")
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void SetPostUserMap(PostDTO postDTO) {
         logger.info("Setting post user map: {}");
         try {
@@ -153,10 +142,12 @@ public class PostService {
             }
         } catch (Exception e) {
             logger.error("Failed to set post user map: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to set post user map " +e); // Rethrow the exception to trigger rollback
         }
     }
+
     @Async("MultiExecutor")
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void SetPostGameMap(PostDTO postDTO) {
         logger.info("Setting post game map: {}");
         try {
@@ -173,8 +164,10 @@ public class PostService {
             }
         } catch (Exception e) {
             logger.error("Failed to set post game map: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to set post game map " +e); // Rethrow the exception to trigger rollback
         }
     }
+
     private PostSavedVO TransferToPostSavedVO(PostDTO postDTO) {
         logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
         try {
@@ -193,14 +186,14 @@ public class PostService {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-            List<Map<Short,Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(),getPostDTO.getGameId(),getPostDTO.getPostId());
+            List<Map<Short, Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
             if (post.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
             } else {
                 logger.info("Post found: " + getPostDTO.getPostId());
-                List<Map<Short,Object>> postImageList = postImageService.findAllImageURLByPostId(getPostDTO);
-                return TransferToShowPostVO(post,postImageList);
+                List<Map<Short, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
+                return TransferToShowPostVO(post, postImageList);
             }
         } catch (Exception e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
@@ -208,11 +201,11 @@ public class PostService {
         }
     }
 
-    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short,Object>> post, List<Map<Short,Object>> postImageList) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short, Object>> post, List<Map<Short, Object>> postImageList) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
-            for(Map<Short,Object> map : post){
+            for (Map<Short, Object> map : post) {
                 showPostBodyVO.setPostId(((BigInteger) map.get("post_id")).longValue());
                 logger.info("Post ID: {}", showPostBodyVO.getPostId());
                 showPostBodyVO.setUserId(((BigInteger) map.get("user_id")).longValue());
@@ -224,16 +217,16 @@ public class PostService {
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
             List<String> ImageURLList = new ArrayList<>();
-            for(Map<Short,Object> map : postImageList){
+            for (Map<Short, Object> map : postImageList) {
                 ImageURLList.add((String) map.get("image_url"));
             }
             showPostBodyVO.setImageURL(ImageURLList);
             logger.info("Transferred post to VO successfully for post ID: {}", showPostBodyVO.getPostId());
             return showPostBodyVO;
-            }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to transfer post to VO: {}", e.getMessage(), e);
         }
-            return null;
+        return null;
     }
 
 

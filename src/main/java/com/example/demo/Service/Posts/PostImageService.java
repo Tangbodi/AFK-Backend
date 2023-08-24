@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,30 +38,49 @@ public class PostImageService {
 
 
     @Async("MultiExecutor")
-    @Transactional
-    public void SavePostImage(List<MultipartFile> imageFiles, PostDTO postDTO) throws IOException {
+    @Transactional(rollbackOn = Exception.class)
+    public void SavePostImage(PostDTO postDTO) {
         logger.info("Saving PostImage: {}");
+        List<String> imageNameList = postDTO.getPostImageNameList();
         try {
             //traverse imageFiles
-            for (int i=0; i< imageFiles.size(); i++) {
+            for (int i=0; i< imageNameList.size(); i++) {
                 //create image id for each image
-                MultipartFile imageFile = imageFiles.get(i);
-                long imageId = Snowflake.generateUniqueId();
-                logger.info("Created PostImage Id: {}", imageId);
+                String imageName = imageNameList.get(i);
+                logger.info("ImageName: {}", imageName);
+                logger.info("Create PostImage");
                 PostImage postImage = new PostImage();
+                Long imageId = Long.valueOf(imageName.substring(0,imageName.indexOf(".")));
+                logger.info("ImageId: {}", imageId);
                 postImage.setId(imageId);
                 postImage.setPostId(postDTO.getPostId());
-
-                String imageType = imageFile.getContentType().substring(6,imageFile.getContentType().length());
-                String imageName = imageId + "." + imageType;
+                String imageType = imageName.substring(imageName.indexOf(".")+1,imageName.length());
                 postImage.setImageType(imageType);
                 postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
-                byte[] imageData = imageFile.getBytes();
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);
                 logger.info("Saved PostImage: {}", postImage);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to save PostImage",  e.getMessage(), e);
+            throw new RuntimeException("Failed to save PostImage "+e);
+        }
+    }
+    public List<String> SavePostImageToServer(List<MultipartFile> images) throws IOException {
+        logger.info("Saving PostImage to server");
+        List<String> postImageNameList = new ArrayList<>();
+        try{
+            for (int i=0; i< images.size(); i++) {
+                //create image id for each image
+                long imageId = Snowflake.generateUniqueId();
+                MultipartFile image = images.get(i);
+                //parse image data and type
+                byte[] imageData = image.getBytes();
+                String imageType = image.getContentType().substring(6,image.getContentType().length());
+                //create image name
+                String imageName = imageId + "." + imageType;
                 logger.info("Saving PostImage to Tomcat and Nginx");
                 Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                 Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
@@ -71,14 +91,16 @@ public class PostImageService {
                 fos_tomcat.close();
                 fos_nginx.close();
                 logger.info("Saved PostImage to Tomcat and Nginx");
+                //add image url
+                postImageNameList.add(imageName);
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to save PostImage to server",  e.getMessage(), e);
+            throw new IOException("Failed to save PostImage to server "+e);
         }
+        return postImageNameList;
     }
-    public List<Map<Short,Object>> findAllImageURLByPostId(GetPostDTO getPostDTO){
+    public List<Map<Short,Object>> findAllImageURLsByPostId(GetPostDTO getPostDTO){
         logger.info("Finding all images by post id");
         try{
             List<Map<Short,Object>> postImages = postImageRepository.findAllImageURLByPostId(getPostDTO.getPostId());
@@ -90,7 +112,7 @@ public class PostImageService {
                 return Collections.emptyList();
             }
         } catch (Exception e){
-            logger.error("Failed to find all images by post id", e);
+            logger.error("Failed to find all images by post id", e.getMessage(), e);
             return Collections.emptyList();
         }
     }

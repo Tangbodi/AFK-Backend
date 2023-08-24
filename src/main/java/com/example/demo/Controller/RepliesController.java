@@ -48,7 +48,7 @@ public class RepliesController {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to share your opinion");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to share your opinion");
         } else {
             String ipAddress = HttpUtils.getRequestIP(request);
             logger.info("ipAddress:::" + ipAddress);

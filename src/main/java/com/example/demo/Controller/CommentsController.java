@@ -46,7 +46,7 @@ public class CommentsController {
         Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Please login to share your opinion");
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your opinion");
         } else {
 
             String ipAddress = HttpUtils.getRequestIP(request);
