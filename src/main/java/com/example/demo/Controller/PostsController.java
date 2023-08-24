@@ -217,7 +217,7 @@ public class PostsController {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your images");
-        } else if (!images.isEmpty() && images.size() <= 3) {
+        } else if (!images.isEmpty() && images.size() <= 9) {
             try {
                 List<String> postImageNameList = postImageService.SavePostImageToServer(images);
                 apiResponse = ApiResponse.success(postImageNameList);
