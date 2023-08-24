@@ -220,7 +220,12 @@ public class PostsController {
         } else if (!images.isEmpty() && images.size() <= 9) {
             try {
                 List<String> postImageNameList = postImageService.SavePostImageToServer(images);
-                apiResponse = ApiResponse.success(postImageNameList);
+
+                if (!postImageNameList.isEmpty()) {
+                    apiResponse = ApiResponse.success(postImageNameList);
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Image is not an image or size is too large");
+                }
             } catch (Exception e) {
                 logger.error("Failed to save post image", e.getMessage(), e);
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());

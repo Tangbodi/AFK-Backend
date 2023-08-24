@@ -73,31 +73,36 @@ public class PostImageService {
         try {
             List<String> postImageNameList = new ArrayList<>();
             for (MultipartFile image : images) {
-                //create image id for each image
-                long imageId = Snowflake.generateUniqueId();
-                //parse image data and type
-                byte[] imageData = image.getBytes();
-                String imageType = image.getContentType();
+                // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
+                if (image.getContentType().startsWith("image/")&&image.getSize() <= 5 * 1024 * 1024) {
+                    //create image id for each image
+                    long imageId = Snowflake.generateUniqueId();
+                    //parse image data and type
+                    byte[] imageData = image.getBytes();
+                    String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
-                imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
-                logger.info("Image type: {}", imageType);
-                //create image name
-                String imageName = imageId + "." + imageType;
-                logger.info("ImageName: {}", imageName);
-                postImageNameList.add(imageName);
-                logger.info("PostImageNameList: {}", postImageNameList);
-                logger.info("Saving PostImage to Tomcat and Nginx");
-                Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
-                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
-                fos_tomcat.write(imageData);
-                fos_nginx.write(imageData);
-                fos_tomcat.close();
-                fos_nginx.close();
-                logger.info("Saved PostImage to Tomcat and Nginx");
-                //add image url
-
+                    imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
+                    logger.info("Image type: {}", imageType);
+                    //create image name
+                    String imageName = imageId + "." + imageType;
+                    logger.info("ImageName: {}", imageName);
+                    postImageNameList.add(imageName);
+                    logger.info("PostImageNameList: {}", postImageNameList);
+                    logger.info("Saving PostImage to Tomcat and Nginx");
+                    Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+                    Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+                    FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
+                    FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+                    fos_tomcat.write(imageData);
+                    fos_nginx.write(imageData);
+                    fos_tomcat.close();
+                    fos_nginx.close();
+                    logger.info("Saved PostImage to Tomcat and Nginx");
+                    //add image url
+                } else {
+                    logger.info("Image is not an image or size is too large");
+                    return Collections.emptyList();
+                }
             }
             return postImageNameList;
         } catch (IOException e) {
