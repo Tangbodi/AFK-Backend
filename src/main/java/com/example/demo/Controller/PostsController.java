@@ -217,7 +217,7 @@ public class PostsController {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your images");
-        } else if (images.length <= 9) {
+        } else if (!images[0].isEmpty() && images.length <= 9) {
             try {
                 List<String> postImageNameList = postImageService.SavePostImageToServer(images);
                 if (!postImageNameList.isEmpty()) {
@@ -229,9 +229,10 @@ public class PostsController {
                 logger.error("Failed to save post image", e.getMessage(), e);
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
             }
+        } else if (images[0].isEmpty()) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "No image found");
         } else {
             apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "You can upload up to 9 images");
-
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
