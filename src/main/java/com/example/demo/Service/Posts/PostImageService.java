@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -44,17 +43,17 @@ public class PostImageService {
         List<String> imageNameList = postDTO.getPostImageNameList();
         try {
             //traverse imageFiles
-            for (int i=0; i< imageNameList.size(); i++) {
+            for (int i = 0; i < imageNameList.size(); i++) {
                 //create image id for each image
                 String imageName = imageNameList.get(i);
                 logger.info("ImageName: {}", imageName);
                 logger.info("Create PostImage");
                 PostImage postImage = new PostImage();
-                Long imageId = Long.valueOf(imageName.substring(0,imageName.indexOf(".")));
+                Long imageId = Long.valueOf(imageName.substring(0, imageName.indexOf(".")));
                 logger.info("ImageId: {}", imageId);
                 postImage.setId(imageId);
                 postImage.setPostId(postDTO.getPostId());
-                String imageType = imageName.substring(imageName.indexOf(".")+1,imageName.length());
+                String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 postImage.setImageType(imageType);
                 postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
@@ -64,23 +63,25 @@ public class PostImageService {
                 logger.info("Saved PostImage: {}", postImage);
             }
         } catch (Exception e) {
-            logger.error("Failed to save PostImage",  e.getMessage(), e);
-            throw new RuntimeException("Failed to save PostImage "+e);
+            logger.error("Failed to save PostImage", e.getMessage(), e);
+            throw new RuntimeException("Failed to save PostImage " + e);
         }
     }
+
     public List<String> SavePostImageToServer(List<MultipartFile> images) throws IOException {
         logger.info("Saving PostImage to server");
-        List<String> postImageNameList = new ArrayList<>();
-        try{
-            for (int i=0; i< images.size(); i++) {
+        try {
+            List<String> postImageNameList = new ArrayList<>();
+            for (int i = 0; i < images.size(); i++) {
                 //create image id for each image
                 long imageId = Snowflake.generateUniqueId();
                 MultipartFile image = images.get(i);
                 //parse image data and type
                 byte[] imageData = image.getBytes();
-                String imageType = image.getContentType().substring(6,image.getContentType().length());
+                String imageType = image.getContentType().substring(6, image.getContentType().length());
                 //create image name
                 String imageName = imageId + "." + imageType;
+                logger.info("ImageName: {}", imageName);
                 logger.info("Saving PostImage to Tomcat and Nginx");
                 Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                 Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
@@ -94,24 +95,26 @@ public class PostImageService {
                 //add image url
                 postImageNameList.add(imageName);
             }
+            return postImageNameList;
         } catch (IOException e) {
-            logger.error("Failed to save PostImage to server",  e.getMessage(), e);
-            throw new IOException("Failed to save PostImage to server "+e);
+            logger.error("Failed to save PostImage to server", e.getMessage(), e);
+            throw new IOException("Failed to save PostImage to server " + e);
         }
-        return postImageNameList;
+
     }
-    public List<Map<Short,Object>> findAllImageURLsByPostId(GetPostDTO getPostDTO){
+
+    public List<Map<Short, Object>> findAllImageURLsByPostId(GetPostDTO getPostDTO) {
         logger.info("Finding all images by post id");
-        try{
-            List<Map<Short,Object>> postImages = postImageRepository.findAllImageURLByPostId(getPostDTO.getPostId());
-            if(!postImages.isEmpty()){
+        try {
+            List<Map<Short, Object>> postImages = postImageRepository.findAllImageURLByPostId(getPostDTO.getPostId());
+            if (!postImages.isEmpty()) {
                 logger.info("Found all images by post id");
                 return postImages;
-            }else{
+            } else {
                 logger.info("No images found by post id");
                 return Collections.emptyList();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to find all images by post id", e.getMessage(), e);
             return Collections.emptyList();
         }
