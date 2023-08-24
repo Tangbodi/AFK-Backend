@@ -226,7 +226,7 @@ public class PostsController {
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
             }
         } else {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "You can upload a maximum of 3 images");
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "You can upload up to 9 images");
 
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
