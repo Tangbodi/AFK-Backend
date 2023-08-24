@@ -68,7 +68,7 @@ public class PostImageService {
         }
     }
 
-    public List<String> SavePostImageToServer(List<MultipartFile> images) throws IOException {
+    public List<String> SavePostImageToServer( MultipartFile[] images) throws IOException {
         logger.info("Saving PostImage to server");
         try {
             List<String> postImageNameList = new ArrayList<>();

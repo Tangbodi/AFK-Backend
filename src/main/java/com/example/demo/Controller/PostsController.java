@@ -212,15 +212,14 @@ public class PostsController {
     }
 
     @PostMapping(value = "/save-post-image")
-    public ResponseEntity SavePostImage(HttpServletRequest request, @RequestParam("images") List<MultipartFile> images, HttpSession session) {
+    public ResponseEntity SavePostImage(HttpServletRequest request, @RequestParam("images") MultipartFile[] images, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your images");
-        } else if (!images.isEmpty() && images.size() <= 9) {
+        } else if (images.length <= 9) {
             try {
                 List<String> postImageNameList = postImageService.SavePostImageToServer(images);
-
                 if (!postImageNameList.isEmpty()) {
                     apiResponse = ApiResponse.success(postImageNameList);
                 } else {
