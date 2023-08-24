@@ -72,16 +72,20 @@ public class PostImageService {
         logger.info("Saving PostImage to server");
         try {
             List<String> postImageNameList = new ArrayList<>();
-            for (int i = 0; i < images.size(); i++) {
+            for (MultipartFile image : images) {
                 //create image id for each image
                 long imageId = Snowflake.generateUniqueId();
-                MultipartFile image = images.get(i);
                 //parse image data and type
                 byte[] imageData = image.getBytes();
-                String imageType = image.getContentType().substring(6, image.getContentType().length());
+                String imageType = image.getContentType();
+//                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
+                imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
+                logger.info("Image type: {}", imageType);
                 //create image name
                 String imageName = imageId + "." + imageType;
                 logger.info("ImageName: {}", imageName);
+                postImageNameList.add(imageName);
+                logger.info("PostImageNameList: {}", postImageNameList);
                 logger.info("Saving PostImage to Tomcat and Nginx");
                 Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                 Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
@@ -93,12 +97,15 @@ public class PostImageService {
                 fos_nginx.close();
                 logger.info("Saved PostImage to Tomcat and Nginx");
                 //add image url
-                postImageNameList.add(imageName);
+
             }
             return postImageNameList;
         } catch (IOException e) {
             logger.error("Failed to save PostImage to server", e.getMessage(), e);
             throw new IOException("Failed to save PostImage to server " + e);
+        } catch (NullPointerException e) {
+            logger.error("Failed to save PostImage to server", e.getMessage(), e);
+            throw new NullPointerException("Failed to save PostImage to server " + e);
         }
 
     }
