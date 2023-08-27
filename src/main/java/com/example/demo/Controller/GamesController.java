@@ -2,7 +2,6 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
-import com.example.demo.Model.VO.GameGenreVO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
@@ -10,19 +9,16 @@ import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.Redis.RedisGameIconService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
-import com.example.demo.Util.GameIdValidator;
-import com.example.demo.Util.GenreIdValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -37,18 +33,22 @@ public class GamesController {
     @Autowired
     private GameIconService gameIconService;
     @Autowired
-    private RedisGameIconService redisGameIconService;
+    private RedisService redisService;
     @Autowired
     private GameGenreService gameGenreService;
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired
     private GameGenreMapService gameGenreMapService;
+    @Autowired
+    private RedisGameIconService redisGameIconService;
+
     @GetMapping("/")
     public ResponseEntity GetAllGameIcons() throws JsonProcessingException {
         ApiResponse apiResponse;
         List<GameIconVO> gameIconVOList;
-        if (redisGameIconService.CheckAllGameIconsCache()) {
+
+        if (redisService.CacheExists(ALL_GAME_ICON_KEY)) {
             logger.info("ALL_GAME_ICONS exists in Redis cache");
             gameIconVOList = redisGameIconService.GetAllGameIconsCache();
         } else {
@@ -57,6 +57,7 @@ public class GamesController {
             redisGameIconService.SetAllGameIconsCache(gameIconVOList);
         }
         apiResponse = ApiResponse.success(gameIconVOList);
+
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 

@@ -1,18 +1,5 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.CommentRepository;
-import com.example.demo.Model.VO.NewestCommentVO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 //@Service
 //public class PostCommentService {
 //    private static final Logger logger = LoggerFactory.getLogger(PostCommentService.class);

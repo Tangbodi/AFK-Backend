@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersAuth;
 
-import com.example.demo.Mapper.Repository.UserAuthRepository;
+import com.example.demo.Repository.UserAuthRepository;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersAuth;

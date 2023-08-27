@@ -1,6 +1,5 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.*;
@@ -8,8 +7,8 @@ import com.example.demo.Model.VO.PostInfoVO;
 import com.example.demo.Model.VO.PostSavedVO;
 import com.example.demo.Model.VO.SearchPostVO;
 import com.example.demo.Model.VO.ShowPostBodyVO;
+import com.example.demo.Repository.*;
 import com.example.demo.Service.IP.IpAddressService;
-import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Util.Snowflake;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -43,11 +42,11 @@ public class PostService {
     @Autowired
     private UserInfoRepository userInfoRepository;
     @Autowired
-    private RedisPostService redisPostService;
-    @Autowired
     private PostImageService postImageService;
     @Autowired
     private IpAddressService ipAddressService;
+    @Autowired
+    private PostInfoService postInfoService;
 
 //    public void SetPostCache(PostDTO postDTO) {
 //        logger.info("Setting post for userId: {}" + postDTO.getUserId());
@@ -112,7 +111,7 @@ public class PostService {
             PostsInfo postsInfo = new PostsInfo();
             postsInfo.setId(postDTO.getPostId());
             postsInfo.setView(0);
-            postsInfo.setComment(0);
+            postsInfo.setCommentReply(0);
             postsInfo.setLike(0);
             postsInfo.setSave(0);
             postsInfoRepository.save(postsInfo); // This will automatically be transactional
@@ -193,6 +192,8 @@ public class PostService {
             } else {
                 logger.info("Post found: " + getPostDTO.getPostId());
                 List<Map<Short, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
+                // Update post viewed count
+                postInfoService.UpdatePostViewCount(getPostDTO.getPostId());
                 return TransferToShowPostVO(post, postImageList);
             }
         } catch (Exception e) {

@@ -1,7 +1,7 @@
 package com.example.demo.Service.UserRegister;
 
-import com.example.demo.Mapper.Repository.UserInfoRepository;
-import com.example.demo.Mapper.Repository.UserRepository;
+import com.example.demo.Repository.UserInfoRepository;
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
@@ -10,7 +10,6 @@ import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersPostsSetting.UserPostSettingService;
 import com.example.demo.Util.Snowflake;
-import com.example.demo.Util.UUIDCreator;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

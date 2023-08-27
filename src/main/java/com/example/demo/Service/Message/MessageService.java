@@ -1,9 +1,9 @@
 package com.example.demo.Service.Message;
 
-import com.example.demo.Mapper.Repository.MessageRepository;
-import com.example.demo.Mapper.Repository.MessageUserMapRepository;
-import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.Message;
+import com.example.demo.Repository.MessageRepository;
+import com.example.demo.Repository.MessageUserMapRepository;
+import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.MessagesUsersMap;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.Redis.RedisMessageService;
@@ -35,9 +35,9 @@ public class MessageService {
         Message message = new Message();
         try {
             if(commentReplyDTO.getReplyId() != null) {
-                message.setCrId(commentReplyDTO.getReplyId());
+                message.setCommentReplyId(commentReplyDTO.getReplyId());
             } else {
-                message.setCrId(commentReplyDTO.getCommentId());
+                message.setCommentReplyId(commentReplyDTO.getCommentId());
             }
             message.setContent(commentReplyDTO.getContent());
             message.setFromUid(commentReplyDTO.getFromUid());
@@ -47,7 +47,7 @@ public class MessageService {
             Message savedMessage = messageRepository.save(message);
             SetMessageUserMap(savedMessage);
         } catch (Exception e) {
-            logger.error("Failed to set reply mention", e);
+            logger.error("Failed to set reply mention", e.getMessage(),e);
         }
         return null;
     }
@@ -63,7 +63,7 @@ public class MessageService {
             messageUserMapRepository.save(messagesUsersMap);
             redisMessageService.SetUserReadStatus(savedMessage.getToUid());
         } catch (Exception e) {
-            logger.error("Failed to set message user map", e);
+            logger.error("Failed to set message user map", e.getMessage(),e);
         }
     }
 
@@ -87,7 +87,7 @@ public class MessageService {
                 return messageVOList;
             }
         } catch (Exception e) {
-            logger.error("Failed to get unread message", e);
+            logger.error("Failed to get unread message", e.getMessage(),e);
         }
         return Collections.emptyList();
     }
@@ -107,7 +107,8 @@ public class MessageService {
             }
             redisMessageService.DeleteUserReadStatus(userId);
         } catch (Exception e) {
-            logger.error("Failed to update read status", e);
+            logger.error("Failed to update read status", e.getMessage(),e);
+            throw new RuntimeException("Failed to update read status " + e);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Mapper.Repository.GameGenreRepository;
+import com.example.demo.Repository.GameGenreRepository;
 import com.example.demo.Model.Entity.GameGenre;
 import com.example.demo.Model.VO.GameGenreVO;
 import org.slf4j.Logger;

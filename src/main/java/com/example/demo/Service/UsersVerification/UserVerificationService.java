@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersVerification;
 
-import com.example.demo.Mapper.Repository.UserVerificationRepository;
+import com.example.demo.Repository.UserVerificationRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersVerificationToken;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
@@ -32,8 +32,7 @@ public class UserVerificationService {
     @Lazy
     @Autowired
     private UserAuthService userAuthService;
-    @Autowired
-    private RedisEmailService redisEmailService;
+
 
 
     @Transactional

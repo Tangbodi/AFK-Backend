@@ -9,15 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.UUID;
 
 @Service
 public class ProcessEmailService {
@@ -48,24 +45,25 @@ public class ProcessEmailService {
                 logger.info("Failed to set user registration verification token");
             }
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to set user registration verification token "+e);
+            throw new RuntimeException("Failed to set user registration verification token " + e);
             // throw new Exception("NullPointerException");
         }
     }
-    public void ProcessLoginEmailValidation(HttpServletRequest request, String email, String token,String username) {
+
+    public void ProcessLoginEmailValidation(HttpServletRequest request, String email, String token, String username) {
         logger.info("Processing login email validation: {}");
         try {
             String recipientEmail = email;
             String siteURL = request.getRequestURL().toString();
             siteURL.replace(request.getServletPath(), "");
-            String emailValidationLink = siteURL + "/email-validation?token=" + token+"/username="+username;
+            String emailValidationLink = siteURL + "/email-validation?token=" + token + "/username=" + username;
             logger.info("emailValidationLink:::" + emailValidationLink);
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
             redisUsernameService.SetUserEmailValidationCache(username);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            logger.error("Failed to process login email validation: {}", e.getMessage(),e);
-            throw new RuntimeException("Failed to process login email validation "+e);
+        } catch (MessagingException | UnsupportedEncodingException | JedisConnectionException e) {
+            logger.error("Failed to process login email validation: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process login email validation " + e);
         }
     }
 
@@ -76,11 +74,11 @@ public class ProcessEmailService {
             String siteURL = request.getRequestURL().toString();
             siteURL.replace(request.getServletPath(), "");
             String emailValidationLink = siteURL + "/email-validation?token=" + userId;
-            redisEmailService.SetEmailValidationCacheByToken(userId,newEmail);
+            redisEmailService.SetEmailValidationCacheByToken(userId, newEmail);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            logger.error("Failed to process update email validation: {}", e.getMessage(),e);
-            throw new RuntimeException("Failed to process update email validation "+e);
+            logger.error("Failed to process update email validation: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process update email validation " + e);
         }
     }
 }

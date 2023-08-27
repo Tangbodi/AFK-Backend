@@ -5,6 +5,7 @@ import com.example.demo.Annotation.ValidGenreId;
 import com.example.demo.Annotation.ValidPostId;
 import com.example.demo.Annotation.ValidUserId;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ public class CommentReplyDTO {
     private Long toReplyId;
     private Long commentId;
     @NotBlank(message = "Content is required")
+    @Length(max = 4095, message = "Text length not eligible")
     private String content;
     private Long fromUid;
     @NotNull(message = "ToUid is required")

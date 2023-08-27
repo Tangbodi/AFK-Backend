@@ -15,7 +15,6 @@ import com.example.demo.Service.Posts.PostGameMapService;
 import com.example.demo.Service.Posts.PostImageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Posts.PostService;
-import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.ApiResponse;
@@ -32,9 +31,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -60,8 +61,6 @@ public class PostsController {
     @Autowired
     private GameGenreMapService gameGenreMapService;
     @Autowired
-    private RedisPostService redisPostService;
-    @Autowired
     private PostImageService postImageService;
     @Autowired
     private UserFavoritePostService userFavoritePostService;
@@ -77,7 +76,6 @@ public class PostsController {
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
-        page = page - 1;
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (page < 0 || size <= 0) {
@@ -85,14 +83,27 @@ public class PostsController {
         } else {
             List<PostInfoVO> showPostVOList = postInfoService.GetAllPostInfoInOneGame(gameGenreMapIdDTO);
             if (!showPostVOList.isEmpty()) {
+                page = page - 1;
+                if (page < 0 || size <= 0) {
+                    apiResponse = ApiResponse.success(Collections.emptyList());
+                    return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+                } else {
+                    //
+                }
                 Pageable pageable = PageRequest.of(page, size);
                 int startIdx = (int) pageable.getOffset();
                 int endIdx = Math.min((startIdx + pageable.getPageSize()), showPostVOList.size());
+                logger.info("startIdx:{}" + startIdx);
+                logger.info("endIdx:{}" + endIdx);
+                if (endIdx < startIdx) {
+                    apiResponse = ApiResponse.success(Collections.emptyList());
+                    return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+                }
                 List<PostInfoVO> currentPageItems = showPostVOList.subList(startIdx, endIdx);
                 Page<PostInfoVO> currentPage = new PageImpl<>(currentPageItems, pageable, showPostVOList.size());
                 apiResponse = ApiResponse.success(currentPage);
             } else {
-                apiResponse = ApiResponse.success(showPostVOList);
+                apiResponse = ApiResponse.success(Collections.emptyList());
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -143,7 +154,9 @@ public class PostsController {
     @GetMapping("/comments-replies")
     public ResponseEntity ShowAllCommentsAndReplies(@RequestParam(value = "game") @ValidGameId Short gameId,
                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                                    @RequestParam(value = "post") @ValidPostId Long postId) {
+                                                    @RequestParam(value = "post") @ValidPostId Long postId,
+                                                    @RequestParam(value = "page") int page,
+                                                    @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -161,7 +174,29 @@ public class PostsController {
             } else {
                 //need pagination
                 List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId);
-                apiResponse = ApiResponse.success(res);
+                if (!res.isEmpty()) {
+                    page = page - 1;
+                    if (page < 0 || size <= 0) {
+                        apiResponse = ApiResponse.success(Collections.emptyList());
+                        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+                    } else {
+                        //
+                    }
+                    Pageable pageable = PageRequest.of(page, size);
+                    int startIdx = (int) pageable.getOffset();
+                    int endIdx = Math.min((startIdx + pageable.getPageSize()), res.size());
+                    logger.info("startIdx:{}" + startIdx);
+                    logger.info("endIdx:{}" + endIdx);
+                    if (endIdx < startIdx) {
+                        apiResponse = ApiResponse.success(Collections.emptyList());
+                        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+                    }
+                    List<List<Object>> currentResItems = res.subList(startIdx, endIdx);
+                    Page<List<Object>> currentResPage = new PageImpl<>(currentResItems, pageable, res.size());
+                    apiResponse = ApiResponse.success(currentResPage);
+                } else {
+                    apiResponse = ApiResponse.success(Collections.emptyList());
+                }
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -169,7 +204,7 @@ public class PostsController {
 
     @PostMapping(value = "/save-post")
     public ResponseEntity SavePost(HttpServletRequest request,
-                                   @RequestBody PostDTO postDTO, HttpSession session) {
+                                   @Validated @RequestBody PostDTO postDTO, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
@@ -177,21 +212,21 @@ public class PostsController {
         } else if (gameGenreMapService.FindGamesGenresMapById(postDTO.getGenreId(), postDTO.getGameId()) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
-            logger.info("userId:::" + userId);
+            logger.info("userId:{}" + userId);
             String ipAddress = HttpUtils.getRequestIP(request);
-            logger.info("ipAddress:::" + ipAddress);
+            logger.info("ipAddress:{}" + ipAddress);
             //set ip
             if (ipService.isValidInet4Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split("\\.");
-                logger.info("ipAddress split:::" + ip);
+                logger.info("ipAddress split:{}" + ip);
                 Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                logger.info("ipvF:::" + ipvF);
+                logger.info("ipvF:{}" + ipvF);
                 postDTO.setIpvFour(ipvF);
             } else if (ipService.isValidInet6Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split(":");
-                logger.info("ipvS:::" + Arrays.toString(ip));
+                logger.info("ipvS:{}" + Arrays.toString(ip));
                 postDTO.setIpvSix(ip.toString());
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid IP Address");
@@ -237,24 +272,6 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-//    @PostMapping("/save-post")
-//    public ResponseEntity SavePost(@RequestBody PostDTO postDTO, HttpSession session) throws IOException {
-//        ApiResponse apiResponse;
-//        Long userId = (Long) session.getAttribute("userId");
-//        if (userId == null) {
-//            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to continue to save post");
-//            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//        } else {
-//            PostSavedVO postSavedVO = postService.SavePost(postDTO);
-//            if (postSavedVO != null) {
-//                apiResponse = ApiResponse.success(postSavedVO);
-//            } else {
-//                apiResponse = ApiResponse.error(ReturnCode.RC408.getCode(), "Request timeout, failed to save post, please try again");
-//            }
-//        }
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-
     @PostMapping("/genre/latest-popular-newest")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
@@ -278,29 +295,30 @@ public class PostsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/genre/like-save-post")
-    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
-        ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
-            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-        } else {
-            userLikesSavesPostDTO.setUserId(userId);
-            boolean status;
-            switch (userLikesSavesPostDTO.getType()) {
-                case "like":
-                    status = userFavoritePostService.SetUserLikePost(userLikesSavesPostDTO);
-                    apiResponse = ApiResponse.success(status);
-                    break;
-                case "save":
-                    status = userFavoritePostService.SetUserSavePost(userLikesSavesPostDTO);
-                    apiResponse = ApiResponse.success(status);
-                    break;
-                default:
-                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
-            }
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
+//    @PostMapping("/genre/like-save-post")
+//    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) throws JMSException {
+//        ApiResponse apiResponse;
+//        Long userId = (Long) session.getAttribute("userId");
+//        if (userId == null) {
+//            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
+//            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//        } else {
+//            boolean status;
+//            switch (userLikesSavesPostDTO.getType()) {
+//                case "like":
+//                    userLikesSavesPostDTO.setUserId(userId);
+//                    status = userFavoritePostService.SetUserLikePost(userLikesSavesPostDTO);
+//                    apiResponse = ApiResponse.success(status);
+//                    break;
+//                case "save":
+//                    userLikesSavesPostDTO.setUserId(userId);
+//                    status = userFavoritePostService.SetUserSavePost(userLikesSavesPostDTO);
+//                    apiResponse = ApiResponse.success(status);
+//                    break;
+//                default:
+//                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
+//            }
+//        }
+//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//    }
 }

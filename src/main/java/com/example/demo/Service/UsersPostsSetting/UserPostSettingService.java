@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersPostsSetting;
 
-import com.example.demo.Mapper.Repository.UserPostSettingRepository;
+import com.example.demo.Repository.UserPostSettingRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersPostsSetting;
 import org.slf4j.Logger;

@@ -38,11 +38,6 @@ public class ApiExceptionHandler {
                     , exception.getBindingResult().getAllErrors().stream()
                             .map(ObjectError::getDefaultMessage).collect(Collectors.joining(";")));
         }
-//        else if (e instanceof HttpMessageNotReadableException) {
-//            HttpMessageNotReadableException exception = (HttpMessageNotReadableException) e;
-//            response = ApiResponse.error(HttpStatus.BAD_REQUEST.value()
-//                    , "Neither genreId nor gameId is invalid, "+exception.getMessage());
-//        }
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

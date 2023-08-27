@@ -16,4 +16,5 @@ public class RedisConfiguration {
         // Replace "localhost" with your actual Redis host
         return new JedisPool(poolConfig, "localhost");
     }
+    
 }

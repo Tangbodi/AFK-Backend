@@ -1,10 +1,9 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Mapper.Repository.PostImageRepository;
+import com.example.demo.Repository.PostImageRepository;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
-import com.example.demo.Service.Redis.RedisPostService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +31,6 @@ public class PostImageService {
     private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
     @Autowired
     private PostImageRepository postImageRepository;
-    @Autowired
-    private RedisPostService redisPostService;
 
 
     @Async("MultiExecutor")
@@ -123,7 +120,7 @@ public class PostImageService {
                 logger.info("Found all images by post id");
                 return postImages;
             } else {
-                logger.info("No images found by post id");
+                logger.info("No image found by post id");
                 return Collections.emptyList();
             }
         } catch (Exception e) {

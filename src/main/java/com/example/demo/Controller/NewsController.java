@@ -19,7 +19,6 @@ import java.util.List;
 public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
     private static final String NEWS_CACHE_KEY = "AFK_NEWS";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private NewsService newsService;
     @Autowired

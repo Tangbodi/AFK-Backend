@@ -23,8 +23,8 @@ public class PostsInfo {
     private Integer view;
 
     @NotNull
-    @Column(name = "comment", nullable = false)
-    private Integer comment;
+    @Column(name = "comment_reply", nullable = false)
+    private Integer commentReply;
 
     @NotNull
     @Column(name = "`like`", nullable = false)

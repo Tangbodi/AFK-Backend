@@ -19,8 +19,8 @@ public class Message {
     private Long id;
 
     @NotNull
-    @Column(name = "cr_id", nullable = false)
-    private Long crId;
+    @Column(name = "comment_reply_id", nullable = false)
+    private Long commentReplyId;
 
     @Size(max = 4095)
     @NotNull

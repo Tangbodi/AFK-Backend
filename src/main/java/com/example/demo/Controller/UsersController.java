@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
-import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
@@ -20,12 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 
 @RestController
 @Validated
@@ -51,7 +52,7 @@ public class UsersController {
     private UserLoginService userLoginService;
 
     @PostMapping("/registration")
-    public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) throws Exception {
+    public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) {
         // Encode email for avoiding email scraping and spam bots
         ApiResponse apiResponse;
         String encodedEmail = HtmlUtils.htmlEscape(userRegisterDTO.getEmail());
@@ -67,7 +68,7 @@ public class UsersController {
         } else {
             // If all checks are passed, register user
             logger.info("User doesn't exist");
-            try{
+            try {
                 User user = userRegistrationService.RegisterUser(userRegisterDTO);
                 logger.info("User registered successfully");
                 //Setup email validation
@@ -75,7 +76,7 @@ public class UsersController {
                 userRegisterDTO.setCreatedAt(user.getCreatedAt());
                 processEmailService.ProcessRegistrationEmailValidation(request, userRegisterDTO);
                 apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
-            } catch (Exception e){
+            } catch (Exception e) {
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
             }
         }

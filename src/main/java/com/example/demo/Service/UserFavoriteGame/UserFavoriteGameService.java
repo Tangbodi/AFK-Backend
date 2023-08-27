@@ -1,6 +1,6 @@
 package com.example.demo.Service.UserFavoriteGame;
 
-import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
+import com.example.demo.Repository.UserFavoriteGameRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;

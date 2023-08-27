@@ -27,7 +27,7 @@ public class PostDTO {
     @NotBlank(message = "Content is required")
     @Length(max = 4095, message = "Text length not eligible")
     private String textRender;
-    @Size(max = 3, message = "Image length not eligible")
+    @Size(max = 9, message = "You can upload up to 9 images")
     private List<String> postImageNameList;
     private Long ipvFour;
     private String ipvSix;

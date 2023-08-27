@@ -7,15 +7,22 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 @Service
 public class RedisService {
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
     @Autowired
     private JedisPool jedisPool;
+
+    //If you want to specifically check if a member exists in a set, use SISMEMBER.
+    //If you want to check if a key exists in the database, regardless of the data type associated with that key, use EXISTS.
     public boolean CacheExists(String cacheKey) {
         logger.info("Checking if cache exists: cacheKey = {}", cacheKey);
         Jedis jedis = null;
-        try{
+        try {
             jedis = jedisPool.getResource();
             if (jedis.exists(cacheKey)) {
                 logger.info("Cache exists: cacheKey = {}", cacheKey);

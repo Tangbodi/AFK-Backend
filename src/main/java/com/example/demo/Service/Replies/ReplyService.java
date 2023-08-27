@@ -1,12 +1,12 @@
 package com.example.demo.Service.Replies;
 
-import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Repository.ReplyRepository;
 import com.example.demo.Model.Entity.PostReply;
-import com.example.demo.Model.VO.ReplyVO;
+import com.example.demo.Model.VO.ReplySavedVO;
 import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Util.Snowflake;
-import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,9 @@ public class ReplyService {
     private ReplyRepository replyRepository;
     @Autowired
     private IpAddressService ipAddressService;
-    public ReplyVO SetReply(CommentReplyDTO commentReplyDTO) {
+    @Autowired
+    private PostInfoService postInfoService;
+    public ReplySavedVO SetReply(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting reply");
         try {
             long replyId = Snowflake.generateUniqueId();
@@ -42,6 +44,8 @@ public class ReplyService {
             if (savedReply != null) {
                 logger.info("Reply saved successfully");
                 ipAddressService.SetCommentReplyIpAddress(commentReplyDTO);
+                //update post comment reply count
+                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Failed to save reply");
@@ -58,15 +62,15 @@ public class ReplyService {
         return replyList;
     }
 
-    private static ReplyVO TransferToVO(CommentReplyDTO commentReplyDTO) {
+    private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         logger.info("Transferring reply to VO");
-        ReplyVO replyVO = new ReplyVO();
-        replyVO.setReplyId(commentReplyDTO.getReplyId());
-        replyVO.setCommentId(commentReplyDTO.getCommentId());
-        replyVO.setToReplyId(commentReplyDTO.getToReplyId());
-        replyVO.setToUid(commentReplyDTO.getToUid());
-        replyVO.setCreatedAt(commentReplyDTO.getCreatedAt());
-        return replyVO;
+        ReplySavedVO replySavedVO = new ReplySavedVO();
+        replySavedVO.setReplyId(commentReplyDTO.getReplyId());
+        replySavedVO.setCommentId(commentReplyDTO.getCommentId());
+        replySavedVO.setToReplyId(commentReplyDTO.getToReplyId());
+        replySavedVO.setToUid(commentReplyDTO.getToUid());
+        replySavedVO.setCreatedAt(commentReplyDTO.getCreatedAt());
+        return replySavedVO;
     }
 }
 

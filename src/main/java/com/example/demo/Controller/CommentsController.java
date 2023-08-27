@@ -2,7 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.VO.CommentVO;
+import com.example.demo.Model.VO.CommentSavedVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Message.MessageService;
@@ -42,7 +42,7 @@ public class CommentsController {
 
     @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
-        logger.info("EditComment:::");
+        logger.info("EditComment");
         Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
@@ -50,32 +50,32 @@ public class CommentsController {
         } else {
 
             String ipAddress = HttpUtils.getRequestIP(request);
-            logger.info("ipAddress:::" + ipAddress);
+            logger.info("ipAddress:{}" + ipAddress);
             if (ipService.isValidInet4Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split("\\.");
-                logger.info("ipAddress split:::" + ip);
+                logger.info("ipAddress split:{}" + ip);
                 Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                logger.info("ipvF:::" + ipvF);
+                logger.info("ipvF:{}" + ipvF);
                 commentReplyDTO.setIpvFour(ipvF);
             } else if (ipService.isValidInet6Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split(":");
-                logger.info("ipvS:::" + Arrays.toString(ip));
+                logger.info("ipvS:{}" + Arrays.toString(ip));
                 commentReplyDTO.setIpvSix(ip.toString());
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
-            CommentVO commentVO = commentService.SetComment(commentReplyDTO);
-            if (commentVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
+            CommentSavedVO commentSavedVO = commentService.SetComment(commentReplyDTO);
+            if (commentSavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
                 messageService.SetMessage(commentReplyDTO);
                 redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
             } else {
                 //
             }
-            apiResponse = ApiResponse.success(commentVO);
+            apiResponse = ApiResponse.success(commentSavedVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

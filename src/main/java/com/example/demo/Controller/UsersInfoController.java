@@ -59,8 +59,7 @@ public class UsersInfoController {
     private ProcessEmailService processEmailService;
 
     @GetMapping("/")
-    public ResponseEntity GetUserInfo(HttpSession session) throws IOException {
-        logger.info("GetUserInfo:::session:::" + session);
+    public ResponseEntity GetUserInfo(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {

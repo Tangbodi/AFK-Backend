@@ -2,7 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.VO.ReplyVO;
+import com.example.demo.Model.VO.ReplySavedVO;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
@@ -20,14 +20,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.time.Instant;
 import java.util.Arrays;
 
 @RestController
 @RequestMapping("/all-games-genres")
 public class RepliesController {
     private static final Logger logger = LoggerFactory.getLogger(RepliesController.class);
-    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
 
     @Autowired
     private ReplyService replyService;
@@ -51,33 +49,33 @@ public class RepliesController {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to share your opinion");
         } else {
             String ipAddress = HttpUtils.getRequestIP(request);
-            logger.info("ipAddress:::" + ipAddress);
+            logger.info("ipAddress:{}" + ipAddress);
             if (ipService.isValidInet4Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split("\\.");
-                logger.info("ipAddress split:::" + ip);
+                logger.info("ipAddress split:{}" + ip);
                 Long ipvF = (Long.valueOf(ip[0]) << 24) + (Long.valueOf(ip[1]) << 16) + (Long.valueOf(ip[2]) << 8) + Long.valueOf(ip[3]);
-                logger.info("ipvF:::" + ipvF);
+                logger.info("ipvF:{}" + ipvF);
                 commentReplyDTO.setIpvFour(ipvF);
             } else if (ipService.isValidInet6Address(ipAddress)) {
                 logger.info("ipAddress is valid");
                 String[] ip = ipAddress.split(":");
-                logger.info("ipvS:::" + Arrays.toString(ip));
+                logger.info("ipvS:{}" + Arrays.toString(ip));
                 commentReplyDTO.setIpvSix(ip.toString());
             } else {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Invalid IP Address");
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
-            ReplyVO replyVO = replyService.SetReply(commentReplyDTO);
+            ReplySavedVO replySavedVO = replyService.SetReply(commentReplyDTO);
             //Set mention message after saved reply
-            if (replyVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
+            if (replySavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
                 messageService.SetMessage(commentReplyDTO);
                 redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
             } else {
                //
             }
-            apiResponse = ApiResponse.success(replyVO);
+            apiResponse = ApiResponse.success(replySavedVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
