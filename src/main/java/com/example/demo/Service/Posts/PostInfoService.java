@@ -87,7 +87,9 @@ public class PostInfoService {
             for (Map<Short, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
 //                postInfoVO.setPostId(((BigInteger) map.get("post_id")).longValue());
-                postInfoVO.setPostId((String) map.get("post_id"));
+                BigInteger postIdBigInteger = (BigInteger) map.get("post_id");
+                String postId = postIdBigInteger.toString();
+                postInfoVO.setPostId(postId);
                 postInfoVO.setTitle((String) map.get("title"));
                 postInfoVO.setView((Integer) map.get("view"));
                 postInfoVO.setComment((Integer) map.get("comment"));
