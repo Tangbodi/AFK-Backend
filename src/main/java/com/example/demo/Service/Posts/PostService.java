@@ -214,6 +214,10 @@ public class PostService {
                 showPostBodyVO.setUserName((String) map.get("username"));
                 showPostBodyVO.setTitle((String) map.get("title"));
                 showPostBodyVO.setTextRender((String) map.get("text_render"));
+                showPostBodyVO.setView((Integer) map.get("view"));
+                showPostBodyVO.setCommentReply((Integer) map.get("comment_reply"));
+                showPostBodyVO.setLike((Integer) map.get("like"));
+                showPostBodyVO.setSave((Integer) map.get("save"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
@@ -279,7 +283,8 @@ public class PostService {
         try {
             for (Map<Short, Object> map : allPostsByUserId) {
                 PostInfoVO postHistoryVO = new PostInfoVO();
-                postHistoryVO.setPostId(((BigInteger) map.get("post_id")).longValue());
+//                postHistoryVO.setPostId(((BigInteger) map.get("post_id")).longValue());
+                postHistoryVO.setPostId((String) map.get("post_id"));
                 postHistoryVO.setTitle((String) map.get("title"));
                 postHistoryVO.setUsername((String) map.get("username"));
                 postHistoryVO.setView((Integer) map.get("view"));

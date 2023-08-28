@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class PostInfoVO {
-    private Long postId;
+    private String postId;
     private String title;
     private String username;
     private Integer view;

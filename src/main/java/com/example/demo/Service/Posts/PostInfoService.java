@@ -51,7 +51,7 @@ public class PostInfoService {
         for (Map<Short, Object> popularPost : popularPosts) {
             try {
                 PopularPostVO popularPostVO = new PopularPostVO();
-                popularPostVO.setPostId((Long) popularPost.get("post_id"));
+                popularPostVO.setPostId(((BigInteger) popularPost.get("post_id")).longValue());
                 popularPostVO.setTitle((String) popularPost.get("title"));
                 popularPostVO.setGameName((String) popularPost.get("game_name"));
                 popularPostVOList.add(popularPostVO);
@@ -86,7 +86,8 @@ public class PostInfoService {
             List<PostInfoVO> postInfoVOList = new ArrayList<>();
             for (Map<Short, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
-                postInfoVO.setPostId(((BigInteger) map.get("post_id")).longValue());
+//                postInfoVO.setPostId(((BigInteger) map.get("post_id")).longValue());
+                postInfoVO.setPostId((String) map.get("post_id"));
                 postInfoVO.setTitle((String) map.get("title"));
                 postInfoVO.setView((Integer) map.get("view"));
                 postInfoVO.setComment((Integer) map.get("comment"));
