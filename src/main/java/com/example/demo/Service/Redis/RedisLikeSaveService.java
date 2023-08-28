@@ -22,7 +22,7 @@ public class RedisLikeSaveService {
 
 
     public Boolean MemberExists(String key, Object value) {
-        logger.info("Checking exists");
+        logger.info("Checking exists: {}",key,":::",value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -38,7 +38,7 @@ public class RedisLikeSaveService {
         return false;
     }
     public void AddSet(String key, Object value) {
-        logger.info("Adding set");
+        logger.info("Adding set: {}",key,":::",value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -54,7 +54,7 @@ public class RedisLikeSaveService {
     }
 
     public void AddHashSet(String key, String hashKey, Object value) {
-        logger.info("Adding hash set");
+        logger.info("Adding hash set: {}",key,":::",hashKey,":::",value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -69,7 +69,7 @@ public class RedisLikeSaveService {
         }
     }
     public void DeleteMember(String key, String hashKey){
-        logger.info("Deleting member");
+        logger.info("Deleting member: {}",key,":::",hashKey);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -101,7 +101,7 @@ public class RedisLikeSaveService {
         return null;
     }
     public void RemoveHashSet(String key, Object value){
-        logger.info("Removing hash set");
+        logger.info("Removing hash set: {}",key,":::",value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();

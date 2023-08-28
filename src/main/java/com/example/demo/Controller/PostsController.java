@@ -15,7 +15,7 @@ import com.example.demo.Service.Posts.PostGameMapService;
 import com.example.demo.Service.Posts.PostImageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Posts.PostService;
-import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
+import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.HttpUtils;
@@ -31,7 +31,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ public class PostsController {
     @Autowired
     private PostImageService postImageService;
     @Autowired
-    private UserFavoritePostService userFavoritePostService;
+    private UserLikeSaveService userLikeSaveService;
     @Autowired
     private GameIconService gameIconService;
 
@@ -156,7 +155,7 @@ public class PostsController {
                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                                     @RequestParam(value = "post") @ValidPostId Long postId,
                                                     @RequestParam(value = "page") int page,
-                                                    @RequestParam(value = "size") int size) {
+                                                    @RequestParam(value = "size") int size, HttpSession session) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
@@ -173,7 +172,8 @@ public class PostsController {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
                 //need pagination
-                List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId);
+                Long userId = (Long) session.getAttribute("userId");
+                List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId,userId);
                 if (!res.isEmpty()) {
                     page = page - 1;
                     if (page < 0 || size <= 0) {
@@ -294,31 +294,4 @@ public class PostsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
-//    @PostMapping("/genre/like-save-post")
-//    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) throws JMSException {
-//        ApiResponse apiResponse;
-//        Long userId = (Long) session.getAttribute("userId");
-//        if (userId == null) {
-//            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
-//            return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//        } else {
-//            boolean status;
-//            switch (userLikesSavesPostDTO.getType()) {
-//                case "like":
-//                    userLikesSavesPostDTO.setUserId(userId);
-//                    status = userFavoritePostService.SetUserLikePost(userLikesSavesPostDTO);
-//                    apiResponse = ApiResponse.success(status);
-//                    break;
-//                case "save":
-//                    userLikesSavesPostDTO.setUserId(userId);
-//                    status = userFavoritePostService.SetUserSavePost(userLikesSavesPostDTO);
-//                    apiResponse = ApiResponse.success(status);
-//                    break;
-//                default:
-//                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Invalid type");
-//            }
-//        }
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
 }

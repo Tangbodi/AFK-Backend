@@ -27,5 +27,13 @@ public enum ObjectNameEnum {
         }
         return null;
     }
+    public static Integer GetType(String typeName) {
+        for (ObjectNameEnum objectNameEnum : ObjectNameEnum.values()) {
+            if (typeName.equals(objectNameEnum.getTypeName())) {
+                return objectNameEnum.getType();
+            }
+        }
+        return null;
+    }
 
 }

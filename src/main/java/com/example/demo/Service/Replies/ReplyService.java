@@ -56,9 +56,9 @@ public class ReplyService {
         return null;
     }
 
-    public List<Map<Short, Object>> GetRepliesByCommentId(List<Long> commentIds) {
+    public List<Map<Short, Object>> GetRepliesByCommentId(List<Long> commentIds, Long userId) {
         logger.info("Getting replies by comment id");
-        List<Map<Short, Object>> replyList = replyRepository.findByCommentId(commentIds);
+        List<Map<Short, Object>> replyList = replyRepository.findByCommentId(commentIds,userId);
         return replyList;
     }
 

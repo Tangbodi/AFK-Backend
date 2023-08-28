@@ -70,22 +70,22 @@ public class CommentService {
         return commentSavedVO;
     }
 
-    public List<Map<Short, Object>> GetAllCommentsByPostId(Long postId) {
+    public List<Map<Short, Object>> GetAllCommentsByPostId(Long postId, Long userId) {
         logger.info("Getting all comments by post id: {}", postId);
-        return commentRepository.findCommentsByPostId(postId);
+        return commentRepository.findCommentsByPostId(postId,userId);
     }
 
-    public List<List<Object>> GetAllCommentsAndReplies(Long postId) {
+    public List<List<Object>> GetAllCommentsAndReplies(Long postId, Long userId) {
         logger.info("Getting all comments and replies");
         //get all comments by post id
-        List<Map<Short, Object>> commentsList = GetAllCommentsByPostId(postId);
+        List<Map<Short, Object>> commentsList = GetAllCommentsByPostId(postId,userId);
         List<Long> commentIds = new ArrayList<>();
         //get all comment ids from all comments for getting all replies with same comment ids
         for (Map<Short, Object> comment : commentsList) {
             commentIds.add(((BigInteger) comment.get("comment_id")).longValue());
         }
         //get all replies by comment ids
-        List<Map<Short, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds);
+        List<Map<Short, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds,userId);
         //initialize reply page and size
 //        int replyPage = pageDTO.getReplyPage() - 1;//index starts from 0
 //        int replySize = 2;
@@ -116,6 +116,7 @@ public class CommentService {
                     repliesMap.put("to_uid", reply.get("to_uid"));
                     repliesMap.put("to_username", reply.get("to_username"));
                     repliesMap.put("content", reply.get("content"));
+                    repliesMap.put("like_status", reply.get("like_status"));
                     repliesMap.put("created_at", reply.get("created_at").toString());
                     replies.add(repliesMap);
                 } else {

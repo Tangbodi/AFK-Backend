@@ -17,11 +17,13 @@ public class LikeSaveStrategy {
     protected RedisLikeSaveService redisLikeSaveService;
 
     public void StartStrategy(UserLikeSaveDTO userLikeSaveDTO) {
-
-        Integer status = userLikeSaveDTO.getStatus(); // 1 or 0
-        Long userId = userLikeSaveDTO.getUserId();//userId
-        String typeNameInSet = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());//post_like/comment_like/reply_like
-        Long objectId = userLikeSaveDTO.getObjectId();//postId/commentId/replyId
+        // 1 or 0
+        Integer status = userLikeSaveDTO.getStatus();
+        Long userId = userLikeSaveDTO.getUserId();
+        //post_like/comment_like/reply_like/post_save
+        String typeNameInSet = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());
+        //postId/commentId/replyId
+        Long objectId = userLikeSaveDTO.getObjectId();
 
 //        Long snowFlakeId = Snowflake.generateUniqueId();
         String key = typeNameInSet + ":::" + objectId;
@@ -33,7 +35,6 @@ public class LikeSaveStrategy {
             if (!redisLikeSaveService.MemberExists(typeNameInSet, objectId)) {
                 redisLikeSaveService.AddSet(typeNameInSet, objectId);
             }
-
             redisLikeSaveService.AddHashSet(key, hashKey, value);
         } else {
             //if status is 0, remove from hash set

@@ -34,7 +34,7 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
     @Autowired
-    private PostsInfoRepository postsInfoRepository;
+    private PostInfoRepository postInfoRepository;
     @Autowired
     private PostUserMapRepository postUserMapRepository;
     @Autowired
@@ -114,7 +114,7 @@ public class PostService {
             postsInfo.setCommentReply(0);
             postsInfo.setLike(0);
             postsInfo.setSave(0);
-            postsInfoRepository.save(postsInfo); // This will automatically be transactional
+            postInfoRepository.save(postsInfo); // This will automatically be transactional
             logger.info("Post info saved successfully: {}");
         } catch (Exception e) {
             logger.error("Failed to set post info: {}", e.getMessage(), e);

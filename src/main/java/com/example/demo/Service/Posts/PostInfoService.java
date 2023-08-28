@@ -4,14 +4,13 @@ import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.VO.PopularPostVO;
 import com.example.demo.Model.VO.PostInfoVO;
 import com.example.demo.Repository.PostGameMapRepository;
-import com.example.demo.Repository.PostsInfoRepository;
+import com.example.demo.Repository.PostInfoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class PostInfoService {
     private static final Logger logger = LoggerFactory.getLogger(PostInfoService.class);
 
     @Autowired
-    private PostsInfoRepository postsInfoRepository;
+    private PostInfoRepository postInfoRepository;
     @Autowired
     private PostGameMapRepository postGameMapRepository;
 
@@ -32,7 +31,7 @@ public class PostInfoService {
     public List<PopularPostVO> GetMostPopularPosts() {
         logger.info("Getting most popular posts");
         try {
-            List<Map<Short, Object>> popularPosts = postsInfoRepository.findMostPopularPosts();
+            List<Map<Short, Object>> popularPosts = postInfoRepository.findMostPopularPosts();
             if (!popularPosts.isEmpty()) {
                 logger.info("Got most popular posts");
                 return TransferToPopularPostVO(popularPosts);
@@ -105,57 +104,38 @@ public class PostInfoService {
         }
     }
 
-    @Async("MultiExecutor")
     public void UpdatePostViewCount(Long postId) {
         logger.info("Updating post view count");
-        try {
-            postsInfoRepository.findById(postId).map(postInfo -> {
-                postInfo.setView(postInfo.getView() + 1);
-                return postsInfoRepository.save(postInfo);
-            }).orElseThrow(() -> new RuntimeException("Failed to update post view count"));
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            logger.error("Error while updating post view count:::" + e.getMessage(), e);
-        }
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setView(postInfo.getView() + 1);
+            return postInfoRepository.save(postInfo);
+        }).orElseThrow(() -> new RuntimeException("Failed to update post view count"));
     }
-    @Async("MultiExecutor")
+
     public void UpdatePostLikeCount(Long postId) {
         logger.info("Updating post like count");
-        try{
-            postsInfoRepository.findById(postId).map(postInfo -> {
-                postInfo.setLike(postInfo.getLike()+1);
-                return postsInfoRepository.save(postInfo);
-            }).orElseThrow(()-> new RuntimeException("Failed to update post like count"));
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            logger.error("Error while updating post like count:::"+e.getMessage(),e);
-        }
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setLike(postInfo.getLike()+1);
+            return postInfoRepository.save(postInfo);
+        }).orElseThrow(()-> new RuntimeException("Failed to update post like count"));
     }
-    @Async("MultiExecutor")
+
     public void UpdatePostSaveCount(Long postId){
         logger.info("Updating post save count");
-        try{
-            postsInfoRepository.findById(postId).map(postInfo -> {
-                postInfo.setSave(postInfo.getSave()+1);
-                return postsInfoRepository.save(postInfo);
-            });
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            logger.error("Error while updating post save count:::"+e.getMessage(),e);
-        }
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setSave(postInfo.getSave()+1);
+            return postInfoRepository.save(postInfo);
+        });
+
     }
-    @Async("MultiExecutor")
+
     public void UpdatePostCommentReplyCount(Long postId){
         logger.info("Updating post comment reply count");
-        try{
-            postsInfoRepository.findById(postId).map(postInfo -> {
-                postInfo.setCommentReply(postInfo.getCommentReply()+1);
-                return postsInfoRepository.save(postInfo);
-            });
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            logger.error("Error while updating post comment reply count:::"+e.getMessage(),e);
-        }
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setCommentReply(postInfo.getCommentReply()+1);
+            return postInfoRepository.save(postInfo);
+        });
+
     }
 }
 

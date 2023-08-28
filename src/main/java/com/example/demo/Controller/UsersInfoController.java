@@ -1,16 +1,15 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.DTO.UserEmailDTO;
-import com.example.demo.Model.DTO.UserInfoDTO;
-import com.example.demo.Model.DTO.UserLikesSavesPostDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisEmailService;
-import com.example.demo.Service.UserFavoritePost.UserFavoritePostService;
+import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
@@ -30,7 +29,6 @@ import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,7 +48,7 @@ public class UsersInfoController {
     @Autowired
     private PostService postService;
     @Autowired
-    private UserFavoritePostService userFavoritePostService;
+    private UserLikeSaveService userLikeSaveService;
     @Autowired
     private MessageService messageService;
     @Autowired
@@ -152,15 +150,15 @@ public class UsersInfoController {
 
 
     @PostMapping("/favorite-post")
-    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody UserLikesSavesPostDTO userLikesSavesPostDTO, HttpSession session) {
+    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
-            userLikesSavesPostDTO.setUserId(userId);
-            UserFavoritePostVO userFavoritePostVO = userFavoritePostService.GetUserFavoritePostStatus(userLikesSavesPostDTO);
+            objectUserDTO.setUserId(userId);
+            UserFavoritePostVO userFavoritePostVO = userLikeSaveService.GetUserFavoritePostStatus(objectUserDTO);
             apiResponse = ApiResponse.success(userFavoritePostVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

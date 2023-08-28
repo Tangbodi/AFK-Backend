@@ -20,8 +20,6 @@ public class UserLikeSaveDTO implements Serializable {
     //post: 0, comment: 1, reply: 2
     @NotNull(message = "typeId is required")
     Integer typeId;
-    @NotBlank(message = "type is required")
-    String type;
     private Long userId;
     private Instant createdAt;
 
