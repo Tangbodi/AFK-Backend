@@ -51,7 +51,7 @@ public class PostInfoService {
         for (Map<Short, Object> popularPost : popularPosts) {
             try {
                 PopularPostVO popularPostVO = new PopularPostVO();
-                popularPostVO.setPostId(((BigInteger) popularPost.get("post_id")).longValue());
+                popularPostVO.setPostId(popularPost.get("post_id").toString());
                 popularPostVO.setTitle((String) popularPost.get("title"));
                 popularPostVO.setGameName((String) popularPost.get("game_name"));
                 popularPostVOList.add(popularPostVO);
@@ -66,7 +66,7 @@ public class PostInfoService {
     public List<PostInfoVO> GetAllPostInfoInOneGame(GameGenreMapIdDTO gameGenreMapIdDTO) {
         logger.info("Getting all post info with one game");
         try {
-            List<Map<Short, Object>> allPostInfoWithOneGame = postGameMapRepository.findAllPostsInOneGame(gameGenreMapIdDTO.getGameId());
+            List<Map<String, Object>> allPostInfoWithOneGame = postGameMapRepository.findAllPostsInOneGame(gameGenreMapIdDTO.getGameId());
             if (!allPostInfoWithOneGame.isEmpty()) {
                 logger.info("Got all post info with one game");
                 return TransferToPostInfoVO(allPostInfoWithOneGame);
@@ -80,16 +80,13 @@ public class PostInfoService {
         }
     }
 
-    private static List<PostInfoVO> TransferToPostInfoVO(List<Map<Short, Object>> allPostInfoWithOneGame) {
+    private static List<PostInfoVO> TransferToPostInfoVO(List<Map<String, Object>> allPostInfoWithOneGame) {
         logger.info("Transferring all post info with one game to VO");
         try {
             List<PostInfoVO> postInfoVOList = new ArrayList<>();
-            for (Map<Short, Object> map : allPostInfoWithOneGame) {
+            for (Map<String, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
-//                postInfoVO.setPostId(((BigInteger) map.get("post_id")).longValue());
-                BigInteger postIdBigInteger = (BigInteger) map.get("post_id");
-                String postId = postIdBigInteger.toString();
-                postInfoVO.setPostId(postId);
+                postInfoVO.setPostId(map.get("post_id").toString());
                 postInfoVO.setTitle((String) map.get("title"));
                 postInfoVO.setView((Integer) map.get("view"));
                 postInfoVO.setComment((Integer) map.get("comment"));

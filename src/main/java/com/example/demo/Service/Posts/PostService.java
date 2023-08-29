@@ -171,7 +171,7 @@ public class PostService {
         logger.info("Transferring post to VO for post ID: {}", postDTO.getPostId());
         try {
             PostSavedVO postSavedVO = new PostSavedVO();
-            postSavedVO.setPostId(postDTO.getPostId());
+            postSavedVO.setPostId(postDTO.getPostId().toString());
             postSavedVO.setCreatedAt(postDTO.getCreatedAt());
             return postSavedVO;
         } catch (Exception e) {
@@ -185,13 +185,14 @@ public class PostService {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-            List<Map<Short, Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
+            List<Map<String, Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
+
             if (post.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
             } else {
                 logger.info("Post found: " + getPostDTO.getPostId());
-                List<Map<Short, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
+                List<Map<String, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
                 // Update post viewed count
                 postInfoService.UpdatePostViewCount(getPostDTO.getPostId());
                 return TransferToShowPostVO(post, postImageList);
@@ -202,15 +203,15 @@ public class PostService {
         }
     }
 
-    private ShowPostBodyVO TransferToShowPostVO(List<Map<Short, Object>> post, List<Map<Short, Object>> postImageList) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<String, Object>> post, List<Map<String, Object>> postImageList) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
-            for (Map<Short, Object> map : post) {
-                showPostBodyVO.setPostId(((BigInteger) map.get("post_id")).longValue());
-                logger.info("Post ID: {}", showPostBodyVO.getPostId());
-                showPostBodyVO.setUserId(((BigInteger) map.get("user_id")).longValue());
-                logger.info("User ID: {}", showPostBodyVO.getUserId());
+            for (Map<String, Object> map : post) {
+                showPostBodyVO.setPostId(map.get("post_id").toString());
+                logger.info("Post ID: {}", map.get("post_id"));
+                showPostBodyVO.setUserId(map.get("user_id").toString());
+                logger.info("User ID: {}", map.get("user_id"));
                 showPostBodyVO.setUserName((String) map.get("username"));
                 showPostBodyVO.setTitle((String) map.get("title"));
                 showPostBodyVO.setTextRender((String) map.get("text_render"));
@@ -218,11 +219,13 @@ public class PostService {
                 showPostBodyVO.setCommentReply((Integer) map.get("comment_reply"));
                 showPostBodyVO.setLike((Integer) map.get("like"));
                 showPostBodyVO.setSave((Integer) map.get("save"));
+                showPostBodyVO.setLikeStatus((Byte) map.get("like_status"));
+                showPostBodyVO.setSaveStatus((Byte) map.get("save_status"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
             List<String> ImageURLList = new ArrayList<>();
-            for (Map<Short, Object> map : postImageList) {
+            for (Map<String, Object> map : postImageList) {
                 ImageURLList.add((String) map.get("image_url"));
             }
             showPostBodyVO.setImageURL(ImageURLList);
@@ -244,7 +247,7 @@ public class PostService {
                 List<SearchPostVO> searchPostVOList = new ArrayList<>();
                 for (Post post : postList) {
                     SearchPostVO searchPostVO = new SearchPostVO();
-                    searchPostVO.setPostId(post.getId());
+                    searchPostVO.setPostId(post.getId().toString());
                     searchPostVO.setTitle(post.getTitle());
                     searchPostVO.setTextRender(post.getTextRender());
                     searchPostVOList.add(searchPostVO);
@@ -283,8 +286,7 @@ public class PostService {
         try {
             for (Map<Short, Object> map : allPostsByUserId) {
                 PostInfoVO postHistoryVO = new PostInfoVO();
-//                postHistoryVO.setPostId(((BigInteger) map.get("post_id")).longValue());
-                postHistoryVO.setPostId((String) map.get("post_id"));
+                postHistoryVO.setPostId(map.get("post_id").toString());
                 postHistoryVO.setTitle((String) map.get("title"));
                 postHistoryVO.setUsername((String) map.get("username"));
                 postHistoryVO.setView((Integer) map.get("view"));

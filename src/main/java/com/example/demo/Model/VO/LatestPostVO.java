@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class LatestPostVO {
-    private Long postId;
+    private String postId;
     private String title;
     private String gameName;
     private Instant createdAt;

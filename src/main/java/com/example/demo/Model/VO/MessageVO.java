@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class MessageVO {
-    private Long crId;
+    private String crId;
     private String content;
-    private Long fromUid;
+    private String fromUid;
     private String fromUsername;
 
 }

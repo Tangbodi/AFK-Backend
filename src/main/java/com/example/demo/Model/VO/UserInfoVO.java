@@ -8,7 +8,8 @@ import java.time.Instant;
 @Data
 public class UserInfoVO {
 
-    private Long userId;
+    private Long LongUid;
+    private String userId;
     private String username;
     private String email;
     private String avatarUrl;

@@ -11,5 +11,5 @@ import java.util.Map;
 @Repository
 public interface PostImageRepository extends JpaRepository<PostImage,Long> {
     @Query(value = "SELECT image_url FROM afk.post_images WHERE post_id = :postId", nativeQuery = true)
-    List<Map<Short,Object>> findAllImageURLByPostId(Long postId);
+    List<Map<String,Object>> findAllImageURLByPostId(Long postId);
 }

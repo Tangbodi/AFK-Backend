@@ -18,4 +18,5 @@ public class GetPostDTO {
     @NotNull
     @ValidGenreId
     private Byte genreId;
+    private Long userId;
 }

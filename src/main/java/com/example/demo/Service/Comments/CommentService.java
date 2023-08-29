@@ -1,10 +1,12 @@
 package com.example.demo.Service.Comments;
 
-import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.CommentSavedVO;
 import com.example.demo.Model.VO.NewestCommentVO;
+import com.example.demo.Model.VO.ShowCommentVO;
+import com.example.demo.Model.VO.ShowReplyVO;
+import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Replies.ReplyService;
@@ -64,93 +66,112 @@ public class CommentService {
 
     private static CommentSavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         CommentSavedVO commentSavedVO = new CommentSavedVO();
-        commentSavedVO.setCommentId(commentReplyDTO.getCommentId());
-        commentSavedVO.setPostId(commentReplyDTO.getPostId());
+        commentSavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
+        commentSavedVO.setPostId(commentReplyDTO.getPostId().toString());
         commentSavedVO.setCreatedAt(Instant.now());
         return commentSavedVO;
     }
 
-    public List<Map<Short, Object>> GetAllCommentsByPostId(Long postId, Long userId) {
+    public List<Map<String, Object>> GetAllCommentsByPostId(Long postId, Long userId) {
         logger.info("Getting all comments by post id: {}", postId);
-        return commentRepository.findCommentsByPostId(postId,userId);
+        return commentRepository.findCommentsByPostId(postId, userId);
     }
 
     public List<List<Object>> GetAllCommentsAndReplies(Long postId, Long userId) {
         logger.info("Getting all comments and replies");
         //get all comments by post id
-        List<Map<Short, Object>> commentsList = GetAllCommentsByPostId(postId,userId);
-        List<Long> commentIds = new ArrayList<>();
-        //get all comment ids from all comments for getting all replies with same comment ids
-        for (Map<Short, Object> comment : commentsList) {
-            commentIds.add(((BigInteger) comment.get("comment_id")).longValue());
-        }
-        //get all replies by comment ids
-        List<Map<Short, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds,userId);
-        //initialize reply page and size
-//        int replyPage = pageDTO.getReplyPage() - 1;//index starts from 0
-//        int replySize = 2;
-//        System.out.println("replyPage: " + replyPage);
-//        if(replyPage < 0){
-//            replyPage = 0;
-//        } else {
-//            //continue;
-//        }
-        //final result list
+        List<Map<String, Object>> commentsList = GetAllCommentsByPostId(postId, userId);
         List<List<Object>> res = new ArrayList<>();
-        //traverse all comments and pick out replies with same comment id
-        for (Map<Short, Object> comment : commentsList) {
-            //get comment id
-            Long commentId = ((BigInteger) comment.get("comment_id")).longValue();
-            List<Map<String, Object>> replies = new ArrayList<>();
-            //traverse all replies and pick out replies with same comment id got above
-            for (Map<Short, Object> reply : repliesList) {
-                Map<String, Object> repliesMap = new HashMap<>();
-                //set reply map if the comment id is same as the one got above
-                Long commentId2 = ((BigInteger) reply.get("comment_id")).longValue();
-                if (commentId.equals(commentId2)) {
-                    repliesMap.put("reply_id", reply.get("reply_id"));
-                    repliesMap.put("comment_id", reply.get("comment_id"));
-                    repliesMap.put("from_uid", reply.get("from_uid"));
-                    repliesMap.put("fmui_avatar_url", reply.get("fmui_avatar_url"));
-                    repliesMap.put("from_username", reply.get("from_username"));
-                    repliesMap.put("to_uid", reply.get("to_uid"));
-                    repliesMap.put("to_username", reply.get("to_username"));
-                    repliesMap.put("content", reply.get("content"));
-                    repliesMap.put("like_status", reply.get("like_status"));
-                    repliesMap.put("created_at", reply.get("created_at").toString());
-                    replies.add(repliesMap);
-                } else {
-                    //continue;
+        //get all comment ids from all comments for getting all replies with same comment ids
+        if (commentsList.isEmpty()){
+            logger.info("No comments found");
+            return Collections.emptyList();
+        } else {
+            logger.info("Comments found");
+            List<Long> commentIds = new ArrayList<>();
+            for (Map<String, Object> comment : commentsList) {
+                commentIds.add(((BigInteger) comment.get("comment_id")).longValue());
+            }
+            //get all replies by comment ids
+            List<Map<String, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds, userId);
+            if(repliesList.isEmpty()){
+                logger.info("No replies found");
+                for(Map<String, Object> comment : commentsList){
+                    ShowCommentVO showCommentVO = CreateCommentMap(comment);
+                    List<Object> combinedList = new ArrayList<>();
+                    combinedList.add(showCommentVO);
+                    combinedList.add(Collections.emptyList());
+                    res.add(combinedList);
                 }
-
+            } else {
+                logger.info("Replies found");
+                //final result list
+                //traverse all comments and pick out replies with same comment id
+                for (Map<String, Object> comment : commentsList) {
+                    //get comment id
+                    Long commentId = ((BigInteger) comment.get("comment_id")).longValue();
+                    List<ShowReplyVO> replies = new ArrayList<>();
+                    //traverse all replies and pick out replies with same comment id got above
+                    for (Map<String, Object> reply : repliesList) {
+                        //set reply map if the comment id is same as the one got above
+                        Long commentId2 = ((BigInteger) reply.get("comment_id")).longValue();
+                        if (commentId.equals(commentId2)) {
+                            ShowReplyVO showReplyVO = CreateReplyMap(reply);
+                            replies.add(showReplyVO);
+                        } else {
+                            //continue;
+                        }
+                    }
+                    ShowCommentVO showCommentVO = CreateCommentMap(comment);
+                    List<Object> combinedList = new ArrayList<>();
+                    //add combined comment and replies to final result list and paginate the result
+                    combinedList.add(showCommentVO);
+                    combinedList.add(replies);
+                    res.add(combinedList);
+                }
             }
-//            if(replies.isEmpty()){
-//                continue;
-//            } else {
-                //paginate replies
-//                Pageable pageable = PageRequest.of(replyPage, replySize);
-//                int startIdx = (int) pageable.getOffset();
-//                int endIdx = Math.min((startIdx + pageable.getPageSize()), replies.size());
-//                List<Map<String, Object>> currentReplyItems = replies.subList(startIdx, endIdx);
-//                Page<Map<String, Object>> currentRepliesPage = new PageImpl<>(currentReplyItems, pageable, replies.size());
-
-                List<Object> combinedList = new ArrayList<>();
-                //add comment and all replies that under the comment
-//                combinedList.add(currentRepliesPage.getContent());
-//                combinedList.add(currentRepliesPage.getTotalPages());
-                //add combined comment and replies to final result list and paginate the result
-                combinedList.add(comment);
-                combinedList.add(replies);
-                res.add(combinedList);
-            }
-
-        return res;
+            return res;
+        }
     }
+    private static ShowCommentVO CreateCommentMap(Map<String, Object> comment){
+        logger.info("Creating comment map");
+//        pc.comment_id, p.post_id, pc.from_uid, ui.username, ui.avatar_url, pc.content, ulc.like_status, pc.created_at
+        ShowCommentVO showCommentVO = new ShowCommentVO();
+        showCommentVO.setCommentId(comment.get("comment_id").toString());
+        showCommentVO.setPostId(comment.get("post_id").toString());
+        showCommentVO.setFromUid(comment.get("from_uid").toString());
+        showCommentVO.setUsername(comment.get("username").toString());
+//        showCommentVO.setAvatarUrl(comment.get("avatar_url").toString());
+        showCommentVO.setContent(comment.get("content").toString());
+        showCommentVO.setLikeStatus((Boolean) comment.get("like_status"));
+        Timestamp timestamp = (Timestamp) comment.get("created_at");
+        showCommentVO.setCreatedAt(timestamp.toInstant());
 
+        return showCommentVO;
+    }
+    private static ShowReplyVO CreateReplyMap(Map<String, Object> reply){
+        logger.info("Creating reply map");
+
+        ShowReplyVO showReplyVO = new ShowReplyVO();
+        showReplyVO.setReplyId(reply.get("reply_id").toString());
+        showReplyVO.setCommentId(reply.get("comment_id").toString());
+//        showReplyVO.setToReplyId(reply.get("to_reply_id").toString());
+        showReplyVO.setFromUid(reply.get("from_uid").toString());
+//        showReplyVO.setFromAvatarURL(reply.get("fm_avatar_url").toString());
+        showReplyVO.setFromUsername(reply.get("fm_username").toString());
+        showReplyVO.setToUid(reply.get("to_uid").toString());
+        showReplyVO.setToUsername(reply.get("to_username").toString());
+        showReplyVO.setContent(reply.get("content").toString());
+        showReplyVO.setLikeStatus((Boolean) reply.get("like_status"));
+        Timestamp timestamp = (Timestamp) reply.get("created_at");
+        showReplyVO.setCreatedAt(timestamp.toInstant());
+
+        return showReplyVO;
+    }
     public List<NewestCommentVO> GetNewestComments() {
         logger.info("Getting newest comments");
         try {
-            List<Map<Short, Object>> newestCommentsList = commentRepository.findNewestComments();
+            List<Map<String, Object>> newestCommentsList = commentRepository.findNewestComments();
             if (!newestCommentsList.isEmpty()) {
                 logger.info("Newest comments found");
                 return TransferToNewestCommentVO(newestCommentsList);
@@ -163,13 +184,13 @@ public class CommentService {
         return Collections.emptyList();
     }
 
-    private static List<NewestCommentVO> TransferToNewestCommentVO(List<Map<Short, Object>> newestCommentsList) {
+    private static List<NewestCommentVO> TransferToNewestCommentVO(List<Map<String, Object>> newestCommentsList) {
         logger.info("Transferring to newest comment VO");
         List<NewestCommentVO> newestCommentVOList = new ArrayList<>();
-        for (Map<Short, Object> map : newestCommentsList) {
+        for (Map<String, Object> map : newestCommentsList) {
             try {
                 NewestCommentVO newestCommentVO = new NewestCommentVO();
-                newestCommentVO.setPostId((Long) map.get("post_id"));
+                newestCommentVO.setPostId(map.get("post_id").toString());
                 newestCommentVO.setContent((String) map.get("content"));
                 newestCommentVO.setGameName((String) map.get("game_name"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");

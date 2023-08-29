@@ -10,8 +10,8 @@ import java.util.List;
 
 @Data
 public class ShowPostBodyVO {
-    private Long postId;
-    private Long userId;
+    private String postId;
+    private String userId;
     private String userName;
     private String title;
     private String textRender;
@@ -19,6 +19,8 @@ public class ShowPostBodyVO {
     private Integer commentReply;
     private Integer like;
     private Integer save;
+    private Byte likeStatus;
+    private Byte saveStatus;
     private List<String> imageURL;
     private Instant createdAt;
 }

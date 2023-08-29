@@ -112,10 +112,10 @@ public class PostImageService {
 
     }
 
-    public List<Map<Short, Object>> findAllImageURLsByPostId(GetPostDTO getPostDTO) {
+    public List<Map<String, Object>> findAllImageURLsByPostId(GetPostDTO getPostDTO) {
         logger.info("Finding all images by post id");
         try {
-            List<Map<Short, Object>> postImages = postImageRepository.findAllImageURLByPostId(getPostDTO.getPostId());
+            List<Map<String, Object>> postImages = postImageRepository.findAllImageURLByPostId(getPostDTO.getPostId());
             if (!postImages.isEmpty()) {
                 logger.info("Found all images by post id");
                 return postImages;

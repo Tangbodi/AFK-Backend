@@ -24,7 +24,7 @@ public class PostGameMapService {
     public List<LatestPostVO> ShowLatestPosts() {
         logger.info("Showing latest posts");
         try {
-            List<Map<Short, Object>> postsGamesMaps = postGameMapRepository.findLatestPostsGamesMap();
+            List<Map<String, Object>> postsGamesMaps = postGameMapRepository.findLatestPostsGamesMap();
             if (!postsGamesMaps.isEmpty()) {
                 logger.info("Latest posts found");
                 return TransferToLatestPostVO(postsGamesMaps);
@@ -37,13 +37,13 @@ public class PostGameMapService {
         return Collections.emptyList();
     }
 
-    private static List<LatestPostVO> TransferToLatestPostVO(List<Map<Short, Object>> postsGamesMaps) {
+    private static List<LatestPostVO> TransferToLatestPostVO(List<Map<String, Object>> postsGamesMaps) {
         logger.info("Transferring to latest post VO");
         List<LatestPostVO> latestPostVOList = new ArrayList<>();
-        for (Map<Short, Object> map : postsGamesMaps) {
+        for (Map<String, Object> map : postsGamesMaps) {
             try {
                 LatestPostVO latestPostVO = new LatestPostVO();
-                latestPostVO.setPostId((Long) map.get("post_id"));
+                latestPostVO.setPostId(map.get("post_id").toString());
                 latestPostVO.setTitle((String) map.get("title"));
                 latestPostVO.setGameName((String) map.get("game_name"));
                 Timestamp timestamp = (Timestamp) map.get("created_at");

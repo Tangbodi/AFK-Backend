@@ -123,7 +123,8 @@ public class UserInfoService {
     }
     public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO){
         UserInfoVO userInfoVO = new UserInfoVO();
-        userInfoVO.setUserId(userInfoDTO.getUserId());
+        userInfoVO.setLongUid(userInfoDTO.getUserId());
+        userInfoVO.setUserId(userInfoDTO.getUserId().toString());
         userInfoVO.setUsername(userInfoDTO.getUsername());
         userInfoVO.setEmail(userInfoDTO.getEmail());
         userInfoVO.setAvatarUrl(userInfoDTO.getAvatarUrl());

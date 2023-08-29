@@ -76,12 +76,12 @@ public class MessageService {
             if (!messagesUsersMapList.isEmpty()) {
                 redisMessageService.SetUserReadStatus(userId);
                 List<MessageVO> messageVOList = new ArrayList<>();
-                for (Map<Short, Object> messagesUsersMap : messagesUsersMapList) {
+                for (Map<Short, Object> map : messagesUsersMapList) {
                     MessageVO messageVO = new MessageVO();
-                    messageVO.setCrId(((BigInteger) messagesUsersMap.get("reply_id")).longValue());
-                    messageVO.setFromUid(((BigInteger) messagesUsersMap.get("user_id")).longValue());
-                    messageVO.setFromUsername((String) messagesUsersMap.get("username"));
-                    messageVO.setContent((String) messagesUsersMap.get("content"));
+                    messageVO.setCrId(map.get("reply_id").toString());
+                    messageVO.setFromUid(map.get("user_id").toString());
+                    messageVO.setFromUsername((String) map.get("username"));
+                    messageVO.setContent((String) map.get("content"));
                     messageVOList.add(messageVO);
                 }
                 return messageVOList;

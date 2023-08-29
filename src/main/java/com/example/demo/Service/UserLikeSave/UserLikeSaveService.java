@@ -170,7 +170,7 @@ public class UserLikeSaveService {
                 usersLikeReply.setModifiedAt(objectUserDTO.getCreatedAt());
                 userLikeReplyRepository.save(usersLikeReply);
                 logger.info("User like reply saved successfully for user ID: {}, reply ID: {}", usersLikeReplyId.getUserId(), usersLikeReplyId.getReplyId());
-                List<Map<Short, Object>> postInfo = replyRepository.findPostIdByReplyId(objectUserDTO.getObjectId());
+                List<Map<String, Object>> postInfo = replyRepository.findPostIdByReplyId(objectUserDTO.getObjectId());
                 Long postId = ((BigInteger)postInfo.get(0).get("post_id")).longValue();
                 postInfoService.UpdatePostCommentReplyCount(postId);
                 //Update reply count
@@ -219,8 +219,8 @@ public class UserLikeSaveService {
     private static UserFavoritePostVO TransferToUserFavoritePostVO(UsersFavoritePost usersFavoritePost) {
         logger.info("Transferring user favorite post status to VO for user ID: {}, post ID: {}", usersFavoritePost.getId().getUserId(), usersFavoritePost.getId().getPostId());
         UserFavoritePostVO userFavoritePostVO = new UserFavoritePostVO();
-        userFavoritePostVO.setUserId(usersFavoritePost.getId().getUserId());
-        userFavoritePostVO.setPostId(usersFavoritePost.getId().getPostId());
+        userFavoritePostVO.setUserId(usersFavoritePost.getId().getUserId().toString());
+        userFavoritePostVO.setPostId(usersFavoritePost.getId().getPostId().toString());
         userFavoritePostVO.setLikeStatus(usersFavoritePost.getLikeStatus());
         userFavoritePostVO.setSaveStatus(usersFavoritePost.getSaveStatus());
 

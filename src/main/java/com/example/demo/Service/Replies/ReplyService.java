@@ -56,19 +56,19 @@ public class ReplyService {
         return null;
     }
 
-    public List<Map<Short, Object>> GetRepliesByCommentId(List<Long> commentIds, Long userId) {
+    public List<Map<String, Object>> GetRepliesByCommentId(List<Long> commentIds, Long userId) {
         logger.info("Getting replies by comment id");
-        List<Map<Short, Object>> replyList = replyRepository.findByCommentId(commentIds,userId);
+        List<Map<String, Object>> replyList = replyRepository.findByCommentId(commentIds,userId);
         return replyList;
     }
 
     private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         logger.info("Transferring reply to VO");
         ReplySavedVO replySavedVO = new ReplySavedVO();
-        replySavedVO.setReplyId(commentReplyDTO.getReplyId());
-        replySavedVO.setCommentId(commentReplyDTO.getCommentId());
-        replySavedVO.setToReplyId(commentReplyDTO.getToReplyId());
-        replySavedVO.setToUid(commentReplyDTO.getToUid());
+        replySavedVO.setReplyId(commentReplyDTO.getReplyId().toString());
+        replySavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
+        replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
+        replySavedVO.setToUid(commentReplyDTO.getToUid().toString());
         replySavedVO.setCreatedAt(commentReplyDTO.getCreatedAt());
         return replySavedVO;
     }

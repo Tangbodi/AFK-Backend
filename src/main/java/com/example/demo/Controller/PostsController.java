@@ -128,11 +128,12 @@ public class PostsController {
     public ResponseEntity ShowPostBody(HttpServletRequest request,
                                        @RequestParam(value = "game") @ValidGameId Short gameId,
                                        @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                       @RequestParam(value = "post") @ValidPostId Long postId) {
+                                       @RequestParam(value = "post") @ValidPostId Long postId, HttpSession session) {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
+        Long userId = (Long) session.getAttribute("userId");
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
@@ -140,6 +141,7 @@ public class PostsController {
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
+            getPostDTO.setUserId(userId);
             ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
             if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
@@ -160,6 +162,7 @@ public class PostsController {
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
+        Long userId = (Long) session.getAttribute("userId");
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
@@ -167,12 +170,12 @@ public class PostsController {
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
+            getPostDTO.setUserId(userId);
             ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
             if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
                 //need pagination
-                Long userId = (Long) session.getAttribute("userId");
                 List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId,userId);
                 if (!res.isEmpty()) {
                     page = page - 1;

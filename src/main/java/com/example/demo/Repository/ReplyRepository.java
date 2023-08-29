@@ -12,20 +12,17 @@ import java.util.Map;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<PostReply, Long> {
-    @Query(value = "SELECT pr.reply_id, pr.comment_id, pr.from_uid, ui.avatar_url as fmui_avatar_url, " +
-            "fm.username as from_username, pr.to_uid, tm.username as to_username, pr.content, ulr.like_status, pr.created_at\n" +
+    @Query(value = "SELECT pr.reply_id, pr.comment_id,pr.to_reply_id, pr.from_uid, pr.to_uid, fui.username as fm_username, " +
+            "tui.username as to_username, fui.avatar_url as fm_avatar_url, pr.content, ulr.like_status, pr.created_at\n" +
             "FROM afk.post_replies pr\n" +
             "JOIN afk.post_comments pc ON pr.comment_id = pc.comment_id \n" +
-            "LEFT JOIN vw_userid_username_mapping fm\n" +
-            "ON pr.from_uid = fm.user_id\n" +
-            "LEFT JOIN vw_userid_username_mapping tm\n" +
-            "ON pr.to_uid = tm.user_id\n" +
-            "LEFT JOIN users_info ui ON fm.user_id = ui.user_id\n" +
-            "LEFT JOIN users_like_replies ulr ON pr.reply_id = ulr.reply_id\n" +
+            "LEFT JOIN afk.users_info fui ON pr.from_uid = fui.user_id\n" +
+            "LEFT JOIN afk.users_info tui ON pr.to_uid = tui.user_id\n" +
+            "LEFT JOIN afk.users_like_replies ulr ON pr.reply_id = ulr.reply_id\n" +
             "AND ulr.user_id = :userId\n" +
             "WHERE pc.comment_id IN  (:ids) ORDER BY pr.created_at ASC", nativeQuery = true)
-    List<Map<Short, Object>> findByCommentId(@Param("ids") List<Long> commentIds, @Param("userId") Long userId);
+    List<Map<String, Object>> findByCommentId(@Param("ids") List<Long> commentIds, @Param("userId") Long userId);
 
     @Query(value = "SELECT pi.post_id, pi.comment_reply FROM afk.post_replies pr JOIN afk.post_comments pc ON pr.comment_id = pc.comment_id JOIN afk.posts_info pi ON pc.post_id = pi.post_id WHERE pr.reply_id = :replyId", nativeQuery = true)
-    List<Map<Short, Object>> findPostIdByReplyId(@Param("replyId") Long replyId);
+    List<Map<String, Object>> findPostIdByReplyId(@Param("replyId") Long replyId);
 }

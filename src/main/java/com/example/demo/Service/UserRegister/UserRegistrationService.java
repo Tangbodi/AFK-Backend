@@ -45,7 +45,7 @@ public class UserRegistrationService {
         return usersInfo;
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public User RegisterUser(UserRegisterDTO userRegisterDTO){
         logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
