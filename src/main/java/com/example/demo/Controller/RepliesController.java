@@ -68,7 +68,7 @@ public class RepliesController {
             }
             commentReplyDTO.setFromUid(userId);
             ReplySavedVO replySavedVO = replyService.SetReply(commentReplyDTO);
-            //Set mention message after saved reply
+            //Set mention message after saved reply if the user is not replying to himself
             if (replySavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
                 messageService.SetMessage(commentReplyDTO);
                 redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
@@ -79,5 +79,4 @@ public class RepliesController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
 }

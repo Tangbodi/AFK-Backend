@@ -1,5 +1,6 @@
 package com.example.demo.Service.MQ;
 
+import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +19,15 @@ public class MQSender {
 
     @Autowired
     private JmsMessagingTemplate jmsMessagingTemplate;
-
     @Autowired
-    private Queue queue;
+    private Queue LikeSaveQueue;
+    @Autowired
+    private Queue CommentCountQueue;
+    @Autowired
+    private Queue ReplyCountQueue;
     @Async("MultiExecutor")
-    public void SendMessage(UserLikeSaveDTO userLikeSaveDTO,Long userId) throws JMSException, InterruptedException {
-        String queueName = queue.getQueueName();
+    public void SendSaveLikeMessage(UserLikeSaveDTO userLikeSaveDTO,Long userId) throws JMSException, InterruptedException {
+        String queueName = LikeSaveQueue.getQueueName();
         userLikeSaveDTO.setUserId(userId);
         userLikeSaveDTO.setCreatedAt(Instant.now());
         jmsMessagingTemplate.convertAndSend(queueName, userLikeSaveDTO);
@@ -31,4 +35,22 @@ public class MQSender {
                 "status: " + userLikeSaveDTO.getStatus() + "，" +
                 "objectId: " + userLikeSaveDTO.getObjectId());
     }
+    @Async("MultiExecutor")
+    public void SendCommentCountMessage(CommentReplyDTO commentReplyDTO) throws JMSException, InterruptedException {
+        String queueName = CommentCountQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, commentReplyDTO);
+        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() +"," +
+                "commentId: " + commentReplyDTO.getCommentId() + "," +
+                "postId: " + commentReplyDTO.getPostId());
+    }
+
+    @Async("MultiExecutor")
+    public void SendReplyCountMessage(CommentReplyDTO commentReplyDTO) throws JMSException, InterruptedException {
+        String queueName = ReplyCountQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, commentReplyDTO);
+        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() +"," +
+                "replyId: " + commentReplyDTO.getReplyId() + "," +
+                "postId: " + commentReplyDTO.getPostId());
+    }
+
 }

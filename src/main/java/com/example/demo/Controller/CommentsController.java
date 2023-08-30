@@ -69,6 +69,7 @@ public class CommentsController {
             }
             commentReplyDTO.setFromUid(userId);
             CommentSavedVO commentSavedVO = commentService.SetComment(commentReplyDTO);
+            //Set mention message after saved comment if the user is not the author of the post
             if (commentSavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
                 messageService.SetMessage(commentReplyDTO);
                 redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());

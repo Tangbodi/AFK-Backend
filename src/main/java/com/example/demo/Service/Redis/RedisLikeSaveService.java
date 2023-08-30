@@ -37,12 +37,12 @@ public class RedisLikeSaveService {
         }
         return false;
     }
-    public void AddSet(String key, Object value) {
-        logger.info("Adding set: {}",key,":::",value);
+    public void AddSet(String typeNameInSet, Object objectId) {
+        logger.info("Adding set: {}",typeNameInSet,":::",objectId);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.sadd(key, String.valueOf(value));
+            jedis.sadd(typeNameInSet, String.valueOf(objectId));
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
@@ -58,7 +58,7 @@ public class RedisLikeSaveService {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.hset(key, hashKey, (String) value);
+            jedis.hset(key, hashKey,  String.valueOf(value));
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
@@ -118,6 +118,11 @@ public class RedisLikeSaveService {
     public Set<String> GetAllSetMembers(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.smembers(key);
+        }
+    }
+    public long GetHashSetSize(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.hlen(key);
         }
     }
     public Map<String, String> GetHashValue(String key) {

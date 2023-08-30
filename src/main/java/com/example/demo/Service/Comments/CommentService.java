@@ -8,6 +8,7 @@ import com.example.demo.Model.VO.ShowCommentVO;
 import com.example.demo.Model.VO.ShowReplyVO;
 import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.Snowflake;
@@ -33,6 +34,8 @@ public class CommentService {
     private IpAddressService ipAddressService;
     @Autowired
     private PostInfoService postInfoService;
+    @Autowired
+    private MQSender mqSender;
 
     @Transactional
     public CommentSavedVO SetComment(CommentReplyDTO commentReplyDTO) {
@@ -51,9 +54,11 @@ public class CommentService {
             PostComment savedComment = commentRepository.save(postComment);
             if (savedComment != null) {
                 logger.info("Comment saved successfully: {}", savedComment);
-                ipAddressService.SetCommentReplyIpAddress(commentReplyDTO);
-                //update post comment reply count
-                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
+                //set comment reply ip address
+                ipAddressService.SetCommentIpAddress(commentReplyDTO);
+                //send message to ActiveMQ
+                mqSender.SendCommentCountMessage(commentReplyDTO);
+//                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Comment not saved: {}");
@@ -77,11 +82,11 @@ public class CommentService {
         return commentRepository.findCommentsByPostId(postId, userId);
     }
 
-    public List<List<Object>> GetAllCommentsAndReplies(Long postId, Long userId) {
+    public List<Map<String, Object>> GetAllCommentsAndReplies(Long postId, Long userId) {
         logger.info("Getting all comments and replies");
         //get all comments by post id
         List<Map<String, Object>> commentsList = GetAllCommentsByPostId(postId, userId);
-        List<List<Object>> res = new ArrayList<>();
+        List<Map<String, Object>> res = new ArrayList<>();
         //get all comment ids from all comments for getting all replies with same comment ids
         if (commentsList.isEmpty()){
             logger.info("No comments found");
@@ -98,10 +103,11 @@ public class CommentService {
                 logger.info("No replies found");
                 for(Map<String, Object> comment : commentsList){
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
-                    List<Object> combinedList = new ArrayList<>();
-                    combinedList.add(showCommentVO);
-                    combinedList.add(Collections.emptyList());
-                    res.add(combinedList);
+                    List<Map<String, Object>> combinedList = new ArrayList<>();
+                    Map<String,Object> map = new HashMap<>();
+                    map.put("comment",showCommentVO);
+                    map.put("reply",Collections.emptyList());
+                    res.add(map);
                 }
             } else {
                 logger.info("Replies found");
@@ -123,11 +129,10 @@ public class CommentService {
                         }
                     }
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
-                    List<Object> combinedList = new ArrayList<>();
-                    //add combined comment and replies to final result list and paginate the result
-                    combinedList.add(showCommentVO);
-                    combinedList.add(replies);
-                    res.add(combinedList);
+                    Map<String,Object> map = new HashMap<>();
+                    map.put("comment",showCommentVO);
+                    map.put("reply",replies);
+                    res.add(map);
                 }
             }
             return res;
@@ -141,9 +146,9 @@ public class CommentService {
         showCommentVO.setPostId(comment.get("post_id").toString());
         showCommentVO.setFromUid(comment.get("from_uid").toString());
         showCommentVO.setUsername(comment.get("username").toString());
-//        showCommentVO.setAvatarUrl(comment.get("avatar_url").toString());
+        showCommentVO.setFromAvatarURL(comment.get("fm_avatar_url").toString());
         showCommentVO.setContent(comment.get("content").toString());
-        showCommentVO.setLikeStatus((Boolean) comment.get("like_status"));
+        showCommentVO.setLikeStatus((Integer) comment.get("like_status"));
         Timestamp timestamp = (Timestamp) comment.get("created_at");
         showCommentVO.setCreatedAt(timestamp.toInstant());
 
@@ -155,14 +160,14 @@ public class CommentService {
         ShowReplyVO showReplyVO = new ShowReplyVO();
         showReplyVO.setReplyId(reply.get("reply_id").toString());
         showReplyVO.setCommentId(reply.get("comment_id").toString());
-//        showReplyVO.setToReplyId(reply.get("to_reply_id").toString());
+        showReplyVO.setToReplyId(reply.get("to_reply_id").toString());
         showReplyVO.setFromUid(reply.get("from_uid").toString());
-//        showReplyVO.setFromAvatarURL(reply.get("fm_avatar_url").toString());
+        showReplyVO.setFromAvatarURL(reply.get("fm_avatar_url").toString());
         showReplyVO.setFromUsername(reply.get("fm_username").toString());
         showReplyVO.setToUid(reply.get("to_uid").toString());
         showReplyVO.setToUsername(reply.get("to_username").toString());
         showReplyVO.setContent(reply.get("content").toString());
-        showReplyVO.setLikeStatus((Boolean) reply.get("like_status"));
+        showReplyVO.setLikeStatus((Integer)reply.get("like_status"));
         Timestamp timestamp = (Timestamp) reply.get("created_at");
         showReplyVO.setCreatedAt(timestamp.toInstant());
 

@@ -55,7 +55,7 @@ public class UserLikeSaveService {
                 userFavoritePostRepository.save(usersFavoritePost);
                 logger.info("User like post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
                 //update post liked count
-                postInfoService.UpdatePostLikeCount(usersFavoritePostId.getPostId());
+//                postInfoService.UpdatePostLikeCount(usersFavoritePostId.getPostId());
             }
 
         } catch (Exception e) {
@@ -63,7 +63,7 @@ public class UserLikeSaveService {
         }
     }
 
-    public UsersFavoritePost CreateUserLikePost(UsersFavoritePostId usersFavoritePostId, Instant createdAt) {
+    private static UsersFavoritePost CreateUserLikePost(UsersFavoritePostId usersFavoritePostId, Instant createdAt) {
         logger.info("Creating user like post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
 
         UsersFavoritePost usersFavoritePost = new UsersFavoritePost();
@@ -94,7 +94,7 @@ public class UserLikeSaveService {
                 userFavoritePostRepository.save(usersFavoritePost);
                 logger.info("User save post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
                 //update post save count
-                postInfoService.UpdatePostSaveCount(usersFavoritePostId.getPostId());
+//                postInfoService.UpdatePostSaveCount(usersFavoritePostId.getPostId());
             }
         } catch (Exception e) {
             logger.error("Error setting user save post: {}", e.getMessage(), e);
@@ -132,10 +132,10 @@ public class UserLikeSaveService {
                 usersLikeComment.setModifiedAt(objectUserDTO.getCreatedAt());
                 userLikeCommentRepository.save(usersLikeComment);
                 logger.info("User like comment saved successfully for user ID: {}, comment ID: {}", usersLikeCommentId.getUserId(), usersLikeCommentId.getCommentId());
-                PostComment postComment = commentRepository.findById(objectUserDTO.getObjectId()).orElse(null);
-                postInfoService.UpdatePostCommentReplyCount(postComment.getPostId());
-                //Update comment count
-                commentInfoService.UpdateCommentLikeCount(objectUserDTO.getObjectId());
+//                PostComment postComment = commentRepository.findById(objectUserDTO.getObjectId()).orElse(null);
+//                postInfoService.UpdatePostCommentReplyCount(postComment.getPostId());
+//                //Update comment count
+//                commentInfoService.UpdateCommentLikeCount(objectUserDTO.getObjectId());
             }
         } catch (Exception e) {
             logger.error("Error setting user like comment: {}", e.getMessage(), e);
@@ -171,10 +171,10 @@ public class UserLikeSaveService {
                 userLikeReplyRepository.save(usersLikeReply);
                 logger.info("User like reply saved successfully for user ID: {}, reply ID: {}", usersLikeReplyId.getUserId(), usersLikeReplyId.getReplyId());
                 List<Map<String, Object>> postInfo = replyRepository.findPostIdByReplyId(objectUserDTO.getObjectId());
-                Long postId = ((BigInteger)postInfo.get(0).get("post_id")).longValue();
-                postInfoService.UpdatePostCommentReplyCount(postId);
-                //Update reply count
-                replyInfoService.UpdateReplyLikeCount(objectUserDTO.getObjectId());
+//                Long postId = ((BigInteger)postInfo.get(0).get("post_id")).longValue();
+//                postInfoService.UpdatePostCommentReplyCount(postId);
+//                //Update reply count
+//                replyInfoService.UpdateReplyLikeCount(objectUserDTO.getObjectId());
             }
         } catch (Exception e) {
             logger.error("Error setting user like reply: {}", e.getMessage(), e);

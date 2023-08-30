@@ -38,11 +38,28 @@ public class IpAddressService {
     }
     @Async("MultiExecutor")
     @Transactional
-    public void SetCommentReplyIpAddress(CommentReplyDTO commentReplyDTO){
+    public void SetCommentIpAddress(CommentReplyDTO commentReplyDTO){
         logger.info("Setting IP Address:::");
         try{
             IpAddress ipAddress = new IpAddress();
             ipAddress.setId(commentReplyDTO.getCommentId());
+            ipAddress.setIpvFour(commentReplyDTO.getIpvFour());
+            ipAddress.setIpvSix(commentReplyDTO.getIpvSix());
+            ipAddress.setCreatedAt(commentReplyDTO.getCreatedAt());
+            ipAddress.setModifiedAt(commentReplyDTO.getCreatedAt());
+            ipAddressRepository.save(ipAddress);
+            logger.info("SetIpAddress:::Success:::");
+        } catch (Exception e) {
+            logger.error("SetIpAddress:::Exception:::" + e.getMessage(), e);
+        }
+    }
+    @Async("MultiExecutor")
+    @Transactional
+    public void SetReplyIpAddress(CommentReplyDTO commentReplyDTO){
+        logger.info("Setting IP Address:::");
+        try{
+            IpAddress ipAddress = new IpAddress();
+            ipAddress.setId(commentReplyDTO.getReplyId());
             ipAddress.setIpvFour(commentReplyDTO.getIpvFour());
             ipAddress.setIpvSix(commentReplyDTO.getIpvSix());
             ipAddress.setCreatedAt(commentReplyDTO.getCreatedAt());

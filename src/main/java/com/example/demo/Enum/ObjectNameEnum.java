@@ -7,10 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ObjectNameEnum {
 
-    POST_LIKE_SET(0, "post_like"),
-    COMMENT_LIKE_SET(1, "comment_like"),
-    REPLY_LIKE_SET(2, "reply_like"),
-    POST_SAVE_SET(3, "post_save");
+    POST_LIKE_SET(0, "POST_LIKE"),
+    COMMENT_LIKE_SET(1, "COMMENT_LIKE"),
+    REPLY_LIKE_SET(2, "REPLY_LIKE"),
+    POST_SAVE_SET(3, "POST_SAVE");
 
     private int type;
 

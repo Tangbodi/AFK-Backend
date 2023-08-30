@@ -9,10 +9,11 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.Instant;
 
 @Data
-public class CommentReplyDTO {
+public class CommentReplyDTO implements Serializable {
     @NotNull(message = "GenreId is required")
     @ValidGenreId
     private Byte genreId;

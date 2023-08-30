@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Repository
 public interface CommentRepository extends JpaRepository<PostComment, Long> {
-    @Query(value = "SELECT pc.comment_id, p.post_id, pc.from_uid, ui.username, ui.avatar_url, pc.content, ulc.like_status, pc.created_at " +
+    @Query(value = "SELECT pc.comment_id, p.post_id, pc.from_uid, ui.username, ifnull(ui.avatar_url,'') AS fm_avatar_url, pc.content, ifnull(ulc.like_status,false) AS like_status, pc.created_at " +
             "FROM afk.posts p\n" +
             "JOIN afk.post_comments pc ON p.post_id = pc.post_id\n" +
             "JOIN afk.users_info ui ON pc.from_uid = ui.user_id\n" +

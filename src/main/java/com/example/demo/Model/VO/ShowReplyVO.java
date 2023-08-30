@@ -9,17 +9,14 @@ import java.time.Instant;
 public class ShowReplyVO {
     private String replyId;
     private String commentId;
-    private Object toReplyId;
+    private String toReplyId;
     private String fromUid;
     private String toUid;
-    private Object fromAvatarURL;
+    private String fromAvatarURL;
     private String fromUsername;
     private String toUsername;
     private String content;
-    private Boolean likeStatus;
+    private Integer likeStatus;
     private Instant createdAt;
-
-
-
 
 }

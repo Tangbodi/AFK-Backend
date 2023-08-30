@@ -27,11 +27,11 @@ public class TestController {
     public ResponseEntity getData() {
         ApiResponse apiResponse;
         Map<String,Map<String,String>> res = new HashMap();
-        Set<String> postIds =  redisLikeSaveService.GetAllSetMembers("post_like");
+        Set<String> postIds =  redisLikeSaveService.GetAllSetMembers("POST_LIKE");
         List<UsersFavoritePostId> postUserIdMap = new ArrayList<>();
         for(String postId: postIds){
             //userId,date
-            Map<String, String> fieldValue = redisLikeSaveService.GetHashValue("post_like:::"+postId);
+            Map<String, String> fieldValue = redisLikeSaveService.GetHashValue("POST_LIKE:::"+postId);
             fieldValue.entrySet().stream().forEach(entry -> {
                 UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
                 usersFavoritePostId.setPostId(Long.valueOf(postId));

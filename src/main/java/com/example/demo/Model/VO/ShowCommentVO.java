@@ -11,10 +11,8 @@ public class ShowCommentVO{
     private String postId;
     private String fromUid;
     private String username;
-    private Object avatarUrl;
+    private String fromAvatarURL;
     private String content;
-    private Boolean likeStatus;
+    private Integer likeStatus;
     private Instant createdAt;
-
-
 }

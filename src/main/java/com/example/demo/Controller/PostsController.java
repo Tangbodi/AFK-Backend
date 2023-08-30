@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -176,7 +177,7 @@ public class PostsController {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
                 //need pagination
-                List<List<Object>> res = commentService.GetAllCommentsAndReplies(postId,userId);
+                List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId,userId);
                 if (!res.isEmpty()) {
                     page = page - 1;
                     if (page < 0 || size <= 0) {
@@ -194,8 +195,8 @@ public class PostsController {
                         apiResponse = ApiResponse.success(Collections.emptyList());
                         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
                     }
-                    List<List<Object>> currentResItems = res.subList(startIdx, endIdx);
-                    Page<List<Object>> currentResPage = new PageImpl<>(currentResItems, pageable, res.size());
+                    List<Map<String, Object>> currentResItems = res.subList(startIdx, endIdx);
+                    Page<Map<String, Object>> currentResPage = new PageImpl<>(currentResItems, pageable, res.size());
                     apiResponse = ApiResponse.success(currentResPage);
                 } else {
                     apiResponse = ApiResponse.success(Collections.emptyList());

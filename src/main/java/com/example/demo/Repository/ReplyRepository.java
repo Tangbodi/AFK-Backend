@@ -12,8 +12,8 @@ import java.util.Map;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<PostReply, Long> {
-    @Query(value = "SELECT pr.reply_id, pr.comment_id,pr.to_reply_id, pr.from_uid, pr.to_uid, fui.username as fm_username, " +
-            "tui.username as to_username, fui.avatar_url as fm_avatar_url, pr.content, ulr.like_status, pr.created_at\n" +
+    @Query(value = "SELECT pr.reply_id, pr.comment_id,ifnull(pr.to_reply_id,'0') AS to_reply_id, pr.from_uid, pr.to_uid, fui.username as fm_username, " +
+            "tui.username as to_username, ifnull(fui.avatar_url,'') AS fm_avatar_url, pr.content, ifnull(ulr.like_status,false) AS like_status, pr.created_at\n" +
             "FROM afk.post_replies pr\n" +
             "JOIN afk.post_comments pc ON pr.comment_id = pc.comment_id \n" +
             "LEFT JOIN afk.users_info fui ON pr.from_uid = fui.user_id\n" +

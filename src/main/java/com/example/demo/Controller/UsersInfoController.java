@@ -8,6 +8,7 @@ import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
+import com.example.demo.Service.Posts.PostUserMapService;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
@@ -55,6 +56,8 @@ public class UsersInfoController {
     private RedisEmailService redisEmailService;
     @Autowired
     private ProcessEmailService processEmailService;
+    @Autowired
+    private PostUserMapService postUserMapService;
 
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) {
@@ -133,7 +136,7 @@ public class UsersInfoController {
         } else if (page < 0 || size <= 0) {
             apiResponse = ApiResponse.success(null);
         } else {
-            List<PostInfoVO> postHistoryVOList = postService.FindUserPostHistory(userId);
+            List<PostInfoVO> postHistoryVOList = postUserMapService.FindUserPostHistory(userId);
             if (!postHistoryVOList.isEmpty()) {
                 Pageable pageable = PageRequest.of(page, size);
                 int startIdx = (int) pageable.getOffset();

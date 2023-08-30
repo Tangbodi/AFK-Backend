@@ -5,6 +5,7 @@ import com.example.demo.Repository.ReplyRepository;
 import com.example.demo.Model.Entity.PostReply;
 import com.example.demo.Model.VO.ReplySavedVO;
 import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ public class ReplyService {
     private IpAddressService ipAddressService;
     @Autowired
     private PostInfoService postInfoService;
+    @Autowired
+    private MQSender mqSender;
     public ReplySavedVO SetReply(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting reply");
         try {
@@ -43,9 +46,12 @@ public class ReplyService {
             PostReply savedReply = replyRepository.save(postReply);
             if (savedReply != null) {
                 logger.info("Reply saved successfully");
-                ipAddressService.SetCommentReplyIpAddress(commentReplyDTO);
+                //set comment reply ip address
+                ipAddressService.SetReplyIpAddress(commentReplyDTO);
+                //send message to ActiveMQ
+                mqSender.SendReplyCountMessage(commentReplyDTO);
                 //update post comment reply count
-                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
+//                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Failed to save reply");
@@ -67,7 +73,11 @@ public class ReplyService {
         ReplySavedVO replySavedVO = new ReplySavedVO();
         replySavedVO.setReplyId(commentReplyDTO.getReplyId().toString());
         replySavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
-        replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
+        if(commentReplyDTO.getToReplyId() == null){
+            replySavedVO.setToReplyId("0");
+        }else{
+            replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
+        }
         replySavedVO.setToUid(commentReplyDTO.getToUid().toString());
         replySavedVO.setCreatedAt(commentReplyDTO.getCreatedAt());
         return replySavedVO;

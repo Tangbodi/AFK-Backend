@@ -1,12 +1,16 @@
 package com.example.demo.Service.Posts;
 
+import com.example.demo.Model.DTO.PostDTO;
+import com.example.demo.Model.Entity.PostsGamesMap;
 import com.example.demo.Repository.PostGameMapRepository;
 import com.example.demo.Model.VO.LatestPostVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +58,28 @@ public class PostGameMapService {
             }
         }
         return latestPostVOList;
+    }
+
+    @Async("MultiExecutor")
+    @Transactional
+    public void SetPostGameMap(PostDTO postDTO) {
+        logger.info("Setting post game map: {}");
+        try {
+            PostsGamesMap postsGamesMap = new PostsGamesMap();
+            postsGamesMap.setId(postDTO.getPostId());
+            postsGamesMap.setGameId(postDTO.getGameId());
+            postsGamesMap.setGenreId(postDTO.getGenreId());
+            postsGamesMap.setCreatedAt(postDTO.getCreatedAt());
+            postsGamesMap.setModifiedAt(postDTO.getCreatedAt());
+            if (postGameMapRepository.save(postsGamesMap) != null) {
+                logger.info("Post game map saved successfully: {}");
+            } else {
+                logger.info("Failed to save post game map: {}");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to set post game map: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to set post game map " +e); // Rethrow the exception to trigger rollback
+        }
     }
 }
 

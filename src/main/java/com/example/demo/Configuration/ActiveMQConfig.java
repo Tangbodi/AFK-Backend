@@ -13,10 +13,18 @@ import javax.jms.Queue;
 public class ActiveMQConfig {
 
     @Bean
-    public Queue queue() {
+    public Queue LikeSaveQueue() {
         return new ActiveMQQueue("like-save-redis");
     }
 
+    @Bean
+    public Queue CommentCountQueue() {
+        return new ActiveMQQueue("comment-count-redis");
+    }
+    @Bean
+    public Queue ReplyCountQueue() {
+        return new ActiveMQQueue("reply-count-redis");
+    }
     @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
