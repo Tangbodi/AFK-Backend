@@ -3,7 +3,7 @@ package com.example.demo.Service.UserLikeSave;
 import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.*;
-import com.example.demo.Model.VO.UserFavoritePostVO;
+import com.example.demo.Model.VO.ShowSavedPostVO;
 import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Replies.ReplyInfoService;
@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -195,35 +197,38 @@ public class UserLikeSaveService {
     }
 
 
-    public UserFavoritePostVO GetUserFavoritePostStatus(ObjectUserDTO objectUserDTO) {
+    public List<ShowSavedPostVO> GetSavedPostByUserId(ObjectUserDTO objectUserDTO) {
         logger.info("Getting user favorite post status for user ID: {}, post ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
         try {
-            UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-            usersFavoritePostId.setPostId(objectUserDTO.getObjectId());
-            usersFavoritePostId.setUserId(objectUserDTO.getUserId());
-            UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId).orElse(null);
-            if (usersFavoritePost != null) {
-                logger.info("User favorite post status found for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
-                return TransferToUserFavoritePostVO(usersFavoritePost);
+            List<Map<String, Object>> savedPosts = userFavoritePostRepository.findAllSavedPostsByUserId(objectUserDTO.getUserId());
+            if (!savedPosts.isEmpty()) {
+                logger.info("All saved posts found for user ID: {}", objectUserDTO.getUserId());
+                return TransferToUserFavoritePostVO(savedPosts, objectUserDTO);
             } else {
-                logger.info("No user favorite post status found for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
+                logger.info("No saved posts found for user ID: {}", objectUserDTO.getUserId());
                 return null;
             }
         } catch (Exception e) {
-            logger.error("Error getting user favorite post status: {}", e.getMessage(), e);
+            logger.error("Error getting saved posts: {}", e.getMessage(), e);
             return null;
         }
     }
 
-    private static UserFavoritePostVO TransferToUserFavoritePostVO(UsersFavoritePost usersFavoritePost) {
-        logger.info("Transferring user favorite post status to VO for user ID: {}, post ID: {}", usersFavoritePost.getId().getUserId(), usersFavoritePost.getId().getPostId());
-        UserFavoritePostVO userFavoritePostVO = new UserFavoritePostVO();
-        userFavoritePostVO.setUserId(usersFavoritePost.getId().getUserId().toString());
-        userFavoritePostVO.setPostId(usersFavoritePost.getId().getPostId().toString());
-        userFavoritePostVO.setLikeStatus(usersFavoritePost.getLikeStatus());
-        userFavoritePostVO.setSaveStatus(usersFavoritePost.getSaveStatus());
-
-        logger.info("Transferred user favorite post status to VO for user ID: {}, post ID: {}", usersFavoritePost.getId().getUserId(), usersFavoritePost.getId().getPostId());
-        return userFavoritePostVO;
+    private static List<ShowSavedPostVO> TransferToUserFavoritePostVO( List<Map<String, Object>> savedPosts, ObjectUserDTO objectUserDTO) {
+        logger.info("Transferring saved posts to VO for user ID: {}", objectUserDTO.getUserId());
+        List<ShowSavedPostVO> showSavedPostVOList = new ArrayList<>();
+        for(Map<String, Object> savedPost : savedPosts){
+            ShowSavedPostVO showSavedPostVO = new ShowSavedPostVO();
+            showSavedPostVO.setPostId(savedPost.get("post_id").toString());
+            showSavedPostVO.setTitle((String) savedPost.get("title"));
+            showSavedPostVO.setView((Integer) savedPost.get("view"));
+            showSavedPostVO.setCommentReply((Integer) savedPost.get("comment_reply"));
+            showSavedPostVO.setLike((Integer) savedPost.get("like"));
+            Timestamp timestamp = (Timestamp) savedPost.get("created_at");
+            showSavedPostVO.setCreatedAt(timestamp.toInstant());
+            showSavedPostVOList.add(showSavedPostVO);
+        }
+        logger.info("Transferred saved posts to VO for user ID: {}", objectUserDTO.getUserId());
+        return showSavedPostVOList;
     }
 }

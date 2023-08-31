@@ -26,6 +26,8 @@ import java.util.*;
 @Service
 public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+    private static final String COMMENT = "comment";
+    private static final String REPLY = "reply";
     @Autowired
     private CommentRepository commentRepository;
     @Autowired
@@ -105,8 +107,8 @@ public class CommentService {
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
                     List<Map<String, Object>> combinedList = new ArrayList<>();
                     Map<String,Object> map = new HashMap<>();
-                    map.put("comment",showCommentVO);
-                    map.put("reply",Collections.emptyList());
+                    map.put(COMMENT,showCommentVO);
+                    map.put(REPLY,Collections.emptyList());
                     res.add(map);
                 }
             } else {
@@ -130,8 +132,8 @@ public class CommentService {
                     }
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
                     Map<String,Object> map = new HashMap<>();
-                    map.put("comment",showCommentVO);
-                    map.put("reply",replies);
+                    map.put(COMMENT,showCommentVO);
+                    map.put(REPLY,replies);
                     res.add(map);
                 }
             }

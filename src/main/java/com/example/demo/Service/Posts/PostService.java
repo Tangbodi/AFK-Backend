@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -106,9 +107,8 @@ public class PostService {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-            List<Map<String, Object>> post = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
-
-            if (post.isEmpty()) {
+            List<Map<String, Object>> posts = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
+            if (posts.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
             } else {
@@ -116,7 +116,7 @@ public class PostService {
                 List<Map<String, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
                 // Update post viewed count
                 postInfoService.UpdatePostViewCount(getPostDTO.getPostId());
-                return TransferToShowPostVO(post, postImageList);
+                return TransferToShowPostVO(posts, postImageList);
             }
         } catch (Exception e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
@@ -124,25 +124,25 @@ public class PostService {
         }
     }
 
-    private ShowPostBodyVO TransferToShowPostVO(List<Map<String, Object>> post, List<Map<String, Object>> postImageList) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<String, Object>> posts, List<Map<String, Object>> postImageList) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
-            for (Map<String, Object> map : post) {
-                showPostBodyVO.setPostId(map.get("post_id").toString());
-                logger.info("Post ID: {}", map.get("post_id"));
-                showPostBodyVO.setUserId(map.get("user_id").toString());
-                logger.info("User ID: {}", map.get("user_id"));
-                showPostBodyVO.setUserName((String) map.get("username"));
-                showPostBodyVO.setTitle((String) map.get("title"));
-                showPostBodyVO.setTextRender((String) map.get("text_render"));
-                showPostBodyVO.setView((Integer) map.get("view"));
-                showPostBodyVO.setCommentReply((Integer) map.get("comment_reply"));
-                showPostBodyVO.setLike((Integer) map.get("like"));
-                showPostBodyVO.setSave((Integer) map.get("save"));
-                showPostBodyVO.setLikeStatus((Byte) map.get("like_status"));
-                showPostBodyVO.setSaveStatus((Byte) map.get("save_status"));
-                Timestamp timestamp = (Timestamp) map.get("created_at");
+            for (Map<String, Object> post : posts) {
+                showPostBodyVO.setPostId(post.get("post_id").toString());
+                logger.info("Post ID: {}", post.get("post_id"));
+                showPostBodyVO.setUserId(post.get("user_id").toString());
+                logger.info("User ID: {}", post.get("user_id"));
+                showPostBodyVO.setUserName((String) post.get("username"));
+                showPostBodyVO.setTitle((String) post.get("title"));
+                showPostBodyVO.setTextRender((String) post.get("text_render"));
+                showPostBodyVO.setView((Integer) post.get("view"));
+                showPostBodyVO.setCommentReply((Integer) post.get("comment_reply"));
+                showPostBodyVO.setLike((Integer) post.get("like"));
+                showPostBodyVO.setSave((Integer) post.get("save"));
+                showPostBodyVO.setLikeStatus(((BigInteger)post.get("like_status")).intValue());
+                showPostBodyVO.setSaveStatus(((BigInteger) post.get("save_status")).intValue());
+                Timestamp timestamp = (Timestamp) post.get("created_at");
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
             List<String> ImageURLList = new ArrayList<>();

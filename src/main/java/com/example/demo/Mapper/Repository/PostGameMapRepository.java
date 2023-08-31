@@ -27,7 +27,7 @@ public interface PostGameMapRepository extends JpaRepository<PostsGamesMap, Long
             "WHERE pgm.game_id = :gameId ORDER BY created_at DESC", nativeQuery = true)
     List<Map<String, Object>> findAllPostsInOneGame(@Param("gameId") Short gameId);
 
-    @Query(value = "SELECT p.post_id, ui.user_id, ui.username, p.title,p.text_render, pi.view, pi.comment_reply, pi.like, pi.save, ufp.like_status, ufp.save_status, p.created_at\n" +
+    @Query(value = "SELECT p.post_id, ui.user_id, ui.username, p.title,p.text_render, pi.view, pi.comment_reply, pi.like, pi.save, ifnull(ufp.like_status,false) AS like_status, ifnull(ufp.save_status,false) AS save_status, p.created_at\n" +
             "FROM afk.posts_games_map pgm \n" +
             "JOIN afk.posts p ON pgm.post_id = p.post_id\n" +
             "JOIN afk.posts_users_map pum ON pgm.post_id = pum.post_id \n" +

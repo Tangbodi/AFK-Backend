@@ -35,7 +35,7 @@ import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping("/user-info/username")
+@RequestMapping("/user-info")
 public class UsersInfoController {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoController.class);
     @Autowired
@@ -152,8 +152,8 @@ public class UsersInfoController {
     }
 
 
-    @PostMapping("/favorite-post")
-    public ResponseEntity GetUserFavoritePost(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpSession session) {
+    @GetMapping("/saved-post")
+    public ResponseEntity GetSavedPostByUser(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
@@ -161,8 +161,8 @@ public class UsersInfoController {
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
             objectUserDTO.setUserId(userId);
-            UserFavoritePostVO userFavoritePostVO = userLikeSaveService.GetUserFavoritePostStatus(objectUserDTO);
-            apiResponse = ApiResponse.success(userFavoritePostVO);
+            List<ShowSavedPostVO> showSavedPostVOList = userLikeSaveService.GetSavedPostByUserId(objectUserDTO);
+            apiResponse = ApiResponse.success(showSavedPostVOList);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

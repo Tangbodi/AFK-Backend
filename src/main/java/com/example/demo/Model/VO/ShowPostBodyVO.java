@@ -19,8 +19,8 @@ public class ShowPostBodyVO {
     private Integer commentReply;
     private Integer like;
     private Integer save;
-    private Byte likeStatus;
-    private Byte saveStatus;
+    private Integer likeStatus;
+    private Integer saveStatus;
     private List<String> imageURL;
     private Instant createdAt;
 }
