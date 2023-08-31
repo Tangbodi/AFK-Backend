@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +20,8 @@ public class ShowPostBodyVO {
     private Integer commentReply;
     private Integer like;
     private Integer save;
-    private Integer likeStatus;
-    private Integer saveStatus;
+    private Object likeStatus;
+    private Object saveStatus;
     private List<String> imageURL;
     private Instant createdAt;
 }

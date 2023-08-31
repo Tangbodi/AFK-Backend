@@ -140,8 +140,8 @@ public class PostService {
                 showPostBodyVO.setCommentReply((Integer) post.get("comment_reply"));
                 showPostBodyVO.setLike((Integer) post.get("like"));
                 showPostBodyVO.setSave((Integer) post.get("save"));
-                showPostBodyVO.setLikeStatus(((BigInteger)post.get("like_status")).intValue());
-                showPostBodyVO.setSaveStatus(((BigInteger) post.get("save_status")).intValue());
+                showPostBodyVO.setLikeStatus(post.get("like_status"));
+                showPostBodyVO.setSaveStatus(post.get("save_status"));
                 Timestamp timestamp = (Timestamp) post.get("created_at");
                 showPostBodyVO.setCreatedAt(timestamp.toInstant());
             }
