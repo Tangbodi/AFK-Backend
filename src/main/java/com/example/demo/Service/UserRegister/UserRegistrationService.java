@@ -1,7 +1,7 @@
 package com.example.demo.Service.UserRegister;
 
-import com.example.demo.Repository.UserInfoRepository;
-import com.example.demo.Repository.UserRepository;
+import com.example.demo.Mapper.Repository.UserInfoRepository;
+import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;

@@ -1,7 +1,7 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Enum.CountNameEnum;
-import com.example.demo.Enum.ObjectNameEnum;
+import com.example.demo.Constant.Enum.CountNameEnum;
+import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Posts.PostInfoService;

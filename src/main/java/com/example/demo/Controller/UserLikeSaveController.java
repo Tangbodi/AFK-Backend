@@ -1,15 +1,11 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Enum.ObjectNameEnum;
-import com.example.demo.Enum.ReturnCode;
-import com.example.demo.Model.DTO.ObjectUserDTO;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Posts.PostInfoService;
-import com.example.demo.Service.Redis.RedisLikeSaveService;
 import com.example.demo.Service.Replies.ReplyInfoService;
-import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.jms.JMSException;
 import javax.servlet.http.HttpSession;
-import java.time.Instant;
-import java.util.*;
 
 @RestController
 @Validated
@@ -44,7 +38,11 @@ public class UserLikeSaveController {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
-            apiResponse = ApiResponse.success(null);
+            if (userLikeSaveDTO.getStatus() == 0) {
+                apiResponse = ApiResponse.success(1);
+            } else {
+                apiResponse = ApiResponse.success(0);
+            }
             mqSender.SendSaveLikeMessage(userLikeSaveDTO, userId);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

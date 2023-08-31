@@ -9,7 +9,6 @@ public class Snowflake {
     private static final Logger logger = Logger.getLogger(Snowflake.class.getName());
     private static long dataCenterId = 1L;
     private static long machineId = 1L;
-
     private static long sequence = 0L;
     private static long lastTimestamp = -1L;
 

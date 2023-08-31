@@ -2,7 +2,7 @@ package com.example.demo.Service.Posts;
 
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostsGamesMap;
-import com.example.demo.Repository.PostGameMapRepository;
+import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Model.VO.LatestPostVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

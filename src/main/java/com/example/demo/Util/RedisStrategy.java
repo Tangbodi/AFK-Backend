@@ -1,8 +1,8 @@
 package com.example.demo.Util;
 
-import com.example.demo.Enum.CountNameEnum;
-import com.example.demo.Enum.ObjectNameEnum;
-import com.example.demo.Enum.StatusEnum;
+import com.example.demo.Constant.Enum.CountNameEnum;
+import com.example.demo.Constant.Enum.ObjectNameEnum;
+import com.example.demo.Constant.Enum.StatusEnum;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
@@ -86,12 +86,4 @@ public class RedisStrategy {
         //postId -> replyId -> fromUid
         redisLikeSaveService.AddHashSet(key, hashKey, value);
     }
-
-//    public void like(UserLikeSaveDTO UserLikeDTO) {
-//    }
-
-//    public String getTypeName() {
-//        return null;
-//    }
-
 }

@@ -1,7 +1,7 @@
 package com.example.demo.Service.Games;
 
-import com.example.demo.Repository.GameIconRepository;
-import com.example.demo.Repository.HomeGameImageRepository;
+import com.example.demo.Mapper.Repository.GameIconRepository;
+import com.example.demo.Mapper.Repository.HomeGameImageRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.Entity.GameIcon;
 import com.example.demo.Model.VO.GameIconVO;

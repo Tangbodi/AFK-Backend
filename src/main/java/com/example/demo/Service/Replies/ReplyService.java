@@ -1,7 +1,7 @@
 package com.example.demo.Service.Replies;
 
 import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Repository.ReplyRepository;
+import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.Entity.PostReply;
 import com.example.demo.Model.VO.ReplySavedVO;
 import com.example.demo.Service.IP.IpAddressService;

@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersInfo;
 
-import com.example.demo.Repository.UserMailAddressRepository;
+import com.example.demo.Mapper.Repository.UserMailAddressRepository;
 import com.example.demo.Model.DTO.UserMailDTO;
 import com.example.demo.Model.Entity.UsersMailAddress;
 import com.example.demo.Model.VO.UserMailAddressVO;

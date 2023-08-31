@@ -1,9 +1,9 @@
 package com.example.demo.Service.UserLikeSave;
 
+import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.*;
 import com.example.demo.Model.VO.UserFavoritePostVO;
-import com.example.demo.Repository.*;
 import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Replies.ReplyInfoService;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;

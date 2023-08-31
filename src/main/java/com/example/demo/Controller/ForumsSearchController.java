@@ -1,6 +1,6 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.ForumSearchDTO;
 import com.example.demo.Model.VO.SearchPostVO;
 import com.example.demo.Service.Posts.PostService;

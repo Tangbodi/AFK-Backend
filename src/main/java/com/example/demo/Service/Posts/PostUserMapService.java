@@ -4,7 +4,7 @@ import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostsUsersMap;
 import com.example.demo.Model.Entity.PostsUsersMapId;
 import com.example.demo.Model.VO.PostInfoVO;
-import com.example.demo.Repository.PostUserMapRepository;
+import com.example.demo.Mapper.Repository.PostUserMapRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

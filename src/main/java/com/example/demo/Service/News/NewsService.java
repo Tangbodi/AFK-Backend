@@ -2,7 +2,7 @@ package com.example.demo.Service.News;
 
 import com.example.demo.Model.Entity.News;
 import com.example.demo.Service.Redis.RedisNewsService;
-import com.example.demo.Repository.NewsRepository;
+import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.VO.NewsVO;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;

@@ -6,7 +6,7 @@ import com.example.demo.Model.VO.CommentSavedVO;
 import com.example.demo.Model.VO.NewestCommentVO;
 import com.example.demo.Model.VO.ShowCommentVO;
 import com.example.demo.Model.VO.ShowReplyVO;
-import com.example.demo.Repository.CommentRepository;
+import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Posts.PostInfoService;

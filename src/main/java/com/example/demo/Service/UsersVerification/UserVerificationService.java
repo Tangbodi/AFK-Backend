@@ -1,10 +1,9 @@
 package com.example.demo.Service.UsersVerification;
 
-import com.example.demo.Repository.UserVerificationRepository;
+import com.example.demo.Mapper.Repository.UserVerificationRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersVerificationToken;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
-import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.UUIDCreator;

@@ -1,6 +1,6 @@
 package com.example.demo.Exception;
 
-import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Util.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

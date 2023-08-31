@@ -1,6 +1,6 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.DTO.UserEmailDTO;
 import com.example.demo.Model.DTO.UserMailDTO;

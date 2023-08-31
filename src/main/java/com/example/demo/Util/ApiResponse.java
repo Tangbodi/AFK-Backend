@@ -1,6 +1,6 @@
 package com.example.demo.Util;
 
-import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Constant.Enum.ReturnCode;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 

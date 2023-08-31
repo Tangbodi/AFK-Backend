@@ -3,7 +3,7 @@ package com.example.demo.Controller;
 import com.example.demo.Annotation.ValidGameId;
 import com.example.demo.Annotation.ValidGenreId;
 import com.example.demo.Annotation.ValidPostId;
-import com.example.demo.Enum.ReturnCode;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.Comments.CommentService;

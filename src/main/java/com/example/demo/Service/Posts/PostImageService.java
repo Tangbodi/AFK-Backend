@@ -1,6 +1,6 @@
 package com.example.demo.Service.Posts;
 
-import com.example.demo.Repository.PostImageRepository;
+import com.example.demo.Mapper.Repository.PostImageRepository;
 import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;

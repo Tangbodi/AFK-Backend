@@ -1,6 +1,6 @@
 package com.example.demo.Service.UserLogin;
 
-import com.example.demo.Repository.UserRepository;
+import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.Entity.User;
 import org.mindrot.jbcrypt.BCrypt;

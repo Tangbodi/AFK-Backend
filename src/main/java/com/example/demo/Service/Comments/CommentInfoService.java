@@ -2,13 +2,11 @@ package com.example.demo.Service.Comments;
 
 import com.example.demo.Model.Entity.CommentsInfo;
 import com.example.demo.Model.Entity.UsersLikeComment;
-import com.example.demo.Model.Entity.UsersLikeCommentId;
-import com.example.demo.Repository.CommentInfoRepository;
-import com.example.demo.Repository.UserLikeCommentRepository;
+import com.example.demo.Mapper.Repository.CommentInfoRepository;
+import com.example.demo.Mapper.Repository.UserLikeCommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;

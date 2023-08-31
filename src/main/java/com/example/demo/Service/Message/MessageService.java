@@ -1,8 +1,8 @@
 package com.example.demo.Service.Message;
 
 import com.example.demo.Model.Entity.Message;
-import com.example.demo.Repository.MessageRepository;
-import com.example.demo.Repository.MessageUserMapRepository;
+import com.example.demo.Mapper.Repository.MessageRepository;
+import com.example.demo.Mapper.Repository.MessageUserMapRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.MessagesUsersMap;
 import com.example.demo.Model.VO.MessageVO;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

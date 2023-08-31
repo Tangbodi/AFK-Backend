@@ -1,15 +1,12 @@
 package com.example.demo.Service.Replies;
 
-import com.example.demo.Model.Entity.CommentsInfo;
 import com.example.demo.Model.Entity.RepliesInfo;
-import com.example.demo.Model.Entity.UsersLikeComment;
 import com.example.demo.Model.Entity.UsersLikeReply;
-import com.example.demo.Repository.ReplyInfoRepository;
-import com.example.demo.Repository.UserLikeReplyRepository;
+import com.example.demo.Mapper.Repository.ReplyInfoRepository;
+import com.example.demo.Mapper.Repository.UserLikeReplyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;

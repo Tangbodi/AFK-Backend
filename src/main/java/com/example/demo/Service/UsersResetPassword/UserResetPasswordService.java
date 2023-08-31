@@ -1,6 +1,6 @@
 package com.example.demo.Service.UsersResetPassword;
 
-import com.example.demo.Repository.UserResetPasswordRepository;
+import com.example.demo.Mapper.Repository.UserResetPasswordRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersResetPasswordToken;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
