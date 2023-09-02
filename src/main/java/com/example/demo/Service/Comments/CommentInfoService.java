@@ -1,5 +1,6 @@
 package com.example.demo.Service.Comments;
 
+import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.CommentsInfo;
 import com.example.demo.Model.Entity.UsersLikeComment;
 import com.example.demo.Mapper.Repository.CommentInfoRepository;
@@ -21,6 +22,15 @@ public class CommentInfoService {
     @Autowired
     private UserLikeCommentRepository userLikeCommentRepository;
 
+    public void CalculateCommentTotalLike(List<ObjectUserDTO> objectUserDTOList){
+        logger.info("Finding all users like comments list with like status = 1");
+        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+            Long commentId = objectUserDTO.getObjectId();
+            Map<String,Object> map = userLikeCommentRepository.findCommentTotalLikeByLikeStatus(commentId);
+            Integer totalLike= ((BigInteger) map.get("total_like")).intValue();
+            UpdateCommentLikeCount(commentId, totalLike);
+        }
+    }
     public void UpdateCommentLikeCount(Long commentId, Integer totalLike){
         logger.info("Updating comment like count");
         CommentsInfo commentsInfo = commentInfoRepository.findById(commentId)
@@ -36,22 +46,5 @@ public class CommentInfoService {
         commentsInfo.setLike(0);
         logger.info("Created comment info for comment ID: {}", commentId);
         return commentsInfo;
-    }
-    public void CalculateCommentTotalLike(){
-        logger.info("Finding all users like comments list with like status = 1");
-        List<UsersLikeComment> likeList = userLikeCommentRepository.findAllByLikeStatus();
-        if (likeList.isEmpty()){
-            logger.info("No users like comments found");
-        } else {
-            logger.info("Found users like comments list with like status = 1");
-            logger.info("Traverse users like comments list");
-            for (UsersLikeComment usersLikeComment : likeList) {
-                Long commentId = usersLikeComment.getId().getCommentId();
-                logger.info("Comment ID: {}", commentId);
-                Map<String,Object> map = userLikeCommentRepository.findTotalLike(commentId);
-                Integer totalLike =  ((BigInteger) map.get("total_like")).intValue();
-                UpdateCommentLikeCount(commentId, totalLike);
-            }
-        }
     }
 }

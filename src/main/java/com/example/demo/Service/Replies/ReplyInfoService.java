@@ -1,5 +1,6 @@
 package com.example.demo.Service.Replies;
 
+import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.RepliesInfo;
 import com.example.demo.Model.Entity.UsersLikeReply;
 import com.example.demo.Mapper.Repository.ReplyInfoRepository;
@@ -21,6 +22,16 @@ public class ReplyInfoService {
     @Autowired
     private UserLikeReplyRepository userLikeReplyRepository;
 
+    public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList){
+        logger.info("Finding all users like replies list with like status = 1");
+        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+            Long replyId = objectUserDTO.getObjectId();
+            Map<String,Object> map = userLikeReplyRepository.findReplyTotalLikeByLikeStatus(replyId);
+            Integer totalLike= ((BigInteger) map.get("total_like")).intValue();
+            UpdateReplyLikeCount(replyId, totalLike);
+        }
+    }
+
     private void UpdateReplyLikeCount(Long replyId, Integer totalLike){
         logger.info("Updating reply like count");
         RepliesInfo repliesInfo = replyInfoRepository.findById(replyId)
@@ -37,21 +48,5 @@ public class ReplyInfoService {
         logger.info("Created reply info for reply ID: {}", replyId);
         return repliesInfo;
     }
-    public void CalculateReplyTotalLike(){
-        logger.info("Finding all users like replies list with like status = 1");
-        List<UsersLikeReply> likeList = userLikeReplyRepository.findAllByLikeStatus();
-        if (likeList.isEmpty()){
-            logger.info("No users like replies found");
-        } else {
-            logger.info("Found users like replies list with like status = 1");
-            logger.info("Traverse users like replies list");
-            for (UsersLikeReply usersLikeReply : likeList) {
-                Long replyId = usersLikeReply.getId().getReplyId();
-                logger.info("Reply ID: {}", replyId);
-                Map<String,Object> map = userLikeReplyRepository.findTotalLike(replyId);
-                Integer totalLike =  ((BigInteger) map.get("total_like")).intValue();
-                UpdateReplyLikeCount(replyId, totalLike);
-            }
-        }
-    }
+
 }

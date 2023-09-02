@@ -1,6 +1,7 @@
 package com.example.demo.Service.Posts;
 
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
+import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostsInfo;
 import com.example.demo.Model.Entity.UsersFavoritePost;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Service
 public class PostInfoService {
@@ -33,6 +36,7 @@ public class PostInfoService {
     private PostGameMapRepository postGameMapRepository;
     @Autowired
     private UserFavoritePostRepository userFavoritePostRepository;
+    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
     @Async("MultiExecutor")
     @Transactional
@@ -128,6 +132,47 @@ public class PostInfoService {
             return Collections.emptyList();
         }
     }
+    public void CalculatePostTotalLike(List<ObjectUserDTO> objectUserDTOList){
+        logger.info("Finding all users favorite post list with like status = 1");
+        //transverse all users favorite post list
+        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+            Long postId = objectUserDTO.getObjectId();
+            logger.info("PostId: {}",postId);
+            Map<String,Object> map = userFavoritePostRepository.findPostTotalLikeByLikeStatus(postId);
+            Integer totalLike = ((BigInteger) map.get("total_like")).intValue();
+            logger.info("Total like: {}",totalLike);
+            //Update post like count
+            UpdatePostLikeCount(postId,totalLike);
+            logger.info("Updated post total like count");
+        }
+    }
+    private void UpdatePostLikeCount(Long postId, Integer totalLike) {
+        logger.info("Updating post like count");
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setLike(totalLike);
+            return postInfoRepository.save(postInfo);
+        }).orElseThrow(()-> new RuntimeException("Failed to update post like count"));
+    }
+    public void CalculatePostTotalSave(List<ObjectUserDTO> objectUserDTOList){
+        logger.info("Finding all users favorite post list with save status = 1");
+        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+            Long postId = objectUserDTO.getObjectId();
+            logger.info("PostId: {}",postId);
+            Map<String,Object> map = userFavoritePostRepository.findPostTotalLikeBySaveStatus(postId);
+            Integer totalSave = ((BigInteger) map.get("total_save")).intValue();
+            logger.info("Total save: {}",totalSave);
+            //Update post save count
+            UpdatePostSaveCount(postId,totalSave);
+            logger.info("Updated post total save count");
+        }
+    }
+    private void UpdatePostSaveCount(Long postId, Integer totalSave) {
+        logger.info("Updating post save count");
+        postInfoRepository.findById(postId).map(postInfo -> {
+            postInfo.setSave(totalSave);
+            return postInfoRepository.save(postInfo);
+        });
+    }
 
     public void UpdatePostViewCount(Long postId) {
         logger.info("Updating post view count");
@@ -137,69 +182,12 @@ public class PostInfoService {
         }).orElseThrow(() -> new RuntimeException("Failed to update post view count"));
     }
 
-    private void UpdatePostLikeCount(Long postId, Integer totalLike) {
-        logger.info("Updating post like count");
-        postInfoRepository.findById(postId).map(postInfo -> {
-            postInfo.setLike(totalLike);
-            return postInfoRepository.save(postInfo);
-        }).orElseThrow(()-> new RuntimeException("Failed to update post like count"));
-    }
-
-    private void UpdatePostSaveCount(Long postId, Integer totalSave) {
-        logger.info("Updating post save count");
-        postInfoRepository.findById(postId).map(postInfo -> {
-            postInfo.setSave(totalSave);
-            return postInfoRepository.save(postInfo);
-        });
-
-    }
-
     public void UpdatePostCommentReplyCount(Long postId, Integer total){
         logger.info("Updating post comment reply count");
         postInfoRepository.findById(postId).map(postInfo -> {
             postInfo.setCommentReply(postInfo.getCommentReply()+total);
             return postInfoRepository.save(postInfo);
         });
-
-    }
-    public void CalculatePostTotalLike(){
-        logger.info("Finding all users favorite post list with like status = 1");
-        List<UsersFavoritePost> likeList = userFavoritePostRepository.findAllByLikeStatus();
-        if(likeList.isEmpty()){
-            logger.info("No users favorite post list found");
-        }
-        else {
-            logger.info("Found users favorite post list with like status = 1");
-            logger.info("Traverse users favorite post list");
-            for (UsersFavoritePost usersFavoritePost : likeList) {
-                Long postId = usersFavoritePost.getId().getPostId();
-                logger.info("PostId: {}",postId);
-                Map<String,Object> map = userFavoritePostRepository.findTotalLike(postId);
-                Integer totalLike = ((BigInteger) map.get("total_like")).intValue();
-                logger.info("Total like: {}",totalLike);
-                UpdatePostLikeCount(postId,totalLike);
-                logger.info("Updated post like count");
-            }
-        }
-    }
-    public void CalculatePostTotalSave(){
-        logger.info("Finding all users favorite post list with save status = 1");
-        List<UsersFavoritePost> saveList = userFavoritePostRepository.findAllBySaveStatus();
-        if(saveList.isEmpty()){
-            logger.info("No users favorite post list found");
-        }
-        else {
-            logger.info("Found users favorite post list with save status = 1");
-            logger.info("Traverse users favorite post list");
-            for (UsersFavoritePost usersFavoritePost : saveList) {
-                Long postId = usersFavoritePost.getId().getPostId();
-                logger.info("PostId: {}",postId);
-                Map<String,Object> map = userFavoritePostRepository.findTotalSave(postId);
-                Integer totalSave =  ((BigInteger) map.get("total_save")).intValue();
-                UpdatePostSaveCount(postId,totalSave);
-                logger.info("Updated post save count");
-            }
-        }
     }
 }
 

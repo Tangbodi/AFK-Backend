@@ -18,5 +18,5 @@ public interface UserLikeReplyRepository extends JpaRepository<UsersLikeReply, U
             "FROM afk.users_like_replies\n" +
             "WHERE like_status = 1\n" +
             "AND reply_id = :replyId", nativeQuery = true)
-    Map<String,Object> findTotalLike(Long replyId);
+    Map<String,Object> findReplyTotalLikeByLikeStatus(Long replyId);
 }

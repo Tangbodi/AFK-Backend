@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -43,8 +44,8 @@ public class CountLikeSaveController {
     @Autowired
     private ReplyInfoService replyInfoService;
 
-    @GetMapping("/update-like-save-status")
-    public ResponseEntity UpdateLikeSaveStatus() {
+    @PostMapping("/update-like-save-status-and-count")
+    public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;
         //get all post ids under POST_LIKE set in Redis
         for (String objectName : OBJECT_NAME_LIST) {
@@ -74,33 +75,26 @@ public class CountLikeSaveController {
                 });
             }
             if (objectCode == 0) {
+                //update like status in database
                 userLikeSaveService.SetUserLikePost(objectUserDTOList);
+                //update total like count in database
+                postInfoService.CalculatePostTotalLike(objectUserDTOList);
             } else if (objectCode == 1) {
                 userLikeSaveService.SetUserLikeComment(objectUserDTOList);
+                commentInfoService.CalculateCommentTotalLike(objectUserDTOList);
             } else if (objectCode == 2) {
                 userLikeSaveService.SetUserLikeReply(objectUserDTOList);
-            } else if (objectCode == 3) {
+                replyInfoService.CalculateReplyTotalLike(objectUserDTOList);
+            } else { //objectCode == 3
                 userLikeSaveService.SetUserSavePost(objectUserDTOList);
-            } else {
-                //
+                postInfoService.CalculatePostTotalSave(objectUserDTOList);
             }
         }
         apiResponse = ApiResponse.success("Updated like save status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/update-like-save-count")
-    public ResponseEntity CalculateLikeSave() {
-        ApiResponse apiResponse;
-        postInfoService.CalculatePostTotalLike();
-        postInfoService.CalculatePostTotalSave();
-        commentInfoService.CalculateCommentTotalLike();
-        replyInfoService.CalculateReplyTotalLike();
-        apiResponse = ApiResponse.success("Updated like save successfully");
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
-
-    @GetMapping("/update-comment-reply-count")
+    @PostMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;
         for (String countName : COUNT_NAME_LIST) {
@@ -114,7 +108,7 @@ public class CountLikeSaveController {
                 hashSetMap.entrySet().stream().forEach(entry -> {
                     String commentReplyId = entry.getKey();
                     logger.info("HashSet Size: {}", total);
-                    redisLikeSaveService.DeleteMember(countName+ ":::" + postId,commentReplyId);
+                    redisLikeSaveService.DeleteMember(countName + ":::" + postId, commentReplyId);
                     if (redisLikeSaveService.NumOfMembers(postId) == 0) {
                         redisLikeSaveService.RemoveHashSet(countName, postId);
                     } else {

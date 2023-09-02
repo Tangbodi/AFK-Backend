@@ -18,5 +18,5 @@ public interface UserLikeCommentRepository extends JpaRepository<UsersLikeCommen
             "FROM afk.users_like_comments\n" +
             "WHERE like_status = 1\n" +
             "AND comment_id = :commentId", nativeQuery = true)
-    Map<String,Object> findTotalLike(Long commentId);
+    Map<String,Object> findCommentTotalLikeByLikeStatus(Long commentId);
 }

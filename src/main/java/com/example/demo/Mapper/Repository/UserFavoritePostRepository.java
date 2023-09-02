@@ -13,22 +13,22 @@ import java.util.Map;
 @Repository
 public interface UserFavoritePostRepository extends JpaRepository<UsersFavoritePost, UsersFavoritePostId> {
 
-    @Query(value = "SELECT * FROM afk.users_favorite_posts WHERE like_status = 1", nativeQuery = true)
-    List<UsersFavoritePost> findAllByLikeStatus();
-
-    @Query(value = "SELECT * FROM afk.users_favorite_posts WHERE save_status = 1", nativeQuery = true)
-    List<UsersFavoritePost> findAllBySaveStatus();
+//    @Query(value = "SELECT * FROM afk.users_favorite_posts WHERE like_status = 1", nativeQuery = true)
+//    List<UsersFavoritePost> findAllByLikeStatus();
+//
+//    @Query(value = "SELECT * FROM afk.users_favorite_posts WHERE save_status = 1", nativeQuery = true)
+//    List<UsersFavoritePost> findAllBySaveStatus();
     @Query(value = "SELECT COUNT(*) AS total_like\n" +
             "FROM afk.users_favorite_posts\n" +
             "WHERE like_status = 1\n" +
             "AND post_id = :postId", nativeQuery = true)
-    Map<String,Object> findTotalLike(@Param("postId") Long postId);
+    Map<String,Object> findPostTotalLikeByLikeStatus(@Param("postId") Long postId);
 
     @Query(value = "SELECT COUNT(*) AS total_save\n" +
             "FROM afk.users_favorite_posts\n" +
             "WHERE save_status = 1\n" +
             "AND post_id = :postId", nativeQuery = true)
-    Map<String,Object> findTotalSave(@Param("postId") Long postId);
+    Map<String,Object> findPostTotalLikeBySaveStatus(@Param("postId") Long postId);
 
     @Query(value = "SELECT p.post_id, p.title, pi.view, pi.comment_reply, pi.like, p.created_at\n" +
             "FROM afk.users_favorite_posts ufp\n" +
