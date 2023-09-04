@@ -27,7 +27,7 @@ import java.util.Map;
 public class PostImageService {
     private static final Logger logger = LoggerFactory.getLogger(PostImageService.class);
     private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
-    private static final String POST_IMAGE_URL = "//31.220.21.110:81/IMAGE/POST/";
+    private static final String POST_IMAGE_URL = "http://31.220.21.110:81/IMAGE/POST/";
     private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
     @Autowired
     private PostImageRepository postImageRepository;
