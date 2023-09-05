@@ -10,6 +10,8 @@ import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Posts.PostUserMapService;
 import com.example.demo.Service.Redis.RedisEmailService;
+import com.example.demo.Service.Redis.RedisMessageService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -38,6 +40,7 @@ import java.util.List;
 @RequestMapping("/user-info")
 public class UsersInfoController {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoController.class);
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private UserRegistrationService userRegistrationService;
     @Autowired
@@ -58,6 +61,10 @@ public class UsersInfoController {
     private ProcessEmailService processEmailService;
     @Autowired
     private PostUserMapService postUserMapService;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private RedisMessageService redisMessageService;
 
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) {
@@ -174,10 +181,12 @@ public class UsersInfoController {
         if (userId == null) {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
-            //redisService.CacheExists(MESSAGE_MENTION_KEY+userId)
-            List<MessageVO> messageVOList = messageService.GetUnreadMessageViaMessageUserMap(userId);
-            apiResponse = ApiResponse.success(messageVOList);
-
+            if(redisService.CacheExists(MESSAGE_MENTION_KEY+userId)){
+                List<MessageVO> messageVOList = redisMessageService.GetUnreadMessage(userId);
+                apiResponse = ApiResponse.success(messageVOList);
+            } else {
+                apiResponse = ApiResponse.success(Collections.emptyList());
+            }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
@@ -201,7 +210,7 @@ public class UsersInfoController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            List<MessageVO> messageVOList = messageService.GetMessagesByUserId(userId);
+            List<MessageVO> messageVOList = messageService.GetMessageHistoryByUserId(userId);
             apiResponse = ApiResponse.success(messageVOList);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

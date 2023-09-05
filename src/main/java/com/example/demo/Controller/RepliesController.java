@@ -4,7 +4,6 @@ import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.VO.ReplySavedVO;
 import com.example.demo.Service.IP.IpService;
-import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
@@ -16,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -37,8 +39,6 @@ public class RepliesController {
     private RedisMessageService redisMessageService;
     @Autowired
     private RedisService redisService;
-    @Autowired
-    private MessageService messageService;
 
 
     @PostMapping("/edit-reply")
@@ -67,15 +67,14 @@ public class RepliesController {
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
+            commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
             ReplySavedVO replySavedVO = replyService.SetReply(commentReplyDTO);
-            //Set mention message after saved reply if the user is not replying to himself
-            if (replySavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
-                messageService.SetMessage(commentReplyDTO);
-                redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
+            if (replySavedVO != null) {
+                apiResponse = ApiResponse.success(replySavedVO);
+
             } else {
-               //
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to save reply");
             }
-            apiResponse = ApiResponse.success(replySavedVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

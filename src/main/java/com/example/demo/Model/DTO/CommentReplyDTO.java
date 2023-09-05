@@ -30,6 +30,7 @@ public class CommentReplyDTO implements Serializable {
     @Length(max = 4095, message = "Text length not eligible")
     private String content;
     private Long fromUid;
+    private String fromUsername;
     @NotNull(message = "ToUid is required")
     @ValidUserId
     private Long toUid;

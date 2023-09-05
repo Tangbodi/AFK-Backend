@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -54,6 +55,6 @@ public class RedisNewsService {
                 logger.info("Closing the jedis connection:::");
             jedis.close();
         }
-        return null;
+        return Collections.emptyList();
     }
 }

@@ -26,6 +26,8 @@ public class ActiveMQConfig {
         return new ActiveMQQueue("reply-count-redis");
     }
     @Bean
+    public Queue MessageMentionQueue() {return new ActiveMQQueue("message-mention-redis");}
+    @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configure.configure(factory, connectionFactory);

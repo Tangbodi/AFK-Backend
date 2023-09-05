@@ -5,6 +5,7 @@ import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.VO.CommentSavedVO;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Redis.RedisMessageService;
@@ -39,7 +40,8 @@ public class CommentsController {
     private MessageService messageService;
     @Autowired
     private RedisMessageService redisMessageService;
-
+    @Autowired
+    private MQSender mqSender;
     @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         logger.info("EditComment");
@@ -68,15 +70,14 @@ public class CommentsController {
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
+            commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
             CommentSavedVO commentSavedVO = commentService.SetComment(commentReplyDTO);
             //Set mention message after saved comment if the user is not the author of the post
-            if (commentSavedVO != null && !commentReplyDTO.getToUid().equals(commentReplyDTO.getFromUid())) {
-                messageService.SetMessage(commentReplyDTO);
-                redisMessageService.SetUserReadStatus(commentReplyDTO.getToUid());
+            if (commentSavedVO != null) {
+                apiResponse = ApiResponse.success(commentSavedVO);
             } else {
-                //
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to save comment");
             }
-            apiResponse = ApiResponse.success(commentSavedVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

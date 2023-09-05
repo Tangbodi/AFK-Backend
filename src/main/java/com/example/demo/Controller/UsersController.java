@@ -110,9 +110,9 @@ public class UsersController {
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoVO userInfoVO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
-
                 logger.info("Set session attribute: {}" + "userId, " + userInfoVO.getLongUid());
                 session.setAttribute("userId", userInfoVO.getLongUid());
+                session.setAttribute("username", userInfoVO.getUsername());
                 userInfoVO.setJSESSIONID(session.getId());
                 logger.info("JSESSIONID: {}" + session.getId());
                 logger.info("User logged in successfully : {}");

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -53,7 +54,7 @@ public class RedisGameIconService {
                 jedis.close();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
     public boolean CheckAllGameIconsCache(){
         logger.info("Checking all game icons cache: {}");

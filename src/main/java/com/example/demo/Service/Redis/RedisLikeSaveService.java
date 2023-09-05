@@ -98,7 +98,7 @@ public class RedisLikeSaveService {
                 jedis.close();
             }
         }
-        return null;
+        return 0L;
     }
     public void RemoveHashSet(String key, Object value){
         logger.info("Removing hash set: {}",key,":::",value);

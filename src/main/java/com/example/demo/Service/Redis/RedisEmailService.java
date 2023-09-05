@@ -91,7 +91,7 @@ public class RedisEmailService {
                 jedis.close();
             }
         }
-        return null;
+        return "";
     }
 
     public void DeleteEmailValidationCacheByToken(String token) {

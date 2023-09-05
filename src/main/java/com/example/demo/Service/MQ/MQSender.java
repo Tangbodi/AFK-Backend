@@ -2,6 +2,7 @@ package com.example.demo.Service.MQ;
 
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.VO.MessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ public class MQSender {
     private Queue LikeSaveQueue;
     @Autowired
     private Queue CommentCountQueue;
+    @Autowired
+    private Queue MessageMentionQueue;
     @Autowired
     private Queue ReplyCountQueue;
     @Async("MultiExecutor")
@@ -53,4 +56,10 @@ public class MQSender {
                 "postId: " + commentReplyDTO.getPostId());
     }
 
+    @Async("MultiExecutor")
+    public void SendMentionMessage(MessageVO messageVO) throws JMSException {
+        String queueName = MessageMentionQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, messageVO);
+        logger.info("Message sent, User: " + messageVO.getToUid());
+    }
 }

@@ -5,11 +5,17 @@ import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.StatusEnum;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
+import com.example.demo.Service.Redis.RedisMessageService;
+import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
+
+import java.util.List;
 
 @Component
 public class RedisStrategy {
@@ -17,6 +23,8 @@ public class RedisStrategy {
 
     @Autowired
     protected RedisLikeSaveService redisLikeSaveService;
+    @Autowired
+    private RedisMessageService redisMessageService;
 
     public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
         logger.info("Start LikeSaveStrategy");
@@ -47,7 +55,7 @@ public class RedisStrategy {
         } else {
             //if status is 0, remove from hash set
             redisLikeSaveService.DeleteMember(key, hashKey);
-            if (redisLikeSaveService.NumOfMembers(key) == 0) {
+            if (redisLikeSaveService.NumOfMembers(key) == 0L) {
                 redisLikeSaveService.RemoveHashSet(typeName, objectId);
             } else {
                 //
@@ -85,5 +93,9 @@ public class RedisStrategy {
         }
         //postId -> replyId -> fromUid
         redisLikeSaveService.AddHashSet(key, hashKey, value);
+    }
+    public void MessageMentionStrategy(MessageVO messageVO){
+        logger.info("Start MessageMentionStrategy");
+        redisMessageService.SetUnreadMessage(messageVO);
     }
 }

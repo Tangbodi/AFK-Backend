@@ -2,6 +2,7 @@ package com.example.demo.Service.MQ;
 
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Util.RedisStrategy;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.slf4j.Logger;
@@ -76,6 +77,26 @@ public class MQReceiver {
                         commentReplyDTO.getFromUid(), commentReplyDTO.getPostId());
             } catch (Exception e) {
                 logger.error("Error processing message for User: " + commentReplyDTO.getFromUid(), e);
+                // Optionally, throw a custom exception or take other appropriate action
+            }
+        } catch (JMSException e) {
+            logger.error("JMS Exception while processing message: " + e.getMessage(), e);
+            // Optionally, throw a custom exception or take other appropriate action
+        } catch (Exception e) {
+            logger.error("Unhandled Exception while processing message: " + e.getMessage(), e);
+            // Optionally, throw a custom exception or take other appropriate action
+        }
+    }
+    @JmsListener(destination = "message-mention-redis", containerFactory = "activeMQFactory")
+    public void MessageMentionHandle(Message message){
+        try {
+            ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
+            MessageVO messageVO = (MessageVO) activeMqObjectMessage.getObject();
+            try {
+                redisStrategy.MessageMentionStrategy(messageVO);
+                logger.info("Message-mention consumer record: User: {}", messageVO.getToUid());
+            } catch (Exception e) {
+                logger.error("Error processing message for User: " + messageVO.getToUid(), e);
                 // Optionally, throw a custom exception or take other appropriate action
             }
         } catch (JMSException e) {

@@ -6,6 +6,7 @@ import com.example.demo.Mapper.Repository.MessageUserMapRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.MessagesUsersMap;
 import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +34,25 @@ public class MessageService {
     public Message SetMessage(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting message");
         Message message = new Message();
+        MessageVO messageVO = new MessageVO();
         try {
             if(commentReplyDTO.getReplyId() != null) {
                 message.setCommentReplyId(commentReplyDTO.getReplyId());
+                //set message mention id
+                messageVO.setCommentReplyId(commentReplyDTO.getReplyId().toString());
             } else {
                 message.setCommentReplyId(commentReplyDTO.getCommentId());
+                //set message mention id
+                messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
             }
+            //set message
             message.setContent(commentReplyDTO.getContent());
             message.setFromUid(commentReplyDTO.getFromUid());
             message.setToUid(commentReplyDTO.getToUid());
             message.setCreatedAt(commentReplyDTO.getCreatedAt());
             message.setModifiedAt(commentReplyDTO.getCreatedAt());
             Message savedMessage = messageRepository.save(message);
+            //set message user map
             SetMessageUserMap(savedMessage);
         } catch (Exception e) {
             logger.error("Failed to set reply mention", e.getMessage(),e);
@@ -61,37 +69,9 @@ public class MessageService {
             messagesUsersMap.setMentionedUid(savedMessage.getToUid());
             messagesUsersMap.setReadStatus(false);
             messageUserMapRepository.save(messagesUsersMap);
-            redisMessageService.SetUserReadStatus(savedMessage.getToUid());
         } catch (Exception e) {
             logger.error("Failed to set message user map", e.getMessage(),e);
         }
-    }
-
-    public List<MessageVO> GetUnreadMessageViaMessageUserMap(Long userId) {
-        logger.info("Getting unread message");
-        List<Map<Short, Object>> messagesUsersMapList;
-        try {
-            messagesUsersMapList = messageUserMapRepository.findUnreadMessages(userId);
-            logger.info("Unread message list size: " + messagesUsersMapList.size());
-            if (!messagesUsersMapList.isEmpty()) {
-                redisMessageService.SetUserReadStatus(userId);
-                List<MessageVO> messageVOList = new ArrayList<>();
-                for (Map<Short, Object> map : messagesUsersMapList) {
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
-                    messageVO.setFromUid(map.get("from_uid").toString());
-                    messageVO.setFromUsername((String) map.get("from_username"));
-                    messageVO.setContent((String) map.get("content"));
-                    Timestamp timestamp = (Timestamp) map.get("created_at");
-                    messageVO.setCreatedAt(timestamp.toInstant());
-                    messageVOList.add(messageVO);
-                }
-                return messageVOList;
-            }
-        } catch (Exception e) {
-            logger.error("Failed to get unread message", e.getMessage(),e);
-        }
-        return Collections.emptyList();
     }
 
     @Transactional
@@ -106,19 +86,21 @@ public class MessageService {
                             messagesUsersMap.setReadStatus(true);
                             messageUserMapRepository.save(messagesUsersMap);
                         });
+            } else {
+                //
             }
-            redisMessageService.DeleteUserReadStatus(userId);
+            redisMessageService.DeleteUnreadMessage(userId);
         } catch (Exception e) {
             logger.error("Failed to update read status", e.getMessage(),e);
             throw new RuntimeException("Failed to update read status " + e);
         }
     }
-    public List<MessageVO> GetMessagesByUserId(Long userId){
+    public List<MessageVO> GetMessageHistoryByUserId(Long userId){
         logger.info("Getting messages by user id");
         try {
-            List<Map<Short, Object>> messagesList = messageRepository.findMessagesByToUId(userId);
+            List<Map<Short, Object>> messagesList = messageRepository.getMessageHistoryByUserId(userId);
             if(!messagesList.isEmpty()){
-                logger.info("Found messages by user id: {}");
+                logger.info("Found messages by user id: {}"+userId);
                 return TransferToNotificationVO(messagesList);
             } else {
                 logger.info("No messages found by user id: {}",userId);
@@ -138,8 +120,9 @@ public class MessageService {
               messageVO.setContent((String) map.get("content"));
               messageVO.setFromUid(map.get("from_uid").toString());
               messageVO.setFromUsername((String) map.get("from_username"));
+              messageVO.setToUid(map.get("to_uid").toString());
               Timestamp timestamp = (Timestamp) map.get("created_at");
-              messageVO.setCreatedAt(timestamp.toInstant());
+              messageVO.setCreatedAt(timestamp.toInstant().toString());
               messageVOList.add(messageVO);
        }
         return messageVOList;

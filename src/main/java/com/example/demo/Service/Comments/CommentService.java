@@ -2,13 +2,11 @@ package com.example.demo.Service.Comments;
 
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostComment;
-import com.example.demo.Model.VO.CommentSavedVO;
-import com.example.demo.Model.VO.NewestCommentVO;
-import com.example.demo.Model.VO.ShowCommentVO;
-import com.example.demo.Model.VO.ShowReplyVO;
+import com.example.demo.Model.VO.*;
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
+import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.Snowflake;
@@ -38,7 +36,8 @@ public class CommentService {
     private PostInfoService postInfoService;
     @Autowired
     private MQSender mqSender;
-
+    @Autowired
+    private MessageService messageService;
     @Transactional
     public CommentSavedVO SetComment(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting comment: {}");
@@ -58,9 +57,25 @@ public class CommentService {
                 logger.info("Comment saved successfully: {}", savedComment);
                 //set comment reply ip address
                 ipAddressService.SetCommentIpAddress(commentReplyDTO);
-                //send message to ActiveMQ
+                //send comment count message to ActiveMQ
                 mqSender.SendCommentCountMessage(commentReplyDTO);
-//                postInfoService.UpdatePostCommentReplyCount(commentReplyDTO.getPostId());
+                if(!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())){
+                    logger.info("FromUid is not equal to ToUid");
+                    //set message mention
+                    MessageVO messageVO = new MessageVO();
+                    messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
+                    messageVO.setContent(commentReplyDTO.getContent());
+                    messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
+                    messageVO.setFromUsername(commentReplyDTO.getFromUsername());
+                    messageVO.setToUid(commentReplyDTO.getToUid().toString());
+                    messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
+                    //send message mention to MQ
+                    mqSender.SendMentionMessage(messageVO);
+                    //set message
+                    messageService.SetMessage(commentReplyDTO);
+                } else {
+                    logger.info("FromUid is equal to ToUid");
+                }
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Comment not saved: {}");
