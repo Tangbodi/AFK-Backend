@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,10 +78,12 @@ public class MessageService {
                 List<MessageVO> messageVOList = new ArrayList<>();
                 for (Map<Short, Object> map : messagesUsersMapList) {
                     MessageVO messageVO = new MessageVO();
-                    messageVO.setCrId(map.get("reply_id").toString());
+                    messageVO.setCommentReplyId(map.get("reply_id").toString());
                     messageVO.setFromUid(map.get("user_id").toString());
                     messageVO.setFromUsername((String) map.get("username"));
                     messageVO.setContent((String) map.get("content"));
+                    Timestamp timestamp = (Timestamp) map.get("created_at");
+                    messageVO.setCreatedAt(timestamp.toInstant());
                     messageVOList.add(messageVO);
                 }
                 return messageVOList;
@@ -109,5 +112,36 @@ public class MessageService {
             logger.error("Failed to update read status", e.getMessage(),e);
             throw new RuntimeException("Failed to update read status " + e);
         }
+    }
+    public List<MessageVO> GetMessagesByUserId(Long userId){
+        logger.info("Getting messages by user id");
+        try {
+            List<Map<Short, Object>> messagesList = messageRepository.findMessagesByToUId(userId);
+            if(!messagesList.isEmpty()){
+                logger.info("Found messages by user id: {}");
+                return TransferToNotificationVO(messagesList);
+            } else {
+                logger.info("No messages found by user id: {}",userId);
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get messages by user id", e.getMessage(),e);
+        }
+        return Collections.emptyList();
+    }
+    private List<MessageVO> TransferToNotificationVO(List<Map<Short, Object>> messagesList){
+        logger.info("Transferring messages to VO");
+        List<MessageVO> messageVOList = new ArrayList<>();
+       for(Map<Short, Object> map : messagesList){
+              MessageVO messageVO = new MessageVO();
+              messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
+              messageVO.setContent((String) map.get("content"));
+              messageVO.setFromUid(map.get("from_uid").toString());
+              messageVO.setFromUsername((String) map.get("from_username"));
+              Timestamp timestamp = (Timestamp) map.get("created_at");
+              messageVO.setCreatedAt(timestamp.toInstant());
+              messageVOList.add(messageVO);
+       }
+        return messageVOList;
     }
 }

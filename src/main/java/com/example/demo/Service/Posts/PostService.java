@@ -131,6 +131,7 @@ public class PostService {
             for (Map<String, Object> post : posts) {
                 showPostBodyVO.setPostId(post.get("post_id").toString());
                 logger.info("Post ID: {}", post.get("post_id"));
+                showPostBodyVO.setGameName(post.get("game_name").toString());
                 showPostBodyVO.setUserId(post.get("user_id").toString());
                 logger.info("User ID: {}", post.get("user_id"));
                 showPostBodyVO.setUserName((String) post.get("username"));

@@ -194,4 +194,17 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+    @GetMapping("/notification")
+    public ResponseEntity GetNotification(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        ApiResponse apiResponse;
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else {
+            List<MessageVO> messageVOList = messageService.GetMessagesByUserId(userId);
+            apiResponse = ApiResponse.success(messageVOList);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+
+    }
 }

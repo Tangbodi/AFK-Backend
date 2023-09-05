@@ -20,4 +20,5 @@ public interface MessageUserMapRepository extends JpaRepository<MessagesUsersMap
 
     @Query(value = "SELECT * FROM afk.messages_users_map WHERE mentioned_uid = :mentionedUid AND read_status = '0'", nativeQuery = true)
     List<MessagesUsersMap> findUnreadMessagesByMentionedUid(@Param("mentionedUid") Long mentionedUid);
+
 }
