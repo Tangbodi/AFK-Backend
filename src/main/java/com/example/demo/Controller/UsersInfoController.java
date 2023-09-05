@@ -199,7 +199,7 @@ public class UsersInfoController {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to see unread messages");
         } else {
             messageService.UpdateMessageUserMap(userId);
-            apiResponse = ApiResponse.success(null);
+            apiResponse = ApiResponse.success("All messages have been marked as read");
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
