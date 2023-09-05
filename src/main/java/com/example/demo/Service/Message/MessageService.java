@@ -78,9 +78,9 @@ public class MessageService {
                 List<MessageVO> messageVOList = new ArrayList<>();
                 for (Map<Short, Object> map : messagesUsersMapList) {
                     MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(map.get("reply_id").toString());
-                    messageVO.setFromUid(map.get("user_id").toString());
-                    messageVO.setFromUsername((String) map.get("username"));
+                    messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
+                    messageVO.setFromUid(map.get("from_uid").toString());
+                    messageVO.setFromUsername((String) map.get("from_username"));
                     messageVO.setContent((String) map.get("content"));
                     Timestamp timestamp = (Timestamp) map.get("created_at");
                     messageVO.setCreatedAt(timestamp.toInstant());
@@ -129,7 +129,7 @@ public class MessageService {
         }
         return Collections.emptyList();
     }
-    private List<MessageVO> TransferToNotificationVO(List<Map<Short, Object>> messagesList){
+    private static List<MessageVO> TransferToNotificationVO(List<Map<Short, Object>> messagesList){
         logger.info("Transferring messages to VO");
         List<MessageVO> messageVOList = new ArrayList<>();
        for(Map<Short, Object> map : messagesList){
