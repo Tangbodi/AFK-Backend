@@ -33,49 +33,6 @@ public class RedisEmailService {
         }
     }
 
-//    public void SetUpdateEmailCache(String userId, String newEmail) {
-//        logger.info("Setting update email cache: {}" + newEmail);
-//        Jedis jedis = null;
-//        try {
-//            jedis = jedisPool.getResource();
-//            jedis.set(EMAIL_UPDATE + userId, newEmail);
-//            jedis.expire(EMAIL_UPDATE + userId, 180);
-//            logger.info("Redis cache for email update set up successfully: {}" + newEmail);
-//
-//        } catch (Exception e) {
-//            logger.error("Failed to set up redis cache for email update: {}", e.getMessage(), e);
-//        } finally {
-//            if (null != jedis) {
-//                logger.info("Closing the jedis connection:::");
-//                jedis.close();
-//            }
-//        }
-//    }
-
-    public boolean CheckEmailValidationCacheByToken(String token) {
-        logger.info("Checking email validation cache by token: {}" + token);
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            if (jedis.exists(EMAIL_VALIDATION + token)) {
-                logger.info("Update email cache exists: {}" + token);
-                return true;
-            } else {
-                logger.info("Update email cache doesn't exist: {}" + token);
-                return false;
-            }
-        } catch (Exception e) {
-            logger.error("Failed to check update email cache: {}", e.getMessage(), e);
-        } finally {
-            if (null != jedis) {
-                logger.info("Closing the jedis connection:::");
-                jedis.close();
-            }
-        }
-        return false;
-    }
-
-
     public String GetEmailByToken(String token) {
         logger.info("Getting email by token: {}" + token);
         Jedis jedis = null;

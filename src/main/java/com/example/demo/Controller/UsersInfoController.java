@@ -4,6 +4,7 @@ import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.DTO.UserEmailDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
+import com.example.demo.Model.DTO.UserPasswordDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
@@ -41,6 +42,7 @@ import java.util.List;
 public class UsersInfoController {
     private static final Logger logger = LoggerFactory.getLogger(UsersInfoController.class);
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
+    private static final String EMAIL_VALIDATION = "EMAIL_VALIDATION:";
     @Autowired
     private UserRegistrationService userRegistrationService;
     @Autowired
@@ -80,10 +82,32 @@ public class UsersInfoController {
 
     }
 
+    @PutMapping("/update-password")
+    public ResponseEntity UpdateUserPassword(@Validated @RequestBody UserPasswordDTO userPasswordDTO, HttpSession session) {
+        ApiResponse apiResponse;
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else {
+            if (!userPasswordDTO.getNewPassword().equals(userPasswordDTO.getConfirmPassword())) {
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "New password and confirm password are not the same");
+                return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+            } else {
+                userPasswordDTO.setUserId(userId);
+                if (userInfoService.UpdateUserPassword(userPasswordDTO)) {
+                    apiResponse = ApiResponse.success("Password has been updated");
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to update password");
+                }
+            }
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
     @PutMapping("/update-email")
     public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
         ApiResponse apiResponse;
-        String userId = (String) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -92,9 +116,9 @@ public class UsersInfoController {
             if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email already exists");
             } else {
-                if (!redisEmailService.CheckEmailValidationCacheByToken(userId)) {
-                    processEmailService.ProcessUpdateEmailValidation(request, userId, encodedEmail);
-                    redisEmailService.SetEmailValidationCacheByToken(userId, encodedEmail);
+                if (!redisService.CacheExists(EMAIL_VALIDATION + userId.toString())) {
+                    processEmailService.ProcessUpdateEmailValidation(request, userId.toString(), encodedEmail);
+                    redisEmailService.SetEmailValidationCacheByToken(userId.toString(), encodedEmail);
                 } else {
                     //
                 }
@@ -181,7 +205,7 @@ public class UsersInfoController {
         if (userId == null) {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
-            if(redisService.CacheExists(MESSAGE_MENTION_KEY+userId)){
+            if (redisService.CacheExists(MESSAGE_MENTION_KEY + userId)) {
                 List<MessageVO> messageVOList = redisMessageService.GetUnreadMessage(userId);
                 apiResponse = ApiResponse.success(messageVOList);
             } else {
@@ -203,6 +227,7 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @GetMapping("/notification")
     public ResponseEntity GetNotification(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");

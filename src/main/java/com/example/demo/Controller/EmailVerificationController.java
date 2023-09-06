@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Service.Redis.RedisEmailService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
@@ -20,6 +21,7 @@ import java.io.IOException;
 @Controller
 public class EmailVerificationController {
     private static final Logger logger = LoggerFactory.getLogger(EmailVerificationController.class);
+    private static final String EMAIL_VALIDATION = "EMAIL_VALIDATION:";
     @Autowired
     private UserVerificationService userVerificationService;
     @Autowired
@@ -28,13 +30,15 @@ public class EmailVerificationController {
     private UserInfoService userInfoService;
     @Autowired
     private RedisUsernameService redisUsernameService;
+    @Autowired
+    private RedisService redisService;
     @GetMapping("/user/registration/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailValidationCacheByToken(token)){
+        if(redisService.CacheExists(EMAIL_VALIDATION + token)){
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
@@ -58,7 +62,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailValidationCacheByToken(token)){
+        if(redisService.CacheExists(EMAIL_VALIDATION + token)){
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
             redisUsernameService.DeleteEmailValidationCacheByUsername(username);
@@ -74,19 +78,19 @@ public class EmailVerificationController {
             response.sendRedirect(redirectURL);
         }
     }
-    @GetMapping("/user-info/username/update-email/email-validation")
+    @GetMapping("/user-info/update-email/email-validation")
     public void ShowEmailValidationPageViaUpdateEmailLink(HttpServletRequest request,@RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
-        if(redisEmailService.CheckEmailValidationCacheByToken(token)) {
+        if(redisService.CacheExists(EMAIL_VALIDATION + token)) {
             String newEmail = redisEmailService.GetEmailByToken(token);
             //the token is userId
             userVerificationService.UpdateUserEmail(token,newEmail);
             userInfoService.UpdateUserEmail(token,newEmail);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
-            redisUsernameService.DeleteEmailValidationCacheByUsername(token);
+//            redisUsernameService.DeleteEmailValidationCacheByUsername(token);
             redirectURL = "https://www.nybing.com/email-verified";
         }else{
             redirectURL = "https://www.nybing.com/link-expired";

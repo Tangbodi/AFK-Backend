@@ -1,12 +1,16 @@
 package com.example.demo.Service.UsersInfo;
 
 import com.example.demo.Mapper.Repository.UserInfoRepository;
+import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserInfoDTO;
+import com.example.demo.Model.DTO.UserPasswordDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,8 @@ public class UserInfoService {
     @Lazy
     @Autowired
     private UserVerificationService userVerificationService;
+    @Autowired
+    private UserRepository userRepository;
 
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
@@ -38,7 +44,7 @@ public class UserInfoService {
                 logger.info("Username does not exist: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to check username: {}", e.getMessage(),e);
+            logger.error("Failed to check username: {}", e.getMessage(), e);
         }
         return null;
     }
@@ -54,7 +60,7 @@ public class UserInfoService {
                 logger.info("Email does not exist: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to check email: {}", e.getMessage(),e);
+            logger.error("Failed to check email: {}", e.getMessage(), e);
         }
         return null;
     }
@@ -71,7 +77,7 @@ public class UserInfoService {
             usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
             userInfoRepository.save(usersInfo);
         } catch (Exception e) {
-            logger.error("Failed to set UsersInfo: {}", e.getMessage(),e);
+            logger.error("Failed to set UsersInfo: {}", e.getMessage(), e);
         }
     }
 
@@ -90,14 +96,15 @@ public class UserInfoService {
                 userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
                 return TransferToVO(userInfoDTO);
             } else {
-                logger.info("UserInfo does not exist: {}" );
+                logger.info("UserInfo does not exist: {}");
             }
 
         } catch (Exception e) {
-            logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(), e);
         }
         return null;
     }
+
     public UserInfoVO GetUserInfoByUserId(Long userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
@@ -113,15 +120,16 @@ public class UserInfoService {
                 userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
                 return TransferToVO(userInfoDTO);
             } else {
-                logger.info("UserInfo does not exist: {}" );
+                logger.info("UserInfo does not exist: {}");
             }
 
         } catch (Exception e) {
-            logger.error("Failed to get UsersInfo: {}", e.getMessage(),e);
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(), e);
         }
         return null;
     }
-    public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO){
+
+    public UserInfoVO TransferToVO(UserInfoDTO userInfoDTO) {
         UserInfoVO userInfoVO = new UserInfoVO();
         userInfoVO.setLongUid(userInfoDTO.getUserId());
         userInfoVO.setUserId(userInfoDTO.getUserId().toString());
@@ -132,16 +140,6 @@ public class UserInfoService {
         userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
         return userInfoVO;
     }
-
-//    public void CreateRedisCacheForUpdateEmail(String newEmail, String userId, HttpServletRequest request) {
-//        logger.info("Creating redis cache for update email: {}" + newEmail);
-//        try {
-//            String token = redisEmailService.SetUpdateEmailCache(newEmail);
-//            userVerificationService.UpdateTokenForUpdateEmail(token, userId, request);
-//        } catch (Exception e) {
-//            logger.error("Failed to create redis cache for update email: {}", e.getMessage(),e);
-//        }
-//    }
 
     @Transactional
     public boolean UpdateUserEmail(String userId, String newEmail) {
@@ -162,7 +160,30 @@ public class UserInfoService {
                 logger.info("Failed to update email: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to update UsersInfo: {}", e.getMessage(),e);
+            logger.error("Failed to update UsersInfo: {}", e.getMessage(), e);
+        }
+        return false;
+    }
+    @Transactional
+    public boolean UpdateUserPassword(UserPasswordDTO userPasswordDTO) {
+        logger.info("Updating password: {}");
+        try {
+            User user = userRepository.findById(userPasswordDTO.getUserId()).orElse(null);
+            logger.info("Found user: {}" + user.getUsername());
+            String oldPassword = user.getPassword();
+            if (BCrypt.checkpw(userPasswordDTO.getOldPassword(), oldPassword)) {
+                logger.info("Old password is correct: {}" + userPasswordDTO.getOldPassword());
+                String newPassword = BCrypt.hashpw(userPasswordDTO.getNewPassword(), BCrypt.gensalt());
+                user.setPassword(newPassword);
+                userRepository.save(user);
+                logger.info("Updated password successfully: {}");
+                return true;
+            } else {
+                logger.info("Old password is incorrect: {}" + userPasswordDTO.getOldPassword());
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update password: {}", e.getMessage(), e);
         }
         return false;
     }

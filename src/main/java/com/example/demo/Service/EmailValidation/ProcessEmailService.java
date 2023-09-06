@@ -56,7 +56,7 @@ public class ProcessEmailService {
             String recipientEmail = email;
             String siteURL = request.getRequestURL().toString();
             siteURL.replace(request.getServletPath(), "");
-            String emailValidationLink = siteURL + "/email-validation?token=" + token + "/username=" + username;
+            String emailValidationLink = siteURL + "/email-validation?token=" + token + "&username=" + username;
             logger.info("emailValidationLink:::" + emailValidationLink);
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
             redisUsernameService.SetUserEmailValidationCache(username);
