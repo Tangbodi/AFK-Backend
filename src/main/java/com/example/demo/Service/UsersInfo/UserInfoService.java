@@ -3,7 +3,7 @@ package com.example.demo.Service.UsersInfo;
 import com.example.demo.Mapper.Repository.UserInfoRepository;
 import com.example.demo.Mapper.Repository.UserRepository;
 import com.example.demo.Model.DTO.UserInfoDTO;
-import com.example.demo.Model.DTO.UserPasswordDTO;
+import com.example.demo.Model.DTO.UpdatePasswordDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
@@ -42,6 +42,7 @@ public class UserInfoService {
                 return usersInfo;
             } else {
                 logger.info("Username does not exist: {}");
+                return null;
             }
         } catch (Exception e) {
             logger.error("Failed to check username: {}", e.getMessage(), e);
@@ -58,13 +59,37 @@ public class UserInfoService {
                 return usersInfo;
             } else {
                 logger.info("Email does not exist: {}");
+                return null;
             }
         } catch (Exception e) {
             logger.error("Failed to check email: {}", e.getMessage(), e);
         }
         return null;
     }
+    public UsersInfo GetUserInfoByEmail(String email) {
+        logger.info("Getting UsersInfo: {}" + email);
+        try {
+            UsersInfo usersInfo = userInfoRepository.findByEmail(email).orElse(null);
+            if (usersInfo != null) {
+                logger.info("UsersInfo: {}" + usersInfo.getUsername());
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                userInfoDTO.setUserId(usersInfo.getId());
+                userInfoDTO.setUsername(usersInfo.getUsername());
+                userInfoDTO.setEmail(usersInfo.getEmail());
+                userInfoDTO.setAvatarUrl(usersInfo.getAvatarUrl());
+                userInfoDTO.setCreatedAt(usersInfo.getCreatedAt());
+                userInfoDTO.setModifiedAt(usersInfo.getModifiedAt());
+                return usersInfo;
+            } else {
+                logger.info("UserInfo does not exist: {}");
+                return null;
+            }
 
+        } catch (Exception e) {
+            logger.error("Failed to get UsersInfo: {}", e.getMessage(), e);
+        }
+        return null;
+    }
     @Transactional
     public void SetUserInfo(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting up UsersInfo: {}");
@@ -97,6 +122,7 @@ public class UserInfoService {
                 return TransferToVO(userInfoDTO);
             } else {
                 logger.info("UserInfo does not exist: {}");
+                return null;
             }
 
         } catch (Exception e) {
@@ -121,6 +147,7 @@ public class UserInfoService {
                 return TransferToVO(userInfoDTO);
             } else {
                 logger.info("UserInfo does not exist: {}");
+                return null;
             }
 
         } catch (Exception e) {
@@ -158,6 +185,7 @@ public class UserInfoService {
                 return true;
             } else {
                 logger.info("Failed to update email: {}");
+                return false;
             }
         } catch (Exception e) {
             logger.error("Failed to update UsersInfo: {}", e.getMessage(), e);
@@ -165,25 +193,40 @@ public class UserInfoService {
         return false;
     }
     @Transactional
-    public boolean UpdateUserPassword(UserPasswordDTO userPasswordDTO) {
+    public boolean UpdateUserPassword(UpdatePasswordDTO updatePasswordDTO) {
         logger.info("Updating password: {}");
         try {
-            User user = userRepository.findById(userPasswordDTO.getUserId()).orElse(null);
+            User user = userRepository.findById(updatePasswordDTO.getUserId()).orElse(null);
             logger.info("Found user: {}" + user.getUsername());
             String oldPassword = user.getPassword();
-            if (BCrypt.checkpw(userPasswordDTO.getOldPassword(), oldPassword)) {
-                logger.info("Old password is correct: {}" + userPasswordDTO.getOldPassword());
-                String newPassword = BCrypt.hashpw(userPasswordDTO.getNewPassword(), BCrypt.gensalt());
+            if (BCrypt.checkpw(updatePasswordDTO.getOldPassword(), oldPassword)) {
+                logger.info("Old password is correct: {}" + updatePasswordDTO.getOldPassword());
+                String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
                 user.setPassword(newPassword);
                 userRepository.save(user);
                 logger.info("Updated password successfully: {}");
                 return true;
             } else {
-                logger.info("Old password is incorrect: {}" + userPasswordDTO.getOldPassword());
+                logger.info("Old password is incorrect: {}" + updatePasswordDTO.getOldPassword());
                 return false;
             }
         } catch (Exception e) {
             logger.error("Failed to update password: {}", e.getMessage(), e);
+        }
+        return false;
+    }
+    @Transactional
+    public boolean ResetUserPassword(UpdatePasswordDTO updatePasswordDTO){
+        logger.info("Resetting password: {}");
+        try{
+            User user = userRepository.findById(updatePasswordDTO.getUserId()).orElse(null);
+            logger.info("Found user: {}" + user.getUsername());
+            String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
+            user.setPassword(newPassword);
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to reset password: {}", e.getMessage(), e);
         }
         return false;
     }

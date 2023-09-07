@@ -11,7 +11,7 @@ import redis.clients.jedis.JedisPool;
 public class RedisEmailService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUsernameService.class);
     private static final String EMAIL_VALIDATION = "EMAIL_VALIDATION:";
-    private static final String EMAIL_UPDATE = "EMAIL_UPDATE:";
+
     @Autowired
     private JedisPool jedisPool;
 
@@ -32,7 +32,22 @@ public class RedisEmailService {
             }
         }
     }
-
+    public void SetEmailValidationCache(String email) {
+        logger.info("Setting up email validation cache: {}");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.set(EMAIL_VALIDATION + email, "true");
+            jedis.expire(EMAIL_VALIDATION + email, 180);
+        } catch (Exception e) {
+            logger.error("Failed to set email validation cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
     public String GetEmailByToken(String token) {
         logger.info("Getting email by token: {}" + token);
         Jedis jedis = null;

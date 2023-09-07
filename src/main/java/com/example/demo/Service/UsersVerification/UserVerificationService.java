@@ -32,8 +32,6 @@ public class UserVerificationService {
     @Autowired
     private UserAuthService userAuthService;
 
-
-
     @Transactional
     public boolean SetUserRegistrationVerificationToken(String token, UserRegisterDTO userRegisterDTO) {
         logger.info("Setting UserRegistrationVerificationToken");
@@ -55,8 +53,6 @@ public class UserVerificationService {
             return false;
         }
     }
-
-
 
     @Transactional
     public void SetUserLoginVerificationToken(String username, HttpServletRequest request) {
@@ -81,8 +77,6 @@ public class UserVerificationService {
             logger.error("Failed to set token: {}", e.getMessage(), e);
         }
     }
-
-
 
     public void FindUserVerificationByToken(String token) {
         logger.info("Getting UsersVerificationToken: {}", token);
@@ -114,7 +108,6 @@ public class UserVerificationService {
 
         }
     }
-
 
     @Transactional
     public void UpdateUserEmail(String userId, String newEmail) {

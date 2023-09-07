@@ -56,22 +56,6 @@ public class RedisUsernameService {
         }
         return false;
     }
-    public void SetUserEmailValidationCache(String username) {
-        logger.info("Setting up user email validation cache: {}");
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            jedis.set(EMAIL_VALIDATION + username, "true");
-            jedis.expire(EMAIL_VALIDATION + username, 180);
-        } catch (Exception e) {
-            logger.error("Failed to set user email validation cache: {}", e.getMessage(), e);
-        } finally {
-            if (null != jedis) {
-                logger.info("Closing the jedis connection:::");
-                jedis.close();
-            }
-        }
-    }
     public boolean CheckEmailValidationCacheByUsername(String username) {
         logger.info("Checking user email validation cache: {}");
         Jedis jedis = null;

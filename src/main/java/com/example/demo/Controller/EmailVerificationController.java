@@ -1,5 +1,7 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Model.Entity.User;
+import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUsernameService;
@@ -32,6 +34,7 @@ public class EmailVerificationController {
     private RedisUsernameService redisUsernameService;
     @Autowired
     private RedisService redisService;
+
     @GetMapping("/user/registration/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
@@ -39,6 +42,7 @@ public class EmailVerificationController {
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
         if(redisService.CacheExists(EMAIL_VALIDATION + token)){
+            logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
             redirectURL = "https://www.nybing.com/email-verified";
@@ -63,6 +67,7 @@ public class EmailVerificationController {
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
         if(redisService.CacheExists(EMAIL_VALIDATION + token)){
+            logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
             redisUsernameService.DeleteEmailValidationCacheByUsername(username);
@@ -85,6 +90,7 @@ public class EmailVerificationController {
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
         if(redisService.CacheExists(EMAIL_VALIDATION + token)) {
+            logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             String newEmail = redisEmailService.GetEmailByToken(token);
             //the token is userId
             userVerificationService.UpdateUserEmail(token,newEmail);
@@ -103,5 +109,27 @@ public class EmailVerificationController {
             response.sendRedirect(redirectURL);
         }
     }
-
+    @GetMapping("/user-info/forgot-password/reset-password")
+    public void ShowEmailValidationPageViaResetPasswordLink(HttpServletRequest request,@RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
+        boolean isRedirected = true;
+        HttpSession session = request.getSession();
+        session.setAttribute("isRedirected",isRedirected);
+        String redirectURL;
+        if(redisService.CacheExists(EMAIL_VALIDATION + token)) {
+            logger.info("EMAIL_VALIDATION cache exists: {}" + token);
+            String email = redisEmailService.GetEmailByToken(token);
+            logger.info("email:::" + email);
+            UsersInfo usersInfo = userInfoService.GetUserInfoByEmail(email);
+            redirectURL = "https://www.nybing.com/reset-password?token=" + usersInfo.getId();
+        } else{
+            redirectURL = "https://www.nybing.com/link-expired";
+        }
+        isRedirected = (boolean) session.getAttribute("isRedirected");//true
+        if(isRedirected) {
+            isRedirected = false;
+            logger.info("isRedirected:::" + isRedirected);
+            session.setAttribute("isRedirected", isRedirected);//false
+            response.sendRedirect(redirectURL);
+        }
+    }
 }

@@ -2,9 +2,9 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.ObjectUserDTO;
+import com.example.demo.Model.DTO.UpdatePasswordDTO;
 import com.example.demo.Model.DTO.UserEmailDTO;
 import com.example.demo.Model.DTO.UserMailDTO;
-import com.example.demo.Model.DTO.UserPasswordDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
@@ -19,6 +19,7 @@ import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
+import com.example.demo.Util.UUIDCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,23 +84,58 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity UpdateUserPassword(@Validated @RequestBody UserPasswordDTO userPasswordDTO, HttpSession session) {
+    public ResponseEntity UpdateUserPassword(@Validated @RequestBody UpdatePasswordDTO updatePasswordDTO, HttpSession session) {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            if (!userPasswordDTO.getNewPassword().equals(userPasswordDTO.getConfirmPassword())) {
+            if (!updatePasswordDTO.getNewPassword().equals(updatePasswordDTO.getConfirmPassword())) {
                 apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "New password and confirm password are not the same");
                 return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
             } else {
-                userPasswordDTO.setUserId(userId);
-                if (userInfoService.UpdateUserPassword(userPasswordDTO)) {
+                updatePasswordDTO.setUserId(userId);
+                if (userInfoService.UpdateUserPassword(updatePasswordDTO)) {
                     apiResponse = ApiResponse.success("Password has been updated");
                 } else {
                     apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to update password");
                 }
             }
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity ResetUserPassword(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request) {
+        ApiResponse apiResponse;
+        String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
+        String token = UUIDCreator.CreateUUID();
+        String siteURL = request.getRequestURL().toString();
+        siteURL.replace(request.getServletPath(), "");
+        if (userInfoService.CheckEmailExists(encodedEmail) != null) {
+            logger.info("Email exists: {}", encodedEmail);
+            if(redisService.CacheExists(EMAIL_VALIDATION + encodedEmail)){
+                //set email validation for duplicate request
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Reset password link has been sent out, please check your email");
+            } else {
+                processEmailService.ProcessForgotPasswordEmailValidation(token, siteURL, encodedEmail);
+                redisEmailService.SetEmailValidationCache(encodedEmail);
+                apiResponse = ApiResponse.success("Reset password link has been sent out, please check your email");
+            }
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email doesn't exist");
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @PutMapping("/forgot-password/enter-password")
+    public ResponseEntity EnterNewPassword(@Validated @RequestBody UpdatePasswordDTO updatePasswordDTO, @RequestParam (value = "token") Long token) {
+        ApiResponse apiResponse;
+        updatePasswordDTO.setUserId(token);
+        if (userInfoService.ResetUserPassword(updatePasswordDTO)) {
+            apiResponse = ApiResponse.success("Password has been updated");
+        } else {
+            apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to update password");
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

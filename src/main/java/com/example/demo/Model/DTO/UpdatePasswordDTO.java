@@ -6,10 +6,9 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class UserPasswordDTO {
+public class UpdatePasswordDTO {
     private Long userId;
-    @NotBlank(message = "Old password is required")
-    @ValidPassword
+
     private String oldPassword;
     @NotBlank(message = "New password is required")
     @ValidPassword

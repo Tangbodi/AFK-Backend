@@ -59,7 +59,8 @@ public class ProcessEmailService {
             String emailValidationLink = siteURL + "/email-validation?token=" + token + "&username=" + username;
             logger.info("emailValidationLink:::" + emailValidationLink);
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
-            redisUsernameService.SetUserEmailValidationCache(username);
+            //set email validation cache for duplicate request
+            redisEmailService.SetEmailValidationCache(email);
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
         } catch (MessagingException | UnsupportedEncodingException | JedisConnectionException e) {
             logger.error("Failed to process login email validation: {}", e.getMessage(), e);
@@ -79,6 +80,17 @@ public class ProcessEmailService {
         } catch (MessagingException | UnsupportedEncodingException e) {
             logger.error("Failed to process update email validation: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to process update email validation " + e);
+        }
+    }
+    public void ProcessForgotPasswordEmailValidation(String token, String siteURL, String encodedEmail){
+        logger.info("Processing forgot password email validation: {}");
+        try{
+            String emailValidationLink = siteURL + "/reset-password?token=" + token;
+            redisEmailService.SetEmailValidationCacheByToken(token, encodedEmail);
+            sendEmailService.sendEmailValidationLink(encodedEmail, emailValidationLink);
+        }catch (Exception e){
+            logger.error("Failed to process forgot password email validation: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process forgot password email validation " + e);
         }
     }
 }
