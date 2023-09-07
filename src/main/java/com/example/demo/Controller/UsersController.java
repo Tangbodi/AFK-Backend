@@ -3,15 +3,15 @@ package com.example.demo.Controller;
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
-import com.example.demo.Model.Entity.User;
+import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
-import com.example.demo.Service.UsersResetPassword.UserResetPasswordService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -45,11 +45,11 @@ public class UsersController {
     @Autowired
     private UserVerificationService userVerificationService;
     @Autowired
-    private UserResetPasswordService userResetPasswordService;
-    @Autowired
     private RedisUsernameService redisUsernameService;
     @Autowired
     private UserLoginService userLoginService;
+    @Autowired
+    private MQSender mqSender;
 
     @PostMapping("/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) {
@@ -69,12 +69,16 @@ public class UsersController {
             // If all checks are passed, register user
             logger.info("User doesn't exist");
             try {
-                User user = userRegistrationService.RegisterUser(userRegisterDTO);
+                UsersLogin user = userRegistrationService.RegisterUser(userRegisterDTO);
                 logger.info("User registered successfully");
                 //Setup email validation
                 userRegisterDTO.setUserId(user.getId());
-                userRegisterDTO.setCreatedAt(user.getCreatedAt());
-                processEmailService.ProcessRegistrationEmailValidation(request, userRegisterDTO);
+                String siteURL = request.getRequestURL().toString();
+                siteURL.replace(request.getServletPath(), "");
+                userRegisterDTO.setSiteURL(siteURL);
+                //Send MQ
+                mqSender.SendUserRegistrationMessage(userRegisterDTO);
+//                processEmailService.ProcessRegistrationEmailValidation(siteURL, userRegisterDTO);
                 apiResponse = ApiResponse.success("User registered successfully and verification email has been sent out, please check your email");
             } catch (Exception e) {
                 apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());

@@ -83,5 +83,21 @@ public class RedisEmailService {
             }
         }
     }
-
+    public void DeleteEmailValidationCacheByEmail(String email) {
+        logger.info("Deleting email validation cache by email: {}" + email);
+        Jedis jedis = jedisPool.getResource();
+        try {
+            jedis = jedisPool.getResource();
+            jedis.del(EMAIL_VALIDATION + email); // Delete the token-email pair from Redis
+            logger.info("Email validation cache deleted by email: {}" + email);
+        } catch (Exception e) {
+            logger.error("Failed to delete email validation cache by email: {}", e.getMessage(), e);
+            // Handle exceptions
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
 }

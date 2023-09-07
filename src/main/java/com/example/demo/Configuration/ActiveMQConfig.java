@@ -28,6 +28,12 @@ public class ActiveMQConfig {
     @Bean
     public Queue MessageMentionQueue() {return new ActiveMQQueue("message-mention-redis");}
     @Bean
+    public Queue UserRegistrationQueue() {return new ActiveMQQueue("user-registration-redis");}
+    @Bean
+    public Queue UpdateEmailQueue() {return new ActiveMQQueue("update-email-redis");}
+    @Bean
+    public Queue ForgotPasswordQueue() {return new ActiveMQQueue("forgot-password-redis");}
+    @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configure.configure(factory, connectionFactory);

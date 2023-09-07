@@ -4,13 +4,11 @@ import com.example.demo.Annotation.ValidPassword;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 @Data
-public class UpdatePasswordDTO {
+public class ForgotPasswordDTO {
     private Long userId;
-    @NotBlank(message = "Old password is required")
-    @ValidPassword
-    private String oldPassword;
     @NotBlank(message = "New password is required")
     @ValidPassword
     private String newPassword;

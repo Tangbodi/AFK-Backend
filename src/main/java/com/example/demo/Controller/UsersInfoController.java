@@ -1,12 +1,10 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ReturnCode;
-import com.example.demo.Model.DTO.ObjectUserDTO;
-import com.example.demo.Model.DTO.UpdatePasswordDTO;
-import com.example.demo.Model.DTO.UserEmailDTO;
-import com.example.demo.Model.DTO.UserMailDTO;
+import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Posts.PostUserMapService;
@@ -32,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
@@ -68,6 +67,8 @@ public class UsersInfoController {
     private RedisService redisService;
     @Autowired
     private RedisMessageService redisMessageService;
+    @Autowired
+    private MQSender mqSender;
 
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) {
@@ -106,20 +107,26 @@ public class UsersInfoController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity ResetUserPassword(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request) {
+    public ResponseEntity ResetUserPassword(@Validated @RequestBody EmailDTO emailDTO, HttpServletRequest request) throws JMSException {
         ApiResponse apiResponse;
-        String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
+        String encodedEmail = HtmlUtils.htmlEscape(emailDTO.getEmail());
         String token = UUIDCreator.CreateUUID();
-        String siteURL = request.getRequestURL().toString();
-        siteURL.replace(request.getServletPath(), "");
+        //Check if the email exists if not means the user doesn't exist
         if (userInfoService.CheckEmailExists(encodedEmail) != null) {
             logger.info("Email exists: {}", encodedEmail);
             if(redisService.CacheExists(EMAIL_VALIDATION + encodedEmail)){
                 //set email validation for duplicate request
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Reset password link has been sent out, please check your email");
             } else {
-                processEmailService.ProcessForgotPasswordEmailValidation(token, siteURL, encodedEmail);
-                redisEmailService.SetEmailValidationCache(encodedEmail);
+                // Get site URL
+                String siteURL = request.getRequestURL().toString();
+                siteURL.replace(request.getServletPath(), "");
+                //Send MQ
+                emailDTO.setSiteURL(siteURL);
+                emailDTO.setUserId(token);
+                mqSender.SendForgotPasswordMessage(emailDTO);
+//                processEmailService.ProcessForgotPasswordEmailValidation(token, siteURL, encodedEmail);
+//                redisEmailService.SetEmailValidationCache(encodedEmail);
                 apiResponse = ApiResponse.success("Reset password link has been sent out, please check your email");
             }
         } else {
@@ -129,10 +136,11 @@ public class UsersInfoController {
     }
 
     @PutMapping("/forgot-password/enter-password")
-    public ResponseEntity EnterNewPassword(@Validated @RequestBody UpdatePasswordDTO updatePasswordDTO, @RequestParam (value = "token") Long token) {
+    public ResponseEntity EnterNewPassword(@Validated @RequestBody ForgotPasswordDTO forgotPasswordDTO, @RequestParam (value = "token") Long token) {
         ApiResponse apiResponse;
-        updatePasswordDTO.setUserId(token);
-        if (userInfoService.ResetUserPassword(updatePasswordDTO)) {
+        //Here token is userId
+        forgotPasswordDTO.setUserId(token);
+        if (userInfoService.ResetUserPassword(forgotPasswordDTO)) {
             apiResponse = ApiResponse.success("Password has been updated");
         } else {
             apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to update password");
@@ -141,20 +149,27 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-email")
-    public ResponseEntity UpdateUserInfo(@Validated @RequestBody UserEmailDTO userEmailDTO, HttpServletRequest request, HttpSession session) {
+    public ResponseEntity UpdateUserInfo(@Validated @RequestBody EmailDTO emailDTO, HttpServletRequest request, HttpSession session) throws JMSException {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            String encodedEmail = HtmlUtils.htmlEscape(userEmailDTO.getEmail());
+            String encodedEmail = HtmlUtils.htmlEscape(emailDTO.getEmail());
             logger.info("Encoded email: {}", encodedEmail);
             if (userRegistrationService.CheckEmailExists(encodedEmail) != null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email already exists");
             } else {
                 if (!redisService.CacheExists(EMAIL_VALIDATION + userId.toString())) {
-                    processEmailService.ProcessUpdateEmailValidation(request, userId.toString(), encodedEmail);
-                    redisEmailService.SetEmailValidationCacheByToken(userId.toString(), encodedEmail);
+                    // Get site URL
+                    String siteURL = request.getRequestURL().toString();
+                    siteURL.replace(request.getServletPath(), "");
+                    //Send MQ
+                    emailDTO.setUserId(userId.toString());
+                    emailDTO.setSiteURL(siteURL);
+                    mqSender.SendUserUpdateEmailMessage(emailDTO);
+//                    processEmailService.ProcessUpdateEmailValidation(siteURL, userId.toString(), encodedEmail);
+//                    redisEmailService.SetEmailValidationCacheByToken(userId.toString(), encodedEmail);
                 } else {
                     //
                 }

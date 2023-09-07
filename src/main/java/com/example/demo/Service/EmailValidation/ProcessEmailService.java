@@ -1,5 +1,6 @@
 package com.example.demo.Service.EmailValidation;
 
+import com.example.demo.Model.DTO.EmailDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.Redis.RedisUsernameService;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 @Service
@@ -29,16 +29,14 @@ public class ProcessEmailService {
     @Autowired
     private RedisUsernameService redisUsernameService;
 
-    public void ProcessRegistrationEmailValidation(HttpServletRequest request, UserRegisterDTO userRegisterDTO) {
+    public void ProcessRegistrationEmailValidation(UserRegisterDTO userRegisterDTO) {
         logger.info("Processing registration email validation: {}");
         try {
             String token = UUIDCreator.CreateUUID();
 //            siteURL = siteURL.replace("http://", "https://");
             if (userVerificationService.SetUserRegistrationVerificationToken(token, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();
-                String siteURL = request.getRequestURL().toString();
-                siteURL.replace(request.getServletPath(), "");
-                String emailValidationLink = siteURL + "/email-validation?token=" + token;
+                String emailValidationLink = userRegisterDTO.getSiteURL() + "/email-validation?token=" + token;
                 redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
             } else {
@@ -50,12 +48,10 @@ public class ProcessEmailService {
         }
     }
 
-    public void ProcessLoginEmailValidation(HttpServletRequest request, String email, String token, String username) {
+    public void ProcessLoginEmailValidation(String siteURL, String email, String token, String username) {
         logger.info("Processing login email validation: {}");
         try {
             String recipientEmail = email;
-            String siteURL = request.getRequestURL().toString();
-            siteURL.replace(request.getServletPath(), "");
             String emailValidationLink = siteURL + "/email-validation?token=" + token + "&username=" + username;
             logger.info("emailValidationLink:::" + emailValidationLink);
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
@@ -68,26 +64,27 @@ public class ProcessEmailService {
         }
     }
 
-    public void ProcessUpdateEmailValidation(HttpServletRequest request, String userId, String newEmail) {
+    public void ProcessUpdateEmailValidation(EmailDTO emailDTO) {
         logger.info("Processing update email validation: {}");
         try {
-            String recipientEmail = newEmail;
-            String siteURL = request.getRequestURL().toString();
-            siteURL.replace(request.getServletPath(), "");
-            String emailValidationLink = siteURL + "/email-validation?token=" + userId;
-            redisEmailService.SetEmailValidationCacheByToken(userId, newEmail);
+            String recipientEmail = emailDTO.getEmail();
+            String emailValidationLink = emailDTO.getSiteURL() + "/email-validation?token=" + emailDTO.getUserId();
+            redisEmailService.SetEmailValidationCacheByToken(emailDTO.getUserId(), emailDTO.getEmail());
             sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
         } catch (MessagingException | UnsupportedEncodingException e) {
             logger.error("Failed to process update email validation: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to process update email validation " + e);
         }
     }
-    public void ProcessForgotPasswordEmailValidation(String token, String siteURL, String encodedEmail){
+    public void ProcessForgotPasswordEmailValidation(EmailDTO emailDTO){
         logger.info("Processing forgot password email validation: {}");
         try{
-            String emailValidationLink = siteURL + "/reset-password?token=" + token;
-            redisEmailService.SetEmailValidationCacheByToken(token, encodedEmail);
-            sendEmailService.sendEmailValidationLink(encodedEmail, emailValidationLink);
+            //The userId is actually the token just named userId for convenience
+            String token = emailDTO.getUserId();
+            String emailValidationLink = emailDTO.getSiteURL() + "/reset-password?token=" + token;
+            redisEmailService.SetEmailValidationCacheByToken(token, emailDTO.getEmail());
+            redisEmailService.SetEmailValidationCache(emailDTO.getEmail());
+            sendEmailService.sendEmailValidationLink(emailDTO.getEmail(), emailValidationLink);
         }catch (Exception e){
             logger.error("Failed to process forgot password email validation: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to process forgot password email validation " + e);

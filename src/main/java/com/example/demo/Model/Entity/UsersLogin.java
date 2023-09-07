@@ -17,24 +17,25 @@ import java.time.Instant;
 @Table(name = "users_login")
 public class UsersLogin {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @Size(max = 31)
     @NotNull
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "username", nullable = false, length = 31)
+    private String username;
 
-    @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")
-    private Long ipvFour;
+    @Size(max = 63)
+    @NotNull
+    @Column(name = "password", nullable = false, length = 63)
+    private String password;
 
-    @Size(max = 16)
-    @Column(name = "ipv_six", length = 16)
-    private String ipvSix;
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    @Column(name = "login_at")
-    private Instant loginAt;
-
-    @Column(name = "logout_at")
-    private Instant logoutAt;
+    @NotNull
+    @Column(name = "modified_at", nullable = false)
+    private Instant modifiedAt;
 
 }

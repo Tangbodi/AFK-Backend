@@ -1,10 +1,10 @@
 package com.example.demo.Service.UserRegister;
 
 import com.example.demo.Mapper.Repository.UserInfoRepository;
-import com.example.demo.Mapper.Repository.UserRepository;
+import com.example.demo.Mapper.Repository.UsersLoginRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
-import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
+import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -23,7 +23,7 @@ import java.time.Instant;
 public class UserRegistrationService {
     private static final Logger logger = LoggerFactory.getLogger(UserRegistrationService.class);
     @Autowired
-    private UserRepository userRepository;
+    private UsersLoginRepository usersLoginRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
     @Autowired
@@ -46,7 +46,7 @@ public class UserRegistrationService {
     }
 
     @Transactional
-    public User RegisterUser(UserRegisterDTO userRegisterDTO){
+    public UsersLogin RegisterUser(UserRegisterDTO userRegisterDTO){
         logger.info("Registering user: {}", userRegisterDTO.getUsername());
         try {
             logger.info("Creating UUID for user: {}", userRegisterDTO.getUsername());
@@ -54,7 +54,7 @@ public class UserRegistrationService {
             userRegisterDTO.setUserId(snowflakeId);
             userRegisterDTO.setCreatedAt(Instant.now());
             logger.info("Setting up User :{}");
-            User user = new User();
+            UsersLogin user = new UsersLogin();
             user.setId(snowflakeId);
             user.setUsername(userRegisterDTO.getUsername());
             String encodedPassword = BCrypt.hashpw(userRegisterDTO.getPassword(), BCrypt.gensalt());
@@ -63,9 +63,7 @@ public class UserRegistrationService {
             user.setModifiedAt(userRegisterDTO.getCreatedAt());
             userAuthService.SetUsersAuth(userRegisterDTO);
             userInfoService.SetUserInfo(userRegisterDTO);
-//            userMailAddressService.SetUserMailAddress(userRegisterDTO);
-//            userPostSettingService.SaveSetting(userRegisterDTO);
-            return userRepository.save(user);
+            return usersLoginRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);
             throw new RuntimeException("Failed to register user "+e);

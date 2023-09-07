@@ -8,11 +8,12 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.time.Instant;
 
 
 @Data
-public class UserRegisterDTO {
+public class UserRegisterDTO implements Serializable {
     private Long userId;
     @NotBlank(message = "Username is required")
     @Length(min = 1, max = 30, message = "Username length not eligible")
@@ -28,5 +29,6 @@ public class UserRegisterDTO {
     @NotBlank(message = "Confirm password is required")
     @ValidPassword
     private String confirmPassword;
+    private String siteURL;
     private Instant createdAt;
 }

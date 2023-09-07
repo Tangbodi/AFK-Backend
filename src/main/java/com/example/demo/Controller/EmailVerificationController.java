@@ -1,6 +1,5 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.Redis.RedisService;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -120,6 +118,8 @@ public class EmailVerificationController {
             String email = redisEmailService.GetEmailByToken(token);
             logger.info("email:::" + email);
             UsersInfo usersInfo = userInfoService.GetUserInfoByEmail(email);
+            redisEmailService.DeleteEmailValidationCacheByToken(token);
+            redisEmailService.DeleteEmailValidationCacheByEmail(email);
             redirectURL = "https://www.nybing.com/reset-password?token=" + usersInfo.getId();
         } else{
             redirectURL = "https://www.nybing.com/link-expired";

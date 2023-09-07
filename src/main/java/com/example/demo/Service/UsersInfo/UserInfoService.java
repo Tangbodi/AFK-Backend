@@ -1,12 +1,13 @@
 package com.example.demo.Service.UsersInfo;
 
 import com.example.demo.Mapper.Repository.UserInfoRepository;
-import com.example.demo.Mapper.Repository.UserRepository;
+import com.example.demo.Mapper.Repository.UsersLoginRepository;
+import com.example.demo.Model.DTO.ForgotPasswordDTO;
 import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UpdatePasswordDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
-import com.example.demo.Model.Entity.User;
 import com.example.demo.Model.Entity.UsersInfo;
+import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
@@ -31,7 +32,7 @@ public class UserInfoService {
     @Autowired
     private UserVerificationService userVerificationService;
     @Autowired
-    private UserRepository userRepository;
+    private UsersLoginRepository usersLoginRepository;
 
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
@@ -196,14 +197,15 @@ public class UserInfoService {
     public boolean UpdateUserPassword(UpdatePasswordDTO updatePasswordDTO) {
         logger.info("Updating password: {}");
         try {
-            User user = userRepository.findById(updatePasswordDTO.getUserId()).orElse(null);
+            UsersLogin user = usersLoginRepository.findById(updatePasswordDTO.getUserId()).orElse(null);
             logger.info("Found user: {}" + user.getUsername());
             String oldPassword = user.getPassword();
             if (BCrypt.checkpw(updatePasswordDTO.getOldPassword(), oldPassword)) {
                 logger.info("Old password is correct: {}" + updatePasswordDTO.getOldPassword());
                 String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
                 user.setPassword(newPassword);
-                userRepository.save(user);
+                user.setModifiedAt(Instant.now());
+                usersLoginRepository.save(user);
                 logger.info("Updated password successfully: {}");
                 return true;
             } else {
@@ -216,14 +218,15 @@ public class UserInfoService {
         return false;
     }
     @Transactional
-    public boolean ResetUserPassword(UpdatePasswordDTO updatePasswordDTO){
+    public boolean ResetUserPassword(ForgotPasswordDTO forgotPasswordDTO){
         logger.info("Resetting password: {}");
         try{
-            User user = userRepository.findById(updatePasswordDTO.getUserId()).orElse(null);
+            UsersLogin user = usersLoginRepository.findById(forgotPasswordDTO.getUserId()).orElse(null);
             logger.info("Found user: {}" + user.getUsername());
-            String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
+            String newPassword = BCrypt.hashpw(forgotPasswordDTO.getNewPassword(), BCrypt.gensalt());
             user.setPassword(newPassword);
-            userRepository.save(user);
+            user.setModifiedAt(Instant.now());
+            usersLoginRepository.save(user);
             return true;
         } catch (Exception e) {
             logger.error("Failed to reset password: {}", e.getMessage(), e);

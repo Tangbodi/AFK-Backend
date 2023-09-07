@@ -69,7 +69,9 @@ public class UserVerificationService {
 //                String siteURL = request.getRequestURL().toString();
 //                siteURL.replace(request.getServletPath(), "");
                 logger.info("Saved UserVerificationToken successfully");
-                processEmailService.ProcessLoginEmailValidation(request, usersVerificationToken.getEmail(), token, username);
+                String siteURL = request.getRequestURL().toString();
+                siteURL.replace(request.getServletPath(), "");
+                processEmailService.ProcessLoginEmailValidation(siteURL, usersVerificationToken.getEmail(), token, username);
             } else {
                 logger.info("User not found: {}", username);
             }
@@ -87,7 +89,7 @@ public class UserVerificationService {
                 userAuthService.UpdateUserAuth(usersVerificationToken.getId());
                 RemoveToken(usersVerificationToken);
             } else {
-
+                //
             }
         } catch (Exception e) {
             logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(), e);
@@ -130,25 +132,4 @@ public class UserVerificationService {
             logger.error("Failed to update email: {}", e.getMessage(), e);
         }
     }
-
-    @Transactional
-    public void UpdateTokenForUpdateEmail(String token, Long userId, HttpServletRequest request) {
-        logger.info("Updating token for update email: token={}, userId={}", token, userId);
-        try {
-            UsersVerificationToken usersVerificationToken = userVerificationRepository.findById(userId).orElse(null);
-            if (usersVerificationToken != null) {
-                usersVerificationToken.setToken(token);
-                usersVerificationToken.setModifiedAt(Instant.now());
-                userVerificationRepository.save(usersVerificationToken);
-                logger.info("Updated token for update email successfully");
-
-                processEmailService.ProcessUpdateEmailValidation(request, token, usersVerificationToken.getEmail());
-            } else {
-                logger.info("User not found: {}", userId);
-            }
-        } catch (Exception e) {
-            logger.error("Failed to update token for update email: {}", e.getMessage(), e);
-        }
-    }
-
 }

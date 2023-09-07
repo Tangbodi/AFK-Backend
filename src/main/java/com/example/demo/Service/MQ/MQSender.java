@@ -1,7 +1,6 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.MessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,19 @@ public class MQSender {
     private Queue MessageMentionQueue;
     @Autowired
     private Queue ReplyCountQueue;
+    @Autowired
+    private Queue UserRegistrationQueue;
+    @Autowired
+    private Queue UpdateEmailQueue;
+    @Autowired
+    private Queue ForgotPasswordQueue;
+
+    @Async("MultiExecutor")
+    public void SendUserRegistrationMessage(UserRegisterDTO userRegisterDTO) throws JMSException, InterruptedException {
+        String queueName = UserRegistrationQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, userRegisterDTO);
+        logger.info("Message sent, User: " + userRegisterDTO.getUsername());
+    }
     @Async("MultiExecutor")
     public void SendSaveLikeMessage(UserLikeSaveDTO userLikeSaveDTO,Long userId) throws JMSException, InterruptedException {
         String queueName = LikeSaveQueue.getQueueName();
@@ -61,5 +73,17 @@ public class MQSender {
         String queueName = MessageMentionQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, messageVO);
         logger.info("Message sent, User: " + messageVO.getToUid());
+    }
+    @Async("MultiExecutor")
+    public void SendUserUpdateEmailMessage(EmailDTO emailDTO) throws JMSException {
+        String queueName = UpdateEmailQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, emailDTO);
+        logger.info("Message sent, User: " + emailDTO.getUserId());
+    }
+    @Async("MultiExecutor")
+    public void SendForgotPasswordMessage(EmailDTO emailDTO) throws JMSException {
+        String queueName = ForgotPasswordQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, emailDTO);
+        logger.info("Message sent, User: " + emailDTO.getUserId());
     }
 }

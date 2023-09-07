@@ -1,8 +1,8 @@
 package com.example.demo.Service.UserLogin;
 
-import com.example.demo.Mapper.Repository.UserRepository;
+import com.example.demo.Mapper.Repository.UsersLoginRepository;
 import com.example.demo.Model.DTO.UserLoginDTO;
-import com.example.demo.Model.Entity.User;
+import com.example.demo.Model.Entity.UsersLogin;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +13,17 @@ import org.springframework.stereotype.Service;
 public class UserLoginService {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginService.class);
 
-    private final UserRepository userRepository;
+    private final UsersLoginRepository usersLoginRepository;
 
     @Autowired
-    public UserLoginService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserLoginService(UsersLoginRepository usersLoginRepository) {
+        this.usersLoginRepository = usersLoginRepository;
     }
 
     public boolean CheckPassword(UserLoginDTO userLoginDTO) {
         logger.info("Checking if password is correct for user: {}", userLoginDTO.getUsername());
         try {
-            User user = userRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
+            UsersLogin user = usersLoginRepository.findByUsername(userLoginDTO.getUsername()).orElse(null);
             if (user != null) {
                 logger.info("User exists: {}", user.getUsername());
                 logger.info("Checking password");

@@ -4,18 +4,17 @@ import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.StatusEnum;
 import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Model.DTO.EmailDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
 import com.example.demo.Service.Redis.RedisMessageService;
-import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import redis.clients.jedis.Jedis;
-
-import java.util.List;
 
 @Component
 public class RedisStrategy {
@@ -24,8 +23,14 @@ public class RedisStrategy {
     @Autowired
     protected RedisLikeSaveService redisLikeSaveService;
     @Autowired
-    private RedisMessageService redisMessageService;
+    protected RedisMessageService redisMessageService;
+    @Autowired
+    protected ProcessEmailService processEmailService;
 
+    public void UserRegistrationStrategy(UserRegisterDTO userRegisterDTO){
+        logger.info("Start UserRegistrationStrategy");
+        processEmailService.ProcessRegistrationEmailValidation(userRegisterDTO);
+    }
     public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
         logger.info("Start LikeSaveStrategy");
         // 1 or 0
@@ -97,5 +102,13 @@ public class RedisStrategy {
     public void MessageMentionStrategy(MessageVO messageVO){
         logger.info("Start MessageMentionStrategy");
         redisMessageService.SetUnreadMessage(messageVO);
+    }
+    public void UpdateEmailStrategy(EmailDTO emailDTO){
+        logger.info("Start UpdateEmailStrategy");
+        processEmailService.ProcessUpdateEmailValidation(emailDTO);
+    }
+    public void ForgotPasswordStrategy(EmailDTO emailDTO){
+        logger.info("Start ForgotPasswordStrategy");
+        processEmailService.ProcessForgotPasswordEmailValidation(emailDTO);
     }
 }
