@@ -99,7 +99,7 @@ public class UsersInfoController {
                 if (userInfoService.UpdateUserPassword(updatePasswordDTO)) {
                     apiResponse = ApiResponse.success("Password has been updated");
                 } else {
-                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Failed to update password");
+                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Old password is incorrect");
                 }
             }
         }
