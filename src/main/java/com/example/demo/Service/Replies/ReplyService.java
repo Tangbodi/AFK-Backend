@@ -64,10 +64,10 @@ public class ReplyService {
                     messageVO.setFromUsername(commentReplyDTO.getFromUsername());
                     messageVO.setToUid(commentReplyDTO.getToUid().toString());
                     messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
-                    //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
                     //set message
                     messageService.SetMessage(commentReplyDTO);
+                    //send message mention to MQ
+                    mqSender.SendMentionMessage(messageVO);
                 } else {
                     logger.info("FromUid is equal to ToUid");
                 }

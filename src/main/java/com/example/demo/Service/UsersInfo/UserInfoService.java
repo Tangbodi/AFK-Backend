@@ -1,29 +1,40 @@
 package com.example.demo.Service.UsersInfo;
 
+import com.example.demo.Mapper.Repository.UserAvatarRepository;
 import com.example.demo.Mapper.Repository.UserInfoRepository;
 import com.example.demo.Mapper.Repository.UsersLoginRepository;
 import com.example.demo.Model.DTO.ForgotPasswordDTO;
-import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UpdatePasswordDTO;
+import com.example.demo.Model.DTO.UserInfoDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import com.example.demo.Util.Snowflake;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 
 @Service
 public class UserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
+    private static final String AVATAR_URL = "http://31.220.21.110:81/IMAGE/AVATAR/";
+    private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat2/webapps/IMAGE/AVATAR/";
+    private static final String NGINX_AVATAR_PATH = "/usr/local/nginx2/html/IMAGE/AVATAR/";
     @Autowired
     private UserInfoRepository userInfoRepository;
     @Autowired
@@ -33,6 +44,8 @@ public class UserInfoService {
     private UserVerificationService userVerificationService;
     @Autowired
     private UsersLoginRepository usersLoginRepository;
+    @Autowired
+    private UserAvatarRepository userAvatarRepository;
 
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
@@ -67,6 +80,7 @@ public class UserInfoService {
         }
         return null;
     }
+
     public UsersInfo GetUserInfoByEmail(String email) {
         logger.info("Getting UsersInfo: {}" + email);
         try {
@@ -91,6 +105,7 @@ public class UserInfoService {
         }
         return null;
     }
+
     @Transactional
     public void SetUserInfo(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting up UsersInfo: {}");
@@ -170,6 +185,66 @@ public class UserInfoService {
     }
 
     @Transactional
+    public boolean UpdateUserAvatar(MultipartFile[] images, Long userId) {
+        logger.info("Updating avatar: {}");
+        try {
+            String avatarURL = "";
+            MultipartFile avatar = images[0];
+            // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
+            if (avatar.getContentType().startsWith("image/") && avatar.getSize() <= 5 * 1024 * 1024) {
+                //create avatar id for avatar
+                long avatarId = Snowflake.generateUniqueId();
+                //parse avatar data and type
+                byte[] avatarData = avatar.getBytes();
+                String avatarType = avatar.getContentType();
+                //if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
+                avatarType = avatarType.substring(avatarType.lastIndexOf('/') + 1);
+                logger.info("Avatar type: {}", avatarType);
+                //create avatar name
+                String avatarName = avatarId + "." + avatarType;
+                logger.info("AvatarName: {}", avatarName);
+                avatarURL = AVATAR_URL + avatarName;
+                logger.info("AvatarURL: {}", avatarURL);
+                logger.info("Saving PostImage to Tomcat and Nginx");
+                Path Tomcat_imagePath = Paths.get(TOMCAT_AVATAR_PATH, avatarName);
+                Path Nginx_imagePath = Paths.get(NGINX_AVATAR_PATH, avatarName);
+                FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
+                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+                fos_tomcat.write(avatarData);
+                fos_nginx.write(avatarData);
+                fos_tomcat.close();
+                fos_nginx.close();
+                logger.info("Saved PostImage to Tomcat and Nginx");
+                return SaveUserAvatar(userId, avatarURL);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    @Transactional
+    private boolean SaveUserAvatar(Long userId, String avatarURL) {
+        logger.info("Saving avatar: {}");
+        try {
+            UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);
+            if (usersInfo != null) {
+                usersInfo.setAvatarUrl(avatarURL);
+                usersInfo.setModifiedAt(Instant.now());
+                return true;
+            } else {
+                logger.info("User info does not exist: {}");
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to save UserAvatar: {}", e.getMessage(), e);
+        }
+        return false;
+    }
+
+    @Transactional
     public boolean UpdateUserEmail(String userId, String newEmail) {
         logger.info("Updating email: {}" + userId + "::::::" + newEmail);
         try {
@@ -193,6 +268,7 @@ public class UserInfoService {
         }
         return false;
     }
+
     @Transactional
     public boolean UpdateUserPassword(UpdatePasswordDTO updatePasswordDTO) {
         logger.info("Updating password: {}");
@@ -217,10 +293,11 @@ public class UserInfoService {
         }
         return false;
     }
+
     @Transactional
-    public boolean ResetUserPassword(ForgotPasswordDTO forgotPasswordDTO){
+    public boolean ResetUserPassword(ForgotPasswordDTO forgotPasswordDTO) {
         logger.info("Resetting password: {}");
-        try{
+        try {
             UsersLogin user = usersLoginRepository.findById(forgotPasswordDTO.getUserId()).orElse(null);
             logger.info("Found user: {}" + user.getUsername());
             String newPassword = BCrypt.hashpw(forgotPasswordDTO.getNewPassword(), BCrypt.gensalt());

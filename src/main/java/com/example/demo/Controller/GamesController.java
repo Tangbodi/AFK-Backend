@@ -1,13 +1,14 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ReturnCode;
-import com.example.demo.Model.DTO.GameGenreMapIdDTO;
+import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Games.GameGenreMapService;
 import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.jms.JMSException;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,8 @@ public class GamesController {
     private GameGenreMapService gameGenreMapService;
     @Autowired
     private RedisGameIconService redisGameIconService;
+    @Autowired
+    private MQSender mqSender;
 
     @GetMapping("/")
     public ResponseEntity GetAllGameIcons() throws JsonProcessingException {
@@ -61,26 +65,20 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-
-//    @GetMapping("/all-games-genres")
-//    public ResponseEntity GetAllGameGenres() {
-//        List<GameGenreVO> gameGenreVOList = gameGenreService.GetAllGameGenres();
-//        ApiResponse apiResponse = ApiResponse.success(gameGenreVOList);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-//    }
-
     @PostMapping("/save-game")
-    public ResponseEntity SaveGames(@Validated @RequestBody GameGenreMapIdDTO gameGenreMapIdDTO, HttpSession session) {
+    public ResponseEntity SaveGames(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpSession session) throws JMSException, InterruptedException {
         ApiResponse apiResponse;
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to access games that you’ve liked or saved");
-        } else if (gameGenreMapService.FindGamesGenresMapById(gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId()) == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to add game to your favorites");
         } else {
-            gameGenreMapIdDTO.setUserId(userId);
-            boolean saveStatus = userFavoriteGameService.SetUserFavoriteGame(gameGenreMapIdDTO);
-            apiResponse = ApiResponse.success(saveStatus);
+            if (userLikeSaveDTO.getStatus() == 0) {
+                apiResponse = ApiResponse.success(1);
+            } else {
+                apiResponse = ApiResponse.success(0);
+            }
+            //Send MQ
+            mqSender.SendSaveLikeMessage(userLikeSaveDTO, userId);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
@@ -107,5 +105,6 @@ public class GamesController {
         apiResponse = ApiResponse.success(homeGameImages);
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
 
 }

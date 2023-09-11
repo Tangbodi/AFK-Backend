@@ -32,7 +32,6 @@ public class PostImageService {
     @Autowired
     private PostImageRepository postImageRepository;
 
-
     @Async("MultiExecutor")
     @Transactional(rollbackOn = Exception.class)
     public void SavePostImage(PostDTO postDTO) {

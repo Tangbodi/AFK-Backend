@@ -6,9 +6,10 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Data
-public class GameGenreMapIdDTO {
+public class GameGenreMapIdDTO{
 
     private Long userId;
     @NotNull(message = "GenreId is required")
@@ -17,4 +18,5 @@ public class GameGenreMapIdDTO {
     @NotNull(message = "GameId is required")
     @ValidGameId
     private Short gameId;
+
 }

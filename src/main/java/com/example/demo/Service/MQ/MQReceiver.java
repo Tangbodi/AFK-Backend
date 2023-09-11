@@ -1,11 +1,8 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.EmailDTO;
-import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.MessageVO;
-import com.example.demo.Util.RedisStrategy;
+import com.example.demo.Service.Redis.RedisStrategy;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

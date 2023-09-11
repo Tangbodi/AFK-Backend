@@ -40,7 +40,6 @@ public class NewsService {
     private static final Logger logger = LoggerFactory.getLogger(NewsService.class);
     private static final String GameSpot = "GameSpot";
     private static final String rssFeedUrl = "https://www.gamespot.com/feeds/mashup";
-
     @Autowired
     private NewsRepository newsRepository;
     @Autowired

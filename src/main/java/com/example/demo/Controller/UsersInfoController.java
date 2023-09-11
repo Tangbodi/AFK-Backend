@@ -6,6 +6,7 @@ import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
+import com.example.demo.Service.Posts.PostImageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Posts.PostUserMapService;
 import com.example.demo.Service.Redis.RedisEmailService;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.jms.JMSException;
@@ -69,7 +71,6 @@ public class UsersInfoController {
     private RedisMessageService redisMessageService;
     @Autowired
     private MQSender mqSender;
-
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -82,6 +83,31 @@ public class UsersInfoController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
 
+    }
+
+    @PutMapping("/update-avatar")
+    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile[] images, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        ApiResponse apiResponse;
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else if (images[0].isEmpty()) {
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Please select an image to upload");
+        } else if (!images[0].isEmpty() && images.length > 1) {
+            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Please select only one image to upload");
+        } else {
+            try {
+                if (userInfoService.UpdateUserAvatar(images, userId)) {
+                    apiResponse = ApiResponse.success("Avatar has been updated");
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Avatar is not an image or size is too large");
+                }
+            } catch (Exception e) {
+                logger.error("Failed to update avatar", e.getMessage(), e);
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
+            }
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
     @PutMapping("/update-password")
@@ -114,7 +140,7 @@ public class UsersInfoController {
         //Check if the email exists if not means the user doesn't exist
         if (userInfoService.CheckEmailExists(encodedEmail) != null) {
             logger.info("Email exists: {}", encodedEmail);
-            if(redisService.CacheExists(EMAIL_VALIDATION + encodedEmail)){
+            if (redisService.CacheExists(EMAIL_VALIDATION + encodedEmail)) {
                 //set email validation for duplicate request
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Reset password link has been sent out, please check your email");
             } else {
@@ -136,7 +162,7 @@ public class UsersInfoController {
     }
 
     @PutMapping("/forgot-password/enter-password")
-    public ResponseEntity EnterNewPassword(@Validated @RequestBody ForgotPasswordDTO forgotPasswordDTO, @RequestParam (value = "token") Long token) {
+    public ResponseEntity EnterNewPassword(@Validated @RequestBody ForgotPasswordDTO forgotPasswordDTO, @RequestParam(value = "token") Long token) {
         ApiResponse apiResponse;
         //Here token is userId
         forgotPasswordDTO.setUserId(token);

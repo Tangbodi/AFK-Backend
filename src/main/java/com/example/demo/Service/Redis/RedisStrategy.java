@@ -1,16 +1,11 @@
-package com.example.demo.Util;
+package com.example.demo.Service.Redis;
 
 import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.StatusEnum;
-import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.EmailDTO;
-import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.DTO.*;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
-import com.example.demo.Service.Redis.RedisLikeSaveService;
-import com.example.demo.Service.Redis.RedisMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +38,6 @@ public class RedisStrategy {
         String key = typeName + ":::" + objectId;
         String hashKey = String.valueOf(userLikeSaveDTO.getUserId());
         String value = String.valueOf(userLikeSaveDTO.getCreatedAt());
-
         //if status is 1
         if (status == StatusEnum.TRUE.getCode()) {
             //if the Type name doesn't exist then add to set
@@ -58,7 +52,7 @@ public class RedisStrategy {
             //postId/commentId/replyId -> userId -> createdAt
             redisLikeSaveService.AddHashSet(key, hashKey, value);
         } else {
-            //if status is 0, remove from hash set
+            //if no hash set, remove set
             redisLikeSaveService.DeleteMember(key, hashKey);
             if (redisLikeSaveService.NumOfMembers(key) == 0L) {
                 redisLikeSaveService.RemoveHashSet(typeName, objectId);
@@ -111,4 +105,5 @@ public class RedisStrategy {
         logger.info("Start ForgotPasswordStrategy");
         processEmailService.ProcessForgotPasswordEmailValidation(emailDTO);
     }
+
 }

@@ -72,7 +72,6 @@ public class CommentsController {
             commentReplyDTO.setFromUid(userId);
             commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
             CommentSavedVO commentSavedVO = commentService.SetComment(commentReplyDTO);
-            //Set mention message after saved comment if the user is not the author of the post
             if (commentSavedVO != null) {
                 apiResponse = ApiResponse.success(commentSavedVO);
             } else {

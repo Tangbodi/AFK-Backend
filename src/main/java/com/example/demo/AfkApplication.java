@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @Configuration
 @ComponentScan({"com.example.demo","Controller","Service","Util","Configuration"})
+@EnableScheduling
 @SpringBootApplication
 public class AfkApplication {
 	public static void main(String[] args) {

@@ -59,6 +59,7 @@ public class CommentService {
                 ipAddressService.SetCommentIpAddress(commentReplyDTO);
                 //send comment count message to ActiveMQ
                 mqSender.SendCommentCountMessage(commentReplyDTO);
+                //Set mention message after saved comment if the user is not the author of the post
                 if(!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())){
                     logger.info("FromUid is not equal to ToUid");
                     //set message mention
@@ -69,10 +70,10 @@ public class CommentService {
                     messageVO.setFromUsername(commentReplyDTO.getFromUsername());
                     messageVO.setToUid(commentReplyDTO.getToUid().toString());
                     messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
-                    //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
                     //set message
                     messageService.SetMessage(commentReplyDTO);
+                    //send message mention to MQ
+                    mqSender.SendMentionMessage(messageVO);
                 } else {
                     logger.info("FromUid is equal to ToUid");
                 }

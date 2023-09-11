@@ -2,6 +2,7 @@ package com.example.demo.Service.UserFavoriteGame;
 
 import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
+import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
@@ -24,29 +25,23 @@ public class UserFavoriteGameService {
     private UserFavoriteGameRepository userFavoriteGameRepository;
 
     @Transactional
-    public boolean SetUserFavoriteGame(GameGenreMapIdDTO gameGenreMapIdDTO) {
-        logger.info("Setting user favorite game for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
-                gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
-
+    public void SetUserFavoriteGame(List<ObjectUserDTO> objectUserDTOList) {
+        logger.info("Setting user favorite game for game ID: {}", objectUserDTOList.get(0).getObjectId());
         try {
-            UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
-            usersFavoriteGameId.setUserId(gameGenreMapIdDTO.getUserId());
-            usersFavoriteGameId.setGameId(gameGenreMapIdDTO.getGameId());
-            UsersFavoriteGame usersFavoriteGame = userFavoriteGameRepository.findById(usersFavoriteGameId)
-                    .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
-
-            usersFavoriteGame.setFavoriteStatus(!usersFavoriteGame.getFavoriteStatus());
-            usersFavoriteGame.setModifiedAt(Instant.now());
-            userFavoriteGameRepository.save(usersFavoriteGame);
-            logger.info("User favorite game saved successfully for user ID: {}, genre ID: {}, game ID: {}", gameGenreMapIdDTO.getUserId(),
-                    gameGenreMapIdDTO.getGenreId(), gameGenreMapIdDTO.getGameId());
-
-            return usersFavoriteGame.getFavoriteStatus();
+            for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+                UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
+                usersFavoriteGameId.setUserId(objectUserDTO.getUserId());
+                usersFavoriteGameId.setGameId(objectUserDTO.getObjectId().shortValue());
+                UsersFavoriteGame usersFavoriteGame = userFavoriteGameRepository.findById(usersFavoriteGameId)
+                        .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
+                usersFavoriteGame.setFavoriteStatus(!usersFavoriteGame.getFavoriteStatus());
+                usersFavoriteGame.setModifiedAt(Instant.now());
+                userFavoriteGameRepository.save(usersFavoriteGame);
+                logger.info("User favorite game saved successfully for user ID: {}, game ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
+            }
         } catch (Exception e) {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
-
         }
-        return false;
     }
 
     private UsersFavoriteGame CreateUserFavoriteGame(UsersFavoriteGameId usersFavoriteGameId) {
@@ -56,14 +51,11 @@ public class UserFavoriteGameService {
         usersFavoriteGame.setId(usersFavoriteGameId);
         usersFavoriteGame.setCreatedAt(Instant.now());
         usersFavoriteGame.setModifiedAt(Instant.now());
-
         logger.info("Created user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
         return usersFavoriteGame;
     }
-
     public List<UserFavoriteGameVO> GetUserFavoriteGames(Long userId) {
         logger.info("Getting user favorite games for user ID: {}", userId);
-
         try {
             List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findByUserId(userId);
             if (!userFavoriteGames.isEmpty()) {
