@@ -5,6 +5,7 @@ import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Util.Snowflake;
+import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,28 +75,37 @@ public class PostImageService {
             for (MultipartFile image : images) {
                 // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
                 if (image.getContentType().startsWith("image/")&&image.getSize() <= 5 * 1024 * 1024) {
-                    //create image id for each image
+                    // Generate a unique image ID
                     long imageId = Snowflake.generateUniqueId();
-                    //parse image data and type
+                    // Get image data and type
                     byte[] imageData = image.getBytes();
                     String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
                     imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
                     logger.info("Image type: {}", imageType);
-                    //create image name
+                    // Create image name
                     String imageName = imageId + "." + imageType;
                     logger.info("ImageName: {}", imageName);
                     postImageNameList.add(imageName);
                     logger.info("PostImageNameList: {}", postImageNameList);
                     logger.info("Saving PostImage to Tomcat and Nginx");
-                    Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                    Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                    FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
-                    FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
-                    fos_tomcat.write(imageData);
-                    fos_nginx.write(imageData);
-                    fos_tomcat.close();
-                    fos_nginx.close();
+                    // Define paths for Tomcat and Nginx
+                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+                    Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+                    // Resize and compress the image using Thumbnailator
+                    Thumbnails.of(new ByteArrayInputStream(imageData))
+                            .size(360, 780) // Set your desired resolution here
+                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
+                            .toFile(tomcatImagePath.toFile());
+
+                    // Copy the image to the Nginx directory
+                    Files.copy(tomcatImagePath, nginxImagePath, StandardCopyOption.REPLACE_EXISTING);
+//                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
+//                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
+//                    fos_tomcat.write(imageData);
+//                    fos_nginx.write(imageData);
+//                    fos_tomcat.close();
+//                    fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
                     //add image url
                 } else {
