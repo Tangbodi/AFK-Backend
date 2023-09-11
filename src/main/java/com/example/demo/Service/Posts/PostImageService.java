@@ -5,6 +5,7 @@ import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Util.Snowflake;
+import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -26,7 +29,7 @@ import java.util.Map;
 @Service
 public class PostImageService {
     private static final Logger logger = LoggerFactory.getLogger(PostImageService.class);
-    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
+//    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
     private static final String POST_IMAGE_URL = "http://31.220.21.110:81/IMAGE/POST/";
     private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
     @Autowired
@@ -51,7 +54,7 @@ public class PostImageService {
                 postImage.setPostId(postDTO.getPostId());
                 String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 postImage.setImageType(imageType);
-                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
+//                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
@@ -74,7 +77,7 @@ public class PostImageService {
                     // Generate a unique image ID
                     long imageId = Snowflake.generateUniqueId();
                     // Get image data and type
-                    byte[] imageData = image.getBytes();
+                    InputStream imageData = new BufferedInputStream(image.getInputStream());
                     String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
                     imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
@@ -86,13 +89,18 @@ public class PostImageService {
                     logger.info("PostImageNameList: {}", postImageNameList);
                     logger.info("Saving PostImage to Tomcat and Nginx");
                     // Define paths for Tomcat and Nginx
-                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+//                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
+                    Thumbnails.of(new BufferedInputStream(imageData))
+                            .size(2300,600) // Set your desired resolution here
+                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
+                            .toFile(nginxImagePath.toFile());
+                    // Save image to Tomcat and Nginx
+//                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
                     FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
-                    fos_tomcat.write(imageData);
-                    fos_nginx.write(imageData);
-                    fos_tomcat.close();
+//                    fos_tomcat.write(imageData);
+                    fos_nginx.write(imageData.readAllBytes());
+//                    fos_tomcat.close();
                     fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
                     //add image url
