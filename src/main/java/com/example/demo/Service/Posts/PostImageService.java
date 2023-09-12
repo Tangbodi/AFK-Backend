@@ -31,6 +31,7 @@ public class PostImageService {
 //    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
     private static final String POST_IMAGE_URL = "http://31.220.21.110:81/IMAGE/POST/";
     private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
+    private static final String IMAGE_TYPE = "jpg";
     @Autowired
     private PostImageRepository postImageRepository;
 
@@ -48,12 +49,14 @@ public class PostImageService {
                 logger.info("ImageName: {}", imageName);
                 logger.info("Create PostImage");
                 PostImage postImage = new PostImage();
-                Long imageId = Long.valueOf(imageName.substring(0, imageName.indexOf(".")));
+//                Long imageId = Long.valueOf(imageName.substring(0, imageName.indexOf(".")));
+                Long imageId = Long.valueOf(imageName);
                 logger.info("ImageId: {}", imageId);
                 postImage.setId(imageId);
                 postImage.setPostId(postDTO.getPostId());
-                String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
-                postImage.setImageType(imageType);
+//                String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
+                imageName = imageName+"."+IMAGE_TYPE;
+                postImage.setImageType(IMAGE_TYPE);
                 postImage.setImagePath(NGINX_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
                 postImage.setCreatedAt(postDTO.getCreatedAt());
@@ -79,15 +82,13 @@ public class PostImageService {
                     // Get image data and type
                     byte[] imageData = image.getBytes();
                     logger.info("Image size: {}", image.getSize());
-                    String imageType = image.getContentType();
+//                    String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
-                    imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
-                    logger.info("Image type: {}", imageType);
+//                    imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
+//                    logger.info("Image type: {}", imageType);
                     // Create image name
-                    String imageName = imageId + "." + imageType;
+                    String imageName = imageId + "." + IMAGE_TYPE;
                     logger.info("ImageName: {}", imageName);
-                    postImageNameList.add(imageName);
-                    logger.info("PostImageNameList: {}", postImageNameList);
                     logger.info("Saving PostImage to Tomcat and Nginx");
                     // Define paths for Tomcat and Nginx
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
@@ -95,9 +96,11 @@ public class PostImageService {
                     Thumbnails.of(new ByteArrayInputStream(imageData))
                             .scale(1f)
                             .outputQuality(0.5) // Adjust quality (0.0 to 1.0)
-                            .outputFormat("jpg")
+                            .outputFormat(IMAGE_TYPE)
                             .toFile(nginxImagePath.toFile());
 //                            .size(800, 600) // Set your desired resolution here
+                    postImageNameList.add(imageName);
+                    logger.info("PostImageNameList: {}", postImageNameList);
                     // Save image to Tomcat and Nginx
 //                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
 //                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
