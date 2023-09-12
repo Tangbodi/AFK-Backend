@@ -50,10 +50,12 @@ public class PostImageService {
                 logger.info("ImageId: {}", imageId);
                 postImage.setId(imageId);
                 postImage.setPostId(postDTO.getPostId());
+                logger.info("postId: {}", postDTO.getPostId());
                 String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 postImage.setImageType(imageType);
 //                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
+                logger.info("imageUrl: {}", postImage.getImageUrl());
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);
@@ -89,17 +91,17 @@ public class PostImageService {
                     // Define paths for Tomcat and Nginx
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                    Thumbnails.of(new ByteArrayInputStream(imageData))
-                            .size(800, 600) // Set your desired resolution here
-                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
-                            .toFile(nginxImagePath.toFile());
+//                    Thumbnails.of(new ByteArrayInputStream(imageData))
+//                            .size(800, 600) // Set your desired resolution here
+//                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
+//                            .toFile(nginxImagePath.toFile());
                     // Save image to Tomcat and Nginx
 //                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
-//                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
+                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
 //                    fos_tomcat.write(imageData);
-//                    fos_nginx.write(imageData);
+                    fos_nginx.write(imageData);
 //                    fos_tomcat.close();
-//                    fos_nginx.close();
+                    fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
                     //add image url
                 } else {
