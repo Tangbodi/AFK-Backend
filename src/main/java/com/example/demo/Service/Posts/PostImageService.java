@@ -92,15 +92,15 @@ public class PostImageService {
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
                     Thumbnails.of(new ByteArrayInputStream(imageData))
                             .size(300, 300) // Set your desired resolution here
-                            .outputQuality(0.5) // Adjust quality (0.0 to 1.0)
+                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
                             .toFile(nginxImagePath.toFile());
                     // Save image to Tomcat and Nginx
 //                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
-                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
+//                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
 //                    fos_tomcat.write(imageData);
-                    fos_nginx.write(imageData);
+//                    fos_nginx.write(imageData);
 //                    fos_tomcat.close();
-                    fos_nginx.close();
+//                    fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
                     //add image url
                 } else {
