@@ -5,6 +5,7 @@ import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Util.Snowflake;
+import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -76,6 +78,7 @@ public class PostImageService {
                     long imageId = Snowflake.generateUniqueId();
                     // Get image data and type
                     byte[] imageData = image.getBytes();
+                    logger.info("Image size: {}", image.getSize());
                     String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
                     imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
@@ -89,17 +92,18 @@ public class PostImageService {
                     // Define paths for Tomcat and Nginx
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-//                    Thumbnails.of(new ByteArrayInputStream(imageData))
+                    Thumbnails.of(new ByteArrayInputStream(imageData))
+                            .outputQuality(0.5) // Adjust quality (0.0 to 1.0)
+                            .outputFormat("jpeg")
+                            .toFile(nginxImagePath.toFile());
 //                            .size(800, 600) // Set your desired resolution here
-//                            .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
-//                            .toFile(nginxImagePath.toFile());
                     // Save image to Tomcat and Nginx
 //                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
-                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
+//                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
 //                    fos_tomcat.write(imageData);
-                    fos_nginx.write(imageData);
+//                    fos_nginx.write(imageData);
 //                    fos_tomcat.close();
-                    fos_nginx.close();
+//                    fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
                     //add image url
                 } else {
