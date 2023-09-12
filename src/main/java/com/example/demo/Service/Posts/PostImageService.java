@@ -87,7 +87,7 @@ public class PostImageService {
 //                    imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
 //                    logger.info("Image type: {}", imageType);
                     // Create image name
-                    String imageName = imageId + "." + IMAGE_TYPE;
+                    String imageName = Long.toString(imageId);
                     logger.info("ImageName: {}", imageName);
                     logger.info("Saving PostImage to Tomcat and Nginx");
                     // Define paths for Tomcat and Nginx
