@@ -14,10 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -77,7 +76,7 @@ public class PostImageService {
                     // Generate a unique image ID
                     long imageId = Snowflake.generateUniqueId();
                     // Get image data and type
-                    InputStream imageData = new BufferedInputStream(image.getInputStream());
+                    byte[] imageData = image.getBytes();
                     String imageType = image.getContentType();
 //                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
                     imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
@@ -91,15 +90,15 @@ public class PostImageService {
                     // Define paths for Tomcat and Nginx
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
-                    Thumbnails.of(new BufferedInputStream(imageData))
-                            .size(2300,600) // Set your desired resolution here
+                    Thumbnails.of(new ByteArrayInputStream(imageData))
+                            .size(2300, 600) // Set your desired resolution here
                             .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
                             .toFile(nginxImagePath.toFile());
                     // Save image to Tomcat and Nginx
 //                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
                     FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
 //                    fos_tomcat.write(imageData);
-                    fos_nginx.write(imageData.readAllBytes());
+                    fos_nginx.write(imageData);
 //                    fos_tomcat.close();
                     fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat and Nginx");
