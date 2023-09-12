@@ -91,7 +91,7 @@ public class PostImageService {
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
                     Thumbnails.of(new ByteArrayInputStream(imageData))
-                            .size(2300, 600) // Set your desired resolution here
+                            .size(200, 200) // Set your desired resolution here
                             .outputQuality(1.0) // Adjust quality (0.0 to 1.0)
                             .toFile(nginxImagePath.toFile());
                     // Save image to Tomcat and Nginx
