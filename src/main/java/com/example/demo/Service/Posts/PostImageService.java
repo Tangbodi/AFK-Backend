@@ -5,7 +5,6 @@ import com.example.demo.Model.DTO.GetPostDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.PostImage;
 import com.example.demo.Util.Snowflake;
-import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,12 +33,13 @@ public class PostImageService {
     private PostImageRepository postImageRepository;
 
     @Async("MultiExecutor")
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public void SavePostImage(PostDTO postDTO) {
         logger.info("Saving PostImage: {}");
         List<String> imageNameList = postDTO.getPostImageNameList();
+        logger.info("ImageNameList: {}", imageNameList);
         try {
-            //traverse imageFiles
+            //traverse image name list
             for (int i = 0; i < imageNameList.size(); i++) {
                 //create image id for each image
                 String imageName = imageNameList.get(i);
@@ -53,12 +52,12 @@ public class PostImageService {
                 postImage.setPostId(postDTO.getPostId());
                 String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 postImage.setImageType(imageType);
-//                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
+                postImage.setImagePath(NGINX_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);
-                logger.info("Saved PostImage: {}", postImage);
+                logger.info("Saved PostImage: {}");
             }
         } catch (Exception e) {
             logger.error("Failed to save PostImage", e.getMessage(), e);
