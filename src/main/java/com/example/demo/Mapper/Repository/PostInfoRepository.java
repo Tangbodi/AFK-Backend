@@ -10,22 +10,12 @@ import java.util.Map;
 
 @Repository
 public interface PostInfoRepository extends JpaRepository<PostsInfo, Long> {
-    @Query(value = "SELECT\n" +
-            "    p.post_id,\n" +
-            "    p.title,\n" +
-            "    gm.game_name\n" +
-            "FROM\n" +
-            "    posts_info c\n" +
-            "JOIN\n" +
-            "    afk.posts p ON c.post_id = p.post_id\n" +
-            "JOIN\n" +
-            "    afk.posts_games_map pgm ON p.post_id = pgm.post_id\n" +
-            "JOIN\n" +
-            "    afk.games gm ON pgm.game_id = gm.game_id\n" +
-            "ORDER BY\n" +
-            "    (c.comment_reply + c.view) DESC\n" +
-            "LIMIT\n" +
-            "    3;", nativeQuery = true)
+    @Query(value = "SELECT ggm.genre_id, ggm.game_id, gm.game_name, p.post_id, p.title\n" +
+            " FROM posts_info c JOIN afk.posts p ON c.post_id = p.post_id\n" +
+            "            JOIN afk.posts_games_map pgm ON p.post_id = pgm.post_id\n" +
+            "            JOIN afk.games gm ON pgm.game_id = gm.game_id\n" +
+            "            JOIN afk.games_genres_map ggm ON pgm.game_id = ggm.game_id\n" +
+            "            ORDER BY (c.comment_reply + c.view) DESC LIMIT 9", nativeQuery = true)
     List<Map<Short, Object>> findMostPopularPosts();
 
 }

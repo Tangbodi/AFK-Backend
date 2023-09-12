@@ -34,6 +34,7 @@ public class PostImageService {
     @Autowired
     private PostImageRepository postImageRepository;
 
+    @Async("MultiExecutor")
     @Transactional(rollbackOn = Exception.class)
     public void SavePostImage(PostDTO postDTO) {
         logger.info("Saving PostImage: {}");
@@ -50,12 +51,10 @@ public class PostImageService {
                 logger.info("ImageId: {}", imageId);
                 postImage.setId(imageId);
                 postImage.setPostId(postDTO.getPostId());
-                logger.info("postId: {}", postDTO.getPostId());
                 String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 postImage.setImageType(imageType);
 //                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
-                logger.info("imageUrl: {}", postImage.getImageUrl());
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
                 postImageRepository.save(postImage);

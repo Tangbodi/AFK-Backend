@@ -21,16 +21,16 @@ public interface CommentRepository extends JpaRepository<PostComment, Long> {
     List<Map<String, Object>> findCommentsByPostId(@Param("postId") Long postId, @Param("userId") Long userId);
 
 
-    @Query(value = "WITH RankedComments AS (\n" +
-            "SELECT post_id, content, created_at, ROW_NUMBER() OVER (ORDER BY created_at DESC) AS row_num\n" +
+    @Query(value = "WITH RankedComments AS (SELECT post_id, content, created_at, ROW_NUMBER() OVER (ORDER BY created_at DESC) AS row_num\n" +
             "FROM afk.post_comments),\n" +
             "PostsWithGame AS (\n" +
-            "SELECT rc.post_id, gm.game_name, rc.content, rc.created_at\n" +
+            "SELECT rc.post_id, gm.game_name, ggm.genre_id, ggm.game_id, rc.content, rc.created_at\n" +
             "FROM RankedComments rc\n" +
             "JOIN afk.posts_games_map pgm ON rc.post_id = pgm.post_id\n" +
-            "JOIN afk.games gm ON pgm.game_id = gm.game_id)\n" +
-            "SELECT p.post_id, p.content, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC\n" +
-            "LIMIT 6;", nativeQuery = true)
+            "JOIN afk.games gm ON pgm.game_id = gm.game_id\n" +
+            "JOIN afk.games_genres_map ggm ON gm.game_id = ggm.game_id)\n" +
+            "SELECT p.genre_id, p.game_id, p.post_id, p.content, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC\n" +
+            "LIMIT 9;", nativeQuery = true)
     List<Map<String, Object>> findNewestComments();
 
 

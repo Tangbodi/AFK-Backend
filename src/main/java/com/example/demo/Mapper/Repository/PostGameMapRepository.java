@@ -11,11 +11,11 @@ import java.util.Map;
 
 @Repository
 public interface PostGameMapRepository extends JpaRepository<PostsGamesMap, Long> {
-    @Query(value = "WITH RankedPosts AS ( SELECT post_id, game_id,  genre_id, created_at, ROW_NUMBER() \n" +
-            "OVER (PARTITION BY genre_id ORDER BY created_at DESC) AS row_num FROM afk.posts_games_map ),\n" +
-            "PostsWithGame AS (  SELECT rp.post_id, rp.genre_id, p.title, gm.game_name, rp.created_at FROM RankedPosts rp \n" +
-            "JOIN afk.posts p ON rp.post_id = p.post_id JOIN afk.games gm ON rp.game_id = gm.game_id\n" +
-            "WHERE row_num <=3) SELECT  p.post_id, p.genre_id, p.title, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC", nativeQuery = true)
+    @Query(value = "WITH RankedPosts AS ( SELECT post_id, game_id,  genre_id, created_at, ROW_NUMBER() OVER (PARTITION BY genre_id ORDER BY created_at DESC) AS row_num FROM afk.posts_games_map ),\n" +
+            "PostsWithGame AS (  SELECT rp.post_id, rp.genre_id, rp.game_id, p.title, gm.game_name, rp.created_at FROM RankedPosts rp \n" +
+            "JOIN afk.posts p ON rp.post_id = p.post_id \n" +
+            "JOIN afk.games gm ON rp.game_id = gm.game_id\n" +
+            "WHERE row_num <=3) SELECT  p.post_id, p.genre_id, p.game_id, p.title, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC", nativeQuery = true)
     List<Map<String, Object>> findLatestPostsGamesMap();
 
     @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment_reply, pi.like, pi.save , ui.username, pgm.created_at\n" +

@@ -47,6 +47,8 @@ public class PostGameMapService {
         for (Map<String, Object> map : postsGamesMaps) {
             try {
                 LatestPostVO latestPostVO = new LatestPostVO();
+                latestPostVO.setGenreId(Byte.valueOf(map.get("genre_id").toString()));
+                latestPostVO.setGameId(Short.valueOf(map.get("game_id").toString()));
                 latestPostVO.setPostId(map.get("post_id").toString());
                 latestPostVO.setTitle((String) map.get("title"));
                 latestPostVO.setGameName((String) map.get("game_name"));

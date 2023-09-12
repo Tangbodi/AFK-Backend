@@ -80,6 +80,8 @@ public class PostInfoService {
         for (Map<Short, Object> popularPost : popularPosts) {
             try {
                 PopularPostVO popularPostVO = new PopularPostVO();
+                popularPostVO.setGenreId(Byte.valueOf(popularPost.get("genre_id").toString()));
+                popularPostVO.setGameId(Short.valueOf(popularPost.get("game_id").toString()));
                 popularPostVO.setPostId(popularPost.get("post_id").toString());
                 popularPostVO.setTitle((String) popularPost.get("title"));
                 popularPostVO.setGameName((String) popularPost.get("game_name"));

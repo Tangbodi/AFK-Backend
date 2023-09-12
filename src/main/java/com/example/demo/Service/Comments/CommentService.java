@@ -213,6 +213,8 @@ public class CommentService {
         for (Map<String, Object> map : newestCommentsList) {
             try {
                 NewestCommentVO newestCommentVO = new NewestCommentVO();
+                newestCommentVO.setGenreId(Byte.valueOf(map.get("genre_id").toString()));
+                newestCommentVO.setGameId(Short.valueOf(map.get("game_id").toString()));
                 newestCommentVO.setPostId(map.get("post_id").toString());
                 newestCommentVO.setContent((String) map.get("content"));
                 newestCommentVO.setGameName((String) map.get("game_name"));

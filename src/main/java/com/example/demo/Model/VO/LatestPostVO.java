@@ -6,6 +6,8 @@ import java.time.Instant;
 
 @Data
 public class LatestPostVO {
+    private Byte genreId;
+    private Short gameId;
     private String postId;
     private String title;
     private String gameName;
