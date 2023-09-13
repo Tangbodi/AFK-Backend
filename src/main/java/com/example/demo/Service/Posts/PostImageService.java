@@ -83,9 +83,6 @@ public class PostImageService {
                     byte[] imageData = image.getBytes();
                     logger.info("Image size: {}", image.getSize());
 //                    String imageType = image.getContentType();
-//                if ("jpeg".equals(imageFormat) || "png".equals(imageFormat) || "gif".equals(imageFormat)) {
-//                    imageType = imageType.substring(imageType.lastIndexOf('/') + 1);
-//                    logger.info("Image type: {}", imageType);
                     // Create image name
                     String imageName = Long.toString(imageId);
                     logger.info("ImageName: {}", imageName);

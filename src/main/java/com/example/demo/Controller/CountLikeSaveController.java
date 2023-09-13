@@ -49,7 +49,7 @@ public class CountLikeSaveController {
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
 
-//    @Scheduled(fixedRate = 6000) // every 6 seconds
+    @Scheduled(fixedRate = 3000) // every 6 seconds
     @PutMapping("/update-like-save-status-and-count")
     public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;
@@ -106,7 +106,7 @@ public class CountLikeSaveController {
         apiResponse = ApiResponse.success("Updated like save status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-//    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 6000)
     @PutMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;
