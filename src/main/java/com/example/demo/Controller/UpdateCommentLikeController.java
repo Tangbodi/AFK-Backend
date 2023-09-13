@@ -2,8 +2,9 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
+import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
+import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,33 +20,36 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class GameSaveController {
-    private static final Logger logger = LoggerFactory.getLogger(GameSaveController.class);
-    private static final String GAME_SAVE = ObjectNameEnum.GAME_SAVE_SET.getTypeName();
+public class UpdateCommentLikeController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateCommentLikeController.class);
+    private static final String COMMENT_LIKE = ObjectNameEnum.COMMENT_LIKE_SET.getTypeName();
+
     @Autowired
     private RedisLikeSaveService redisLikeSaveService;
     @Autowired
-    private UserFavoriteGameService userFavoriteGameService;
+    private UserLikeSaveService userLikeSaveService;
+    @Autowired
+    private CommentInfoService commentInfoService;
 
     @Scheduled(fixedRate = 4000)
-    @PutMapping("/update-game-save")
-    public ResponseEntity UpdateLikeSaveStatusAndCount() {
+    @PutMapping("/update-comment-like")
+    public ResponseEntity UpdateCommentLike() {
         ApiResponse apiResponse;
+        //get all post ids under POST_LIKE set in Redis
 
-        Integer objectCode = ObjectNameEnum.GetTypeCode(GAME_SAVE);
+        Integer objectCode = ObjectNameEnum.GetTypeCode(COMMENT_LIKE);
         logger.info("objectCode: {}", objectCode);
         //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(GAME_SAVE);
+        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(COMMENT_LIKE);
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
-
         } else {
             logger.info("objectIds: {}", objectIds);
             List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId,date
                 //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(GAME_SAVE + ":::" + objectId);
+                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(COMMENT_LIKE + ":::" + objectId);
                 hashSetMap.entrySet().stream().forEach(entry -> {
                     ObjectUserDTO objectUserDTO = new ObjectUserDTO();
                     objectUserDTO.setObjectId(Long.valueOf(objectId));
@@ -53,17 +57,18 @@ public class GameSaveController {
                     objectUserDTO.setUserId(Long.valueOf(userId));
                     objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
                     objectUserDTOList.add(objectUserDTO);
-                    redisLikeSaveService.DeleteMember(GAME_SAVE + ":::" + objectId, userId);
+                    redisLikeSaveService.DeleteMember(COMMENT_LIKE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
-                        redisLikeSaveService.RemoveHashSet(GAME_SAVE, objectId);
+                        redisLikeSaveService.RemoveHashSet(COMMENT_LIKE, objectId);
                     } else {
                         //
                     }
                 });
             }
-            userFavoriteGameService.SetUserFavoriteGame(objectUserDTOList);
+            userLikeSaveService.SetUserLikeComment(objectUserDTOList);
+            commentInfoService.CalculateCommentTotalLike(objectUserDTOList);
         }
-        apiResponse = ApiResponse.success("Updated game save status successfully");
+        apiResponse = ApiResponse.success("Updated comment like status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

@@ -65,24 +65,6 @@ public class GamesController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @PostMapping("/save-game")
-    public ResponseEntity SaveGames(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpSession session) throws JMSException, InterruptedException {
-        ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Sign in to add game to your favorites");
-        } else {
-            if (userLikeSaveDTO.getStatus() == 0) {
-                apiResponse = ApiResponse.success(1);
-            } else {
-                apiResponse = ApiResponse.success(0);
-            }
-            //Send MQ
-            mqSender.SendSaveLikeMessage(userLikeSaveDTO, userId);
-        }
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
-
     @GetMapping("/saved-games")
     public ResponseEntity GetSavedGames(HttpSession session) {
         ApiResponse apiResponse;

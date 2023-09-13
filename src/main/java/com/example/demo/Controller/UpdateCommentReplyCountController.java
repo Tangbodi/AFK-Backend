@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class CommentReplyCountController {
-    private static final Logger logger = LoggerFactory.getLogger(CommentReplyCountController.class);
+public class UpdateCommentReplyCountController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateCommentReplyCountController.class);
     private static final String COMMENT_COUNT = CountNameEnum.COMMENT_COUNT.getCountName();
     private static final String REPLY_COUNT = CountNameEnum.REPLY_COUNT.getCountName();
     private static final List<String> COUNT_NAME_LIST = Arrays.asList(COMMENT_COUNT, REPLY_COUNT);

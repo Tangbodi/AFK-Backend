@@ -1,13 +1,9 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
-import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
-import com.example.demo.Service.Replies.ReplyInfoService;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -18,11 +14,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
-public class PostLikeController {
-    private static final Logger logger = LoggerFactory.getLogger(PostLikeController.class);
+public class UpdatePostLikeController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdatePostLikeController.class);
     private static final String POST_LIKE = ObjectNameEnum.POST_LIKE_SET.getTypeName();
 
     @Autowired
@@ -69,19 +68,6 @@ public class PostLikeController {
             userLikeSaveService.SetUserLikePost(objectUserDTOList);
             //update total like count in database
             postInfoService.CalculatePostTotalLike(objectUserDTOList);
-
-//                else if (objectCode == 1) {
-//                    userLikeSaveService.SetUserLikeComment(objectUserDTOList);
-//                    commentInfoService.CalculateCommentTotalLike(objectUserDTOList);
-//                } else if (objectCode == 2) {
-//                    userLikeSaveService.SetUserLikeReply(objectUserDTOList);
-//                    replyInfoService.CalculateReplyTotalLike(objectUserDTOList);
-//                } else if(objectCode == 3) {
-//                    userLikeSaveService.SetUserSavePost(objectUserDTOList);
-//                    postInfoService.CalculatePostTotalSave(objectUserDTOList);
-//                } else { //objectCode == 4
-//                    userFavoriteGameService.SetUserFavoriteGame(objectUserDTOList);
-//                }
         }
         apiResponse = ApiResponse.success("Updated post like status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

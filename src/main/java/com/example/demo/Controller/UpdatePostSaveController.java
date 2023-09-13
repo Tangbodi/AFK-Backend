@@ -2,11 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
-import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
-import com.example.demo.Service.Replies.ReplyInfoService;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -23,8 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class PostSaveController {
-    private static final Logger logger = LoggerFactory.getLogger(PostSaveController.class);
+public class UpdatePostSaveController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdatePostSaveController.class);
     private static final String POST_SAVE = ObjectNameEnum.POST_SAVE_SET.getTypeName();
     @Autowired
     private RedisLikeSaveService redisLikeSaveService;

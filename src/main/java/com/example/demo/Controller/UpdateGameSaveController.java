@@ -2,12 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
-import com.example.demo.Service.Comments.CommentInfoService;
-import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
-import com.example.demo.Service.Replies.ReplyInfoService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
-import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,34 +19,33 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class ReplyLikeController {
-    private static final Logger logger = LoggerFactory.getLogger(ReplyLikeController.class);
-    private static final String REPLY_LIKE = ObjectNameEnum.REPLY_LIKE_SET.getTypeName();
-
+public class UpdateGameSaveController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateGameSaveController.class);
+    private static final String GAME_SAVE = ObjectNameEnum.GAME_SAVE_SET.getTypeName();
     @Autowired
     private RedisLikeSaveService redisLikeSaveService;
     @Autowired
-    private UserLikeSaveService userLikeSaveService;
-    @Autowired
-    private ReplyInfoService replyInfoService;
+    private UserFavoriteGameService userFavoriteGameService;
 
     @Scheduled(fixedRate = 4000)
-    @PutMapping("/update-reply-like")
-    public ResponseEntity UpdateReplyLike() {
+    @PutMapping("/update-game-save")
+    public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;
-        Integer objectCode = ObjectNameEnum.GetTypeCode(REPLY_LIKE);
+
+        Integer objectCode = ObjectNameEnum.GetTypeCode(GAME_SAVE);
         logger.info("objectCode: {}", objectCode);
         //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(REPLY_LIKE);
+        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(GAME_SAVE);
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
+
         } else {
             logger.info("objectIds: {}", objectIds);
             List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId,date
                 //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(REPLY_LIKE + ":::" + objectId);
+                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(GAME_SAVE + ":::" + objectId);
                 hashSetMap.entrySet().stream().forEach(entry -> {
                     ObjectUserDTO objectUserDTO = new ObjectUserDTO();
                     objectUserDTO.setObjectId(Long.valueOf(objectId));
@@ -58,18 +53,17 @@ public class ReplyLikeController {
                     objectUserDTO.setUserId(Long.valueOf(userId));
                     objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
                     objectUserDTOList.add(objectUserDTO);
-                    redisLikeSaveService.DeleteMember(REPLY_LIKE + ":::" + objectId, userId);
+                    redisLikeSaveService.DeleteMember(GAME_SAVE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
-                        redisLikeSaveService.RemoveHashSet(REPLY_LIKE, objectId);
+                        redisLikeSaveService.RemoveHashSet(GAME_SAVE, objectId);
                     } else {
                         //
                     }
                 });
             }
-            userLikeSaveService.SetUserLikeReply(objectUserDTOList);
-            replyInfoService.CalculateReplyTotalLike(objectUserDTOList);
+            userFavoriteGameService.SetUserFavoriteGame(objectUserDTOList);
         }
-        apiResponse = ApiResponse.success("Updated reply like status successfully");
+        apiResponse = ApiResponse.success("Updated game save status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

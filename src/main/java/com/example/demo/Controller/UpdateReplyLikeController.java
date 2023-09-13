@@ -2,11 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Model.DTO.ObjectUserDTO;
-import com.example.demo.Service.Comments.CommentInfoService;
-import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisLikeSaveService;
 import com.example.demo.Service.Replies.ReplyInfoService;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -23,27 +20,25 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class CommentLikeController {
-    private static final Logger logger = LoggerFactory.getLogger(CommentLikeController.class);
-    private static final String COMMENT_LIKE = ObjectNameEnum.COMMENT_LIKE_SET.getTypeName();
+public class UpdateReplyLikeController {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateReplyLikeController.class);
+    private static final String REPLY_LIKE = ObjectNameEnum.REPLY_LIKE_SET.getTypeName();
 
     @Autowired
     private RedisLikeSaveService redisLikeSaveService;
     @Autowired
     private UserLikeSaveService userLikeSaveService;
     @Autowired
-    private CommentInfoService commentInfoService;
+    private ReplyInfoService replyInfoService;
 
     @Scheduled(fixedRate = 4000)
-    @PutMapping("/update-comment-like")
-    public ResponseEntity UpdateCommentLike() {
+    @PutMapping("/update-reply-like")
+    public ResponseEntity UpdateReplyLike() {
         ApiResponse apiResponse;
-        //get all post ids under POST_LIKE set in Redis
-
-        Integer objectCode = ObjectNameEnum.GetTypeCode(COMMENT_LIKE);
+        Integer objectCode = ObjectNameEnum.GetTypeCode(REPLY_LIKE);
         logger.info("objectCode: {}", objectCode);
         //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(COMMENT_LIKE);
+        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(REPLY_LIKE);
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
         } else {
@@ -52,7 +47,7 @@ public class CommentLikeController {
             for (String objectId : objectIds) {
                 //userId,date
                 //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(COMMENT_LIKE + ":::" + objectId);
+                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(REPLY_LIKE + ":::" + objectId);
                 hashSetMap.entrySet().stream().forEach(entry -> {
                     ObjectUserDTO objectUserDTO = new ObjectUserDTO();
                     objectUserDTO.setObjectId(Long.valueOf(objectId));
@@ -60,18 +55,18 @@ public class CommentLikeController {
                     objectUserDTO.setUserId(Long.valueOf(userId));
                     objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
                     objectUserDTOList.add(objectUserDTO);
-                    redisLikeSaveService.DeleteMember(COMMENT_LIKE + ":::" + objectId, userId);
+                    redisLikeSaveService.DeleteMember(REPLY_LIKE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
-                        redisLikeSaveService.RemoveHashSet(COMMENT_LIKE, objectId);
+                        redisLikeSaveService.RemoveHashSet(REPLY_LIKE, objectId);
                     } else {
                         //
                     }
                 });
             }
-            userLikeSaveService.SetUserLikeComment(objectUserDTOList);
-            commentInfoService.CalculateCommentTotalLike(objectUserDTOList);
+            userLikeSaveService.SetUserLikeReply(objectUserDTOList);
+            replyInfoService.CalculateReplyTotalLike(objectUserDTOList);
         }
-        apiResponse = ApiResponse.success("Updated comment like status successfully");
+        apiResponse = ApiResponse.success("Updated reply like status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

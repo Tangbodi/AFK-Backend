@@ -30,7 +30,7 @@ public class RedisStrategy {
         logger.info("Start LikeSaveStrategy");
         // 1 or 0
         Integer status = userLikeSaveDTO.getStatus();
-        //post_like/comment_like/reply_like/post_save/0/1/2/3
+        //post_like/comment_like/reply_like/post_save/game_save/0/1/2/3/4
         String typeName = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());
         //postId/commentId/replyId
         Long objectId = userLikeSaveDTO.getObjectId();
