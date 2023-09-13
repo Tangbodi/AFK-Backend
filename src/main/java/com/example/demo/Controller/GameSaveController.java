@@ -27,7 +27,7 @@ public class GameSaveController {
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-game-save")
     public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;
