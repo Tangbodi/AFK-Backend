@@ -37,9 +37,8 @@ public class RedisStrategy {
         //post_like:::objectId
         String key = typeName + ":::" + objectId;
         String hashKey = String.valueOf(userLikeSaveDTO.getUserId());
-        String value = String.valueOf(userLikeSaveDTO.getCreatedAt());
-        //if status is 1
-        if (status == StatusEnum.TRUE.getCode()) {
+        String value = String.valueOf(userLikeSaveDTO.getStatus());
+        //whatever the status is, add to set
             //if the Type name doesn't exist then add to set
             if (!redisLikeSaveService.MemberExists(typeName, objectId)) {
                 //post_like/comment_like/reply_like/post_save
@@ -51,15 +50,6 @@ public class RedisStrategy {
             }
             //postId/commentId/replyId -> userId -> createdAt
             redisLikeSaveService.AddHashSet(key, hashKey, value);
-        } else {
-            //if no hash set, remove set
-            redisLikeSaveService.DeleteMember(key, hashKey);
-            if (redisLikeSaveService.NumOfMembers(key) == 0L) {
-                redisLikeSaveService.RemoveHashSet(typeName, objectId);
-            } else {
-                //
-            }
-        }
     }
     public void CommentCountStrategy(CommentReplyDTO commentReplyDTO){
         logger.info("Start CommentCountStrategy");

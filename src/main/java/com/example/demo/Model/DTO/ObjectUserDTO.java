@@ -8,5 +8,5 @@ import java.time.Instant;
 public class ObjectUserDTO {
     private Long objectId;
     private Long userId;
-    private Instant createdAt;
+    private Integer status;
 }

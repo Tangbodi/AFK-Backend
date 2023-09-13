@@ -74,7 +74,7 @@ public class CountLikeSaveController {
                         objectUserDTO.setObjectId(Long.valueOf(objectId));
                         String userId = entry.getKey();
                         objectUserDTO.setUserId(Long.valueOf(userId));
-                        objectUserDTO.setCreatedAt(Instant.parse(entry.getValue()));
+                        objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
                         objectUserDTOList.add(objectUserDTO);
                         redisLikeSaveService.DeleteMember(objectName + ":::" + objectId, userId);
                         if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
@@ -106,7 +106,7 @@ public class CountLikeSaveController {
         apiResponse = ApiResponse.success("Updated like save status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 9000)
     @PutMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;

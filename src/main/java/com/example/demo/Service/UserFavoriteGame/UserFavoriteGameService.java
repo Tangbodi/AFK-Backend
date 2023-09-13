@@ -34,7 +34,7 @@ public class UserFavoriteGameService {
                 usersFavoriteGameId.setGameId(objectUserDTO.getObjectId().shortValue());
                 UsersFavoriteGame usersFavoriteGame = userFavoriteGameRepository.findById(usersFavoriteGameId)
                         .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
-                usersFavoriteGame.setFavoriteStatus(!usersFavoriteGame.getFavoriteStatus());
+                usersFavoriteGame.setFavoriteStatus(objectUserDTO.getStatus() == 1);
                 usersFavoriteGame.setModifiedAt(Instant.now());
                 userFavoriteGameRepository.save(usersFavoriteGame);
                 logger.info("User favorite game saved successfully for user ID: {}, game ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
@@ -43,7 +43,7 @@ public class UserFavoriteGameService {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
         }
     }
-
+    @Transactional
     private UsersFavoriteGame CreateUserFavoriteGame(UsersFavoriteGameId usersFavoriteGameId) {
         logger.info("Creating user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
 
