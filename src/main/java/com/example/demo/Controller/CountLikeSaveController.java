@@ -49,7 +49,7 @@ public class CountLikeSaveController {
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
 
-    @Scheduled(fixedRate = 3000) // every 6 seconds
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-like-save-status-and-count")
     public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;
