@@ -10,22 +10,19 @@ import com.example.demo.Service.Replies.ReplyInfoService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Util.ApiResponse;
-import org.apache.activemq.thread.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.*;
 
 @RestController
-public class CountLikeSaveController {
-    private static final Logger logger = LoggerFactory.getLogger(CountLikeSaveController.class);
+public class LikeSaveController {
+    private static final Logger logger = LoggerFactory.getLogger(LikeSaveController.class);
     private static final String POST_LIKE = ObjectNameEnum.POST_LIKE_SET.getTypeName();
     private static final String COMMENT_LIKE = ObjectNameEnum.COMMENT_LIKE_SET.getTypeName();
     private static final String REPLY_LIKE = ObjectNameEnum.REPLY_LIKE_SET.getTypeName();
@@ -49,7 +46,7 @@ public class CountLikeSaveController {
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
 
-    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 5000)
     @PutMapping("/update-like-save-status-and-count")
     public ResponseEntity UpdateLikeSaveStatusAndCount() {
         ApiResponse apiResponse;

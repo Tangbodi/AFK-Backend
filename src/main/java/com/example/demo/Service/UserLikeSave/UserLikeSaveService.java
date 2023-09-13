@@ -10,6 +10,7 @@ import com.example.demo.Service.Replies.ReplyInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -39,6 +40,7 @@ public class UserLikeSaveService {
     @Autowired
     private ReplyInfoService replyInfoService;
 
+    @Async("MultiExecutor")
     @Transactional
     public void SetUserLikePost(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Setting user like post");
@@ -75,7 +77,7 @@ public class UserLikeSaveService {
         logger.info("Created user like post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
         return usersFavoritePost;
     }
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetUserSavePost(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Setting user save post");
@@ -112,7 +114,7 @@ public class UserLikeSaveService {
         logger.info("Created user save post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
         return usersFavoritePost;
     }
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetUserLikeComment(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Setting user like comment");
@@ -146,7 +148,7 @@ public class UserLikeSaveService {
         logger.info("Created user like comment for user ID: {}, comment ID: {}", usersLikeCommentId.getUserId(), usersLikeCommentId.getCommentId());
         return usersLikeComment;
     }
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetUserLikeReply(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Setting user like reply");

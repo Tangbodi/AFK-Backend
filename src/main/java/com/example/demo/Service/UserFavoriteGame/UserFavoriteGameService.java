@@ -9,6 +9,7 @@ import com.example.demo.Model.VO.UserFavoriteGameVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,7 +24,7 @@ public class UserFavoriteGameService {
     private static final Logger logger = LoggerFactory.getLogger(UserFavoriteGameService.class);
     @Autowired
     private UserFavoriteGameRepository userFavoriteGameRepository;
-
+    @Async("MultiExecutor")
     @Transactional
     public void SetUserFavoriteGame(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Setting user favorite game for game ID: {}", objectUserDTOList.get(0).getObjectId());
