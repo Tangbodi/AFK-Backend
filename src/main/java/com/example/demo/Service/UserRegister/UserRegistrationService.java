@@ -5,10 +5,13 @@ import com.example.demo.Mapper.Repository.UsersLoginRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.Entity.UsersLogin;
+import com.example.demo.Service.Comments.CommentOnPostMentionService;
+import com.example.demo.Service.Replies.ReplyOnCommentMentionService;
+import com.example.demo.Service.Replies.ReplyOnPostMentionService;
+import com.example.demo.Service.Replies.ReplyOnReplyMentionService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
-import com.example.demo.Service.UsersPostsSetting.UserPostSettingService;
 import com.example.demo.Util.Snowflake;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -31,10 +34,15 @@ public class UserRegistrationService {
     @Autowired
     private UserAuthService userAuthService;
     @Autowired
-    private UserPostSettingService userPostSettingService;
-    @Autowired
     private UserMailAddressService userMailAddressService;
-
+    @Autowired
+    private CommentOnPostMentionService commentOnPostMentionService;
+    @Autowired
+    private ReplyOnCommentMentionService replyOnCommentMentionService;
+    @Autowired
+    private ReplyOnReplyMentionService replyOnReplyMentionService;
+    @Autowired
+    private ReplyOnPostMentionService replyOnPostMentionService;
     public UsersInfo CheckUsernameExists(String username) {
         UsersInfo usersInfo = userInfoService.CheckUsernameExists(username);
         return usersInfo;
@@ -53,7 +61,7 @@ public class UserRegistrationService {
             Long snowflakeId = Snowflake.generateUniqueId();
             userRegisterDTO.setUserId(snowflakeId);
             userRegisterDTO.setCreatedAt(Instant.now());
-            logger.info("Setting up User :{}");
+            logger.info("Saving User :{}");
             UsersLogin user = new UsersLogin();
             user.setId(snowflakeId);
             user.setUsername(userRegisterDTO.getUsername());
@@ -61,8 +69,12 @@ public class UserRegistrationService {
             user.setPassword(encodedPassword);
             user.setCreatedAt(userRegisterDTO.getCreatedAt());
             user.setModifiedAt(userRegisterDTO.getCreatedAt());
-            userAuthService.SetUsersAuth(userRegisterDTO);
-            userInfoService.SetUserInfo(userRegisterDTO);
+            userAuthService.SaveUsersAuth(userRegisterDTO);
+            userInfoService.SaveUserInfo(userRegisterDTO);
+            commentOnPostMentionService.SaveCommentOnPostMention(userRegisterDTO);
+            replyOnCommentMentionService.SaveReplyOnCommentMention(userRegisterDTO);
+            replyOnReplyMentionService.SaveReplyOnReplyMention(userRegisterDTO);
+            replyOnPostMentionService.SaveReplyOnPostMention(userRegisterDTO);
             return usersLoginRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);

@@ -107,8 +107,8 @@ public class UserInfoService {
     }
 
     @Transactional
-    public void SetUserInfo(UserRegisterDTO userRegisterDTO) {
-        logger.info("Setting up UsersInfo: {}");
+    public void SaveUserInfo(UserRegisterDTO userRegisterDTO) {
+        logger.info("Saving UsersInfo: {}");
         try {
             UsersInfo usersInfo = new UsersInfo();
             usersInfo.setId(userRegisterDTO.getUserId());
@@ -118,7 +118,7 @@ public class UserInfoService {
             usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
             userInfoRepository.save(usersInfo);
         } catch (Exception e) {
-            logger.error("Failed to set UsersInfo: {}", e.getMessage(), e);
+            logger.error("Failed to save UsersInfo: {}", e.getMessage(), e);
         }
     }
 

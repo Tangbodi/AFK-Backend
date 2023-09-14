@@ -1,9 +1,9 @@
 package com.example.demo.Service.Comments;
 
+import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.VO.*;
-import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
@@ -13,6 +13,7 @@ import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -24,10 +25,12 @@ import java.util.*;
 @Service
 public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+    //For response entity map
     private static final String COMMENT = "comment";
     private static final String REPLY = "reply";
     @Autowired
     private CommentRepository commentRepository;
+    @Lazy
     @Autowired
     private ReplyService replyService;
     @Autowired
@@ -38,6 +41,9 @@ public class CommentService {
     private MQSender mqSender;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private CommentOnPostMentionService commentOnPostMentionService;
+
     @Transactional
     public CommentSavedVO SetComment(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting comment: {}");
@@ -60,26 +66,32 @@ public class CommentService {
                 //send comment count message to ActiveMQ
                 mqSender.SendCommentCountMessage(commentReplyDTO);
                 //Set mention message after saved comment if the user is not the author of the post
-                if(!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())){
+                if (!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())) {
                     logger.info("FromUid is not equal to ToUid");
-                    //set message mention
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
-                    messageVO.setContent(commentReplyDTO.getContent());
-                    messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
-                    messageVO.setFromUsername(commentReplyDTO.getFromUsername());
-                    messageVO.setToUid(commentReplyDTO.getToUid().toString());
-                    messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
-                    //set message
-                    messageService.SetMessage(commentReplyDTO);
-                    //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
+                    if (!commentOnPostMentionService.CheckCommentOnPostMention(commentReplyDTO.getToUid())) {
+                        logger.info("Comment on post mention setting is off");
+                        return TransferToVO(commentReplyDTO);
+                    } else {
+                        logger.info("Comment on post mention setting is on");
+                        //set message mention
+                        MessageVO messageVO = new MessageVO();
+                        messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
+                        messageVO.setContent(commentReplyDTO.getContent());
+                        messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
+                        messageVO.setFromUsername(commentReplyDTO.getFromUsername());
+                        messageVO.setToUid(commentReplyDTO.getToUid().toString());
+                        messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
+                        //set message
+                        messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
+                        //send message mention to MQ
+                        mqSender.SendMentionMessage(messageVO);
+                    }
                 } else {
                     logger.info("FromUid is equal to ToUid");
                 }
                 return TransferToVO(commentReplyDTO);
             } else {
-                logger.info("Comment not saved: {}");
+                logger.info("Failed to save comment: {}");
             }
         } catch (Exception e) {
             logger.error("Failed to set comment: {}", e.getMessage(), e);
@@ -106,7 +118,7 @@ public class CommentService {
         List<Map<String, Object>> commentsList = GetAllCommentsByPostId(postId, userId);
         List<Map<String, Object>> res = new ArrayList<>();
         //get all comment ids from all comments for getting all replies with same comment ids
-        if (commentsList.isEmpty()){
+        if (commentsList.isEmpty()) {
             logger.info("No comments found");
             return Collections.emptyList();
         } else {
@@ -117,14 +129,14 @@ public class CommentService {
             }
             //get all replies by comment ids
             List<Map<String, Object>> repliesList = replyService.GetRepliesByCommentId(commentIds, userId);
-            if(repliesList.isEmpty()){
+            if (repliesList.isEmpty()) {
                 logger.info("No replies found");
-                for(Map<String, Object> comment : commentsList){
+                for (Map<String, Object> comment : commentsList) {
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
                     List<Map<String, Object>> combinedList = new ArrayList<>();
-                    Map<String,Object> map = new HashMap<>();
-                    map.put(COMMENT,showCommentVO);
-                    map.put(REPLY,Collections.emptyList());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(COMMENT, showCommentVO);
+                    map.put(REPLY, Collections.emptyList());
                     res.add(map);
                 }
             } else {
@@ -147,16 +159,17 @@ public class CommentService {
                         }
                     }
                     ShowCommentVO showCommentVO = CreateCommentMap(comment);
-                    Map<String,Object> map = new HashMap<>();
-                    map.put(COMMENT,showCommentVO);
-                    map.put(REPLY,replies);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(COMMENT, showCommentVO);
+                    map.put(REPLY, replies);
                     res.add(map);
                 }
             }
             return res;
         }
     }
-    private static ShowCommentVO CreateCommentMap(Map<String, Object> comment){
+
+    private static ShowCommentVO CreateCommentMap(Map<String, Object> comment) {
         logger.info("Creating comment map");
 //        pc.comment_id, p.post_id, pc.from_uid, ui.username, ui.avatar_url, pc.content, ulc.like_status, pc.created_at
         ShowCommentVO showCommentVO = new ShowCommentVO();
@@ -172,7 +185,8 @@ public class CommentService {
 
         return showCommentVO;
     }
-    private static ShowReplyVO CreateReplyMap(Map<String, Object> reply){
+
+    private static ShowReplyVO CreateReplyMap(Map<String, Object> reply) {
         logger.info("Creating reply map");
 
         ShowReplyVO showReplyVO = new ShowReplyVO();
@@ -185,12 +199,13 @@ public class CommentService {
         showReplyVO.setToUid(reply.get("to_uid").toString());
         showReplyVO.setToUsername(reply.get("to_username").toString());
         showReplyVO.setContent(reply.get("content").toString());
-        showReplyVO.setLikeStatus((Integer)reply.get("like_status"));
+        showReplyVO.setLikeStatus((Integer) reply.get("like_status"));
         Timestamp timestamp = (Timestamp) reply.get("created_at");
         showReplyVO.setCreatedAt(timestamp.toInstant());
 
         return showReplyVO;
     }
+
     public List<NewestCommentVO> GetNewestComments() {
         logger.info("Getting newest comments");
         try {
@@ -226,6 +241,23 @@ public class CommentService {
             }
         }
         return newestCommentVOList;
+    }
+
+    public Long GetCommentAuthorByCommentId(Long commentId) {
+        logger.info("Getting comment author");
+        try {
+            PostComment postComment = commentRepository.findById(commentId).orElse(null);
+            if (postComment != null) {
+                Long commentAuthor = postComment.getFromUid();
+                logger.info("Comment author found");
+                return commentAuthor;
+            } else {
+                logger.info("Comment author not found");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get comment author", e);
+        }
+        return null;
     }
 }
 

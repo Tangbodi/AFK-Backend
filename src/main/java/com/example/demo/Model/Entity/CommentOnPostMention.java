@@ -13,8 +13,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "users_posts_setting")
-public class UsersPostsSetting {
+@Table(name = "comment_on_post_mentions")
+public class CommentOnPostMention {
     @Id
     @Column(name = "user_id", nullable = false)
     private Long id;

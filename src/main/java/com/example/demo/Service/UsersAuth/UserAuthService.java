@@ -27,8 +27,8 @@ public class UserAuthService {
     private UserInfoService userInfoService;
 
     @Transactional
-    public void SetUsersAuth(UserRegisterDTO userRegisterDTO) {
-        logger.info("Setting up UsersAuth :{}");
+    public void SaveUsersAuth(UserRegisterDTO userRegisterDTO) {
+        logger.info("Saving UsersAuth :{}");
         try {
             UsersAuth usersAuth = new UsersAuth();
             usersAuth.setId(userRegisterDTO.getUserId());
@@ -39,7 +39,7 @@ public class UserAuthService {
             usersAuth.setModifiedAt(userRegisterDTO.getCreatedAt());
             userAuthRepository.save(usersAuth);
         } catch (Exception e) {
-            logger.error("Failed to set UsersAuth: {}", e.getMessage(), e);
+            logger.error("Failed to save UsersAuth: {}", e.getMessage(), e);
         }
     }
 

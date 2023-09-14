@@ -1,10 +1,11 @@
 package com.example.demo.Service.Replies;
 
-import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Mapper.Repository.PostUserMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
+import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostReply;
-import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.ReplySavedVO;
+import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
@@ -13,6 +14,7 @@ import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -32,6 +34,18 @@ public class ReplyService {
     private MessageService messageService;
     @Autowired
     private MQSender mqSender;
+    @Autowired
+    private ReplyOnCommentMentionService replyOnCommentMentionService;
+    @Autowired
+    private ReplyOnReplyMentionService replyOnReplyMentionService;
+    @Autowired
+    private ReplyOnPostMentionService replyOnPostMentionService;
+    @Lazy
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private PostUserMapRepository postUserMapRepository;
+
     public ReplySavedVO SetReply(CommentReplyDTO commentReplyDTO) {
         logger.info("Setting reply");
         try {
@@ -54,36 +68,47 @@ public class ReplyService {
                 ipAddressService.SetReplyIpAddress(commentReplyDTO);
                 //send message to ActiveMQ
                 mqSender.SendReplyCountMessage(commentReplyDTO);
-                if(!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())){
-                    logger.info("FromUid is not equal to ToUid");
-                    //set message mention
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(commentReplyDTO.getReplyId().toString());
-                    messageVO.setContent(commentReplyDTO.getContent());
-                    messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
-                    messageVO.setFromUsername(commentReplyDTO.getFromUsername());
-                    messageVO.setToUid(commentReplyDTO.getToUid().toString());
-                    messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
-                    //set message
-                    messageService.SetMessage(commentReplyDTO);
-                    //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
+                Long toReplyAuthorId = commentReplyDTO.getToUid();
+                Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
+                Long postAuthorId = postUserMapRepository.findByPostId(commentReplyDTO.getPostId()).get().getId().getUserId();
+                if(commentReplyDTO.getToReplyId() != null){
+                    logger.info("This is a reply on reply");
+                    if(!commentReplyDTO.getFromUid().equals(toReplyAuthorId)){
+                        logger.info("fromUid is not equal to the toUid");
+                        replyOnReplyMentionService.CheckReplyOnReplyMention(commentReplyDTO, toReplyAuthorId);
+                        if(!commentReplyDTO.getFromUid().equals(commentAuthorId)){
+                            logger.info("fromUid is not equal to the commentAuthorId");
+                            replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
+                            if(!commentReplyDTO.getFromUid().equals(postAuthorId)){
+                                logger.info("fromUid is not equal to the postAuthorId");
+                                replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
+                            }
+                        }
+                    }
                 } else {
-                    logger.info("FromUid is equal to ToUid");
+                    logger.info("This is a reply on comment");
+                    if(!commentReplyDTO.getFromUid().equals(commentAuthorId)){
+                        logger.info("fromUid is not equal to the commentAuthorId");
+                        replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
+                        if(!commentReplyDTO.getFromUid().equals(postAuthorId)){
+                            logger.info("fromUid is not equal to the postAuthorId");
+                            replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
+                        }
+                    }
                 }
                 return TransferToVO(commentReplyDTO);
             } else {
-                logger.info("Failed to save reply");
+                logger.info("Failed to save reply: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to set reply", e);
+            logger.error("Failed to set reply: {}", e);
         }
         return null;
     }
 
     public List<Map<String, Object>> GetRepliesByCommentId(List<Long> commentIds, Long userId) {
         logger.info("Getting replies by comment id");
-        List<Map<String, Object>> replyList = replyRepository.findByCommentId(commentIds,userId);
+        List<Map<String, Object>> replyList = replyRepository.findByCommentId(commentIds, userId);
         return replyList;
     }
 
@@ -92,9 +117,9 @@ public class ReplyService {
         ReplySavedVO replySavedVO = new ReplySavedVO();
         replySavedVO.setReplyId(commentReplyDTO.getReplyId().toString());
         replySavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
-        if(commentReplyDTO.getToReplyId() == null){
+        if (commentReplyDTO.getToReplyId() == null) {
             replySavedVO.setToReplyId("0");
-        }else{
+        } else {
             replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
         }
         replySavedVO.setToUid(commentReplyDTO.getToUid().toString());

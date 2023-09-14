@@ -31,29 +31,25 @@ public class MessageService {
     private RedisMessageService redisMessageService;
 
     @Transactional
-    public Message SetMessage(CommentReplyDTO commentReplyDTO) {
-        logger.info("Setting message");
+    public Message SaveMessage(CommentReplyDTO commentReplyDTO, Long toUid) {
+        logger.info("Saving message");
         Message message = new Message();
-        MessageVO messageVO = new MessageVO();
         try {
             if(commentReplyDTO.getReplyId() != null) {
                 message.setCommentReplyId(commentReplyDTO.getReplyId());
-                //set message mention id
-                messageVO.setCommentReplyId(commentReplyDTO.getReplyId().toString());
             } else {
                 message.setCommentReplyId(commentReplyDTO.getCommentId());
-                //set message mention id
-                messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
             }
             //set message
             message.setContent(commentReplyDTO.getContent());
             message.setFromUid(commentReplyDTO.getFromUid());
-            message.setToUid(commentReplyDTO.getToUid());
+            message.setToUid(toUid);
             message.setCreatedAt(commentReplyDTO.getCreatedAt());
             message.setModifiedAt(commentReplyDTO.getCreatedAt());
             Message savedMessage = messageRepository.save(message);
+            logger.info("Saved message");
             //set message user map
-            SetMessageUserMap(savedMessage);
+            SaveMessageUserMap(savedMessage);
         } catch (Exception e) {
             logger.error("Failed to set reply mention", e.getMessage(),e);
         }
@@ -61,14 +57,15 @@ public class MessageService {
     }
 
     @Transactional
-    public void SetMessageUserMap(Message savedMessage) {
-        logger.info("Setting message user map");
+    public void SaveMessageUserMap(Message savedMessage) {
+        logger.info("Saving message user map");
         try {
             MessagesUsersMap messagesUsersMap = new MessagesUsersMap();
             messagesUsersMap.setMessageId(savedMessage.getId());
             messagesUsersMap.setMentionedUid(savedMessage.getToUid());
             messagesUsersMap.setReadStatus(false);
             messageUserMapRepository.save(messagesUsersMap);
+            logger.info("Saved message user map");
         } catch (Exception e) {
             logger.error("Failed to set message user map", e.getMessage(),e);
         }
