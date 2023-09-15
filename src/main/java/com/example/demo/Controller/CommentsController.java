@@ -71,7 +71,7 @@ public class CommentsController {
             }
             commentReplyDTO.setFromUid(userId);
             commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
-            CommentSavedVO commentSavedVO = commentService.SetComment(commentReplyDTO);
+            CommentSavedVO commentSavedVO = commentService.SaveComment(commentReplyDTO);
             if (commentSavedVO != null) {
                 apiResponse = ApiResponse.success(commentSavedVO);
             } else {

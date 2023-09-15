@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +20,7 @@ public class RedisLikeSaveService {
 
 
     public Boolean MemberExists(String key, Object value) {
-        logger.info("Checking exists: {}",key,":::",value);
+        logger.info("Checking exists: {}", key, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -37,8 +35,9 @@ public class RedisLikeSaveService {
         }
         return false;
     }
+
     public void AddSet(String typeNameInSet, Object objectId) {
-        logger.info("Adding set: {}",typeNameInSet,":::",objectId);
+        logger.info("Adding set: {}", typeNameInSet, ":::", objectId);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -54,11 +53,11 @@ public class RedisLikeSaveService {
     }
 
     public void AddHashSet(String key, String hashKey, Object value) {
-        logger.info("Adding hash set: {}",key,":::",hashKey,":::",value);
+        logger.info("Adding hash set: {}", key, ":::", hashKey, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.hset(key, hashKey,  String.valueOf(value));
+            jedis.hset(key, hashKey, String.valueOf(value));
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
@@ -68,8 +67,9 @@ public class RedisLikeSaveService {
             }
         }
     }
-    public void DeleteMember(String key, String hashKey){
-        logger.info("Deleting member: {}",key,":::",hashKey);
+
+    public void DeleteMember(String key, String hashKey) {
+        logger.info("Deleting member: {}", key, ":::", hashKey);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -83,7 +83,8 @@ public class RedisLikeSaveService {
             }
         }
     }
-    public Long NumOfMembers(String key){
+
+    public Long NumOfMembers(String key) {
         logger.info("Getting number of members");
         Jedis jedis = null;
         try {
@@ -100,8 +101,9 @@ public class RedisLikeSaveService {
         }
         return 0L;
     }
-    public void RemoveHashSet(String key, Object value){
-        logger.info("Removing hash set: {}",key,":::",value);
+
+    public void RemoveHashSet(String key, Object value) {
+        logger.info("Removing hash set: {}", key, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -115,16 +117,19 @@ public class RedisLikeSaveService {
             }
         }
     }
+
     public Set<String> GetAllSetMembers(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.smembers(key);
         }
     }
+
     public long GetHashSetSize(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.hlen(key);
         }
     }
+
     public Map<String, String> GetHashValue(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.hgetAll(key);

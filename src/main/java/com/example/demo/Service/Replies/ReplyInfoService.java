@@ -1,15 +1,21 @@
 package com.example.demo.Service.Replies;
 
+import com.example.demo.Mapper.Repository.PostUserMapRepository;
+import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.RepliesInfo;
 import com.example.demo.Model.Entity.UsersLikeReply;
 import com.example.demo.Mapper.Repository.ReplyInfoRepository;
 import com.example.demo.Mapper.Repository.UserLikeReplyRepository;
+import com.example.demo.Service.Comments.CommentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.jms.JMSException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +27,16 @@ public class ReplyInfoService {
     private ReplyInfoRepository replyInfoRepository;
     @Autowired
     private UserLikeReplyRepository userLikeReplyRepository;
+    @Autowired
+    private PostUserMapRepository postUserMapRepository;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private ReplyOnCommentMentionService replyOnCommentMentionService;
+    @Autowired
+    private ReplyOnReplyMentionService replyOnReplyMentionService;
+    @Autowired
+    private ReplyOnPostMentionService replyOnPostMentionService;
 
     public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList){
         logger.info("Finding all users like replies list with like status = 1");
@@ -49,4 +65,27 @@ public class ReplyInfoService {
         return repliesInfo;
     }
 
+    @Async("MultiExecutor")
+    public void SetReplyMention(CommentReplyDTO commentReplyDTO) throws JMSException {
+        Long toReplyAuthorId = commentReplyDTO.getToUid();
+        Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
+        Long postAuthorId = postUserMapRepository.findByPostId(commentReplyDTO.getPostId()).get().getId().getUserId();
+        if (commentReplyDTO.getToReplyId() != null) {
+            logger.info("This is a reply on reply");
+            if (!commentReplyDTO.getFromUid().equals(toReplyAuthorId)) {
+                logger.info("fromUid is not equal to the toUid");
+                replyOnReplyMentionService.CheckReplyOnReplyMention(commentReplyDTO, toReplyAuthorId);
+            }
+        } else {
+            logger.info("This is a reply on comment");
+        }
+        if (!commentReplyDTO.getFromUid().equals(commentAuthorId)) {
+            logger.info("fromUid is not equal to the commentAuthorId");
+            replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
+        }
+        if (!commentReplyDTO.getFromUid().equals(postAuthorId)) {
+            logger.info("fromUid is not equal to the postAuthorId");
+            replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
+        }
+    }
 }

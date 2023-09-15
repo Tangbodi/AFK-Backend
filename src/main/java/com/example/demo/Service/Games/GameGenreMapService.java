@@ -34,4 +34,13 @@ public class GameGenreMapService {
         }
         return null;
     }
+    public GamesGenresMap FindGamesGenresMapByGameId(Short gameId) {
+        logger.info("Finding genre id by game id: {}", gameId);
+        try {
+            return gameGenreMapRepository.findByGameId(gameId);
+        } catch (Exception e) {
+            logger.error("Failed to save game genre map: {}", e.getMessage(), e);
+        }
+        return null;
+    }
 }

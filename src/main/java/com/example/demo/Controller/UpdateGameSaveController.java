@@ -21,49 +21,16 @@ import java.util.Set;
 @RestController
 public class UpdateGameSaveController {
     private static final Logger logger = LoggerFactory.getLogger(UpdateGameSaveController.class);
-    private static final String GAME_SAVE = ObjectNameEnum.GAME_SAVE_SET.getTypeName();
+    private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
     @Autowired
     private RedisLikeSaveService redisLikeSaveService;
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
 
-    @Scheduled(fixedRate = 4000)
-    @PutMapping("/update-game-save")
-    public ResponseEntity UpdateLikeSaveStatusAndCount() {
-        ApiResponse apiResponse;
-
-        Integer objectCode = ObjectNameEnum.GetTypeCode(GAME_SAVE);
-        logger.info("objectCode: {}", objectCode);
-        //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisLikeSaveService.GetAllSetMembers(GAME_SAVE);
-        if (objectIds.isEmpty()) {
-            logger.info("objectIds is empty");
-
-        } else {
-            logger.info("objectIds: {}", objectIds);
-            List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
-            for (String objectId : objectIds) {
-                //userId,date
-                //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisLikeSaveService.GetHashValue(GAME_SAVE + ":::" + objectId);
-                hashSetMap.entrySet().stream().forEach(entry -> {
-                    ObjectUserDTO objectUserDTO = new ObjectUserDTO();
-                    objectUserDTO.setObjectId(Long.valueOf(objectId));
-                    String userId = entry.getKey();
-                    objectUserDTO.setUserId(Long.valueOf(userId));
-                    objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
-                    objectUserDTOList.add(objectUserDTO);
-                    redisLikeSaveService.DeleteMember(GAME_SAVE + ":::" + objectId, userId);
-                    if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
-                        redisLikeSaveService.RemoveHashSet(GAME_SAVE, objectId);
-                    } else {
-                        //
-                    }
-                });
-            }
-            userFavoriteGameService.SetUserFavoriteGame(objectUserDTOList);
-        }
-        apiResponse = ApiResponse.success("Updated game save status successfully");
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
+//    @Scheduled(fixedRate = 10000)
+//    @PutMapping("/update-game-save")
+//    public ResponseEntity UpdateGameSave() {
+//        ApiResponse apiResponse;
+//
+//    }
 }

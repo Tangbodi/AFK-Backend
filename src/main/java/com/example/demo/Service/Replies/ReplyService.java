@@ -35,19 +35,10 @@ public class ReplyService {
     @Autowired
     private MQSender mqSender;
     @Autowired
-    private ReplyOnCommentMentionService replyOnCommentMentionService;
-    @Autowired
-    private ReplyOnReplyMentionService replyOnReplyMentionService;
-    @Autowired
-    private ReplyOnPostMentionService replyOnPostMentionService;
-    @Lazy
-    @Autowired
-    private CommentService commentService;
-    @Autowired
-    private PostUserMapRepository postUserMapRepository;
+    private ReplyInfoService replyInfoService;
 
-    public ReplySavedVO SetReply(CommentReplyDTO commentReplyDTO) {
-        logger.info("Setting reply");
+    public ReplySavedVO SaveReply(CommentReplyDTO commentReplyDTO) {
+        logger.info("Saving reply");
         try {
             long replyId = Snowflake.generateUniqueId();
             commentReplyDTO.setReplyId(replyId);
@@ -61,47 +52,20 @@ public class ReplyService {
             postReply.setToUid(commentReplyDTO.getToUid());
             postReply.setCreatedAt(commentReplyDTO.getCreatedAt());
             postReply.setModifiedAt(commentReplyDTO.getCreatedAt());
-            PostReply savedReply = replyRepository.save(postReply);
-            if (savedReply != null) {
+            if (replyRepository.save(postReply) != null) {
                 logger.info("Reply saved successfully");
                 //set comment reply ip address
                 ipAddressService.SetReplyIpAddress(commentReplyDTO);
                 //send message to ActiveMQ
                 mqSender.SendReplyCountMessage(commentReplyDTO);
-                Long toReplyAuthorId = commentReplyDTO.getToUid();
-                Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
-                Long postAuthorId = postUserMapRepository.findByPostId(commentReplyDTO.getPostId()).get().getId().getUserId();
-                if(commentReplyDTO.getToReplyId() != null){
-                    logger.info("This is a reply on reply");
-                    if(!commentReplyDTO.getFromUid().equals(toReplyAuthorId)){
-                        logger.info("fromUid is not equal to the toUid");
-                        replyOnReplyMentionService.CheckReplyOnReplyMention(commentReplyDTO, toReplyAuthorId);
-                        if(!commentReplyDTO.getFromUid().equals(commentAuthorId)){
-                            logger.info("fromUid is not equal to the commentAuthorId");
-                            replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
-                            if(!commentReplyDTO.getFromUid().equals(postAuthorId)){
-                                logger.info("fromUid is not equal to the postAuthorId");
-                                replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
-                            }
-                        }
-                    }
-                } else {
-                    logger.info("This is a reply on comment");
-                    if(!commentReplyDTO.getFromUid().equals(commentAuthorId)){
-                        logger.info("fromUid is not equal to the commentAuthorId");
-                        replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
-                        if(!commentReplyDTO.getFromUid().equals(postAuthorId)){
-                            logger.info("fromUid is not equal to the postAuthorId");
-                            replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
-                        }
-                    }
-                }
+                //set reply mention
+                replyInfoService.SetReplyMention(commentReplyDTO);
                 return TransferToVO(commentReplyDTO);
             } else {
                 logger.info("Failed to save reply: {}");
             }
         } catch (Exception e) {
-            logger.error("Failed to set reply: {}", e);
+            logger.error("Failed to save reply: {}", e);
         }
         return null;
     }

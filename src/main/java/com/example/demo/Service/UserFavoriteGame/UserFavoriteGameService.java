@@ -1,11 +1,14 @@
 package com.example.demo.Service.UserFavoriteGame;
 
+import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
+import com.example.demo.Service.Redis.RedisGameIconService;
+import com.example.demo.Service.Redis.RedisLikeSaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +25,14 @@ import java.util.Map;
 @Service
 public class UserFavoriteGameService {
     private static final Logger logger = LoggerFactory.getLogger(UserFavoriteGameService.class);
+    private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
     @Autowired
     private UserFavoriteGameRepository userFavoriteGameRepository;
+    @Autowired
+    private RedisGameIconService redisGameIconService;
+    @Autowired
+    private RedisLikeSaveService redisLikeSaveService;
+
     @Async("MultiExecutor")
     @Transactional
     public void SetUserFavoriteGame(List<ObjectUserDTO> objectUserDTOList) {
@@ -59,11 +68,24 @@ public class UserFavoriteGameService {
         logger.info("Getting user favorite games for user ID: {}", userId);
         try {
             List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findByUserId(userId);
+
+            String key = SAVED_GAME + ":::" + userId;
+            if(redisLikeSaveService.MemberExists(SAVED_GAME,userId)){
+                logger.info("User favorite games exists in Redis cache for user ID: {}", userId);
+            } else {
+                logger.info("User favorite games doesn't exist in Redis cache for user ID: {}", userId);
+                redisLikeSaveService.AddSet(SAVED_GAME,userId);
+            }
             if (!userFavoriteGames.isEmpty()) {
                 logger.info("User favorite games found for user ID: {}", userId);
-                return TransferToUserFavoriteGameVO(userFavoriteGames);
+                List<UserFavoriteGameVO> userFavoriteGameVOList = TransferToUserFavoriteGameVO(userFavoriteGames);
+                //Save user saved game to Redis
+                redisGameIconService.SetUserFavoriteGameCache(key, userId,userFavoriteGameVOList);
+                return userFavoriteGameVOList;
             } else {
                 logger.info("No user favorite games found for user ID: {}", userId);
+                List<UserFavoriteGameVO> userFavoriteGameVOList = Collections.emptyList();
+                redisGameIconService.SetUserFavoriteGameCache(key, userId,userFavoriteGameVOList);
                 return Collections.emptyList();
             }
 

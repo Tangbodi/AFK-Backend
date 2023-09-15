@@ -2,8 +2,10 @@ package com.example.demo.Model.VO;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class GameIconVO {
+public class GameIconVO implements Serializable {
     private Short gameId;
     private Byte genreId;
     private String gameName;

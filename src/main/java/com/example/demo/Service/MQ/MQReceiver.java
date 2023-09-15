@@ -49,9 +49,13 @@ public class MQReceiver {
             Integer status = userLikeSaveDTO.getStatus();
 
             try {
-                redisStrategy.LikeSaveStrategy(userLikeSaveDTO);
-                logger.info("Like-save consumer record: User: {}, status: {}, objectId: {}",
-                        userLikeSaveDTO.getUserId(), status, userLikeSaveDTO.getObjectId());
+                if(userLikeSaveDTO.getTypeId() == 4 ){
+                    redisStrategy.UserFavoriteGameStrategy(userLikeSaveDTO);
+                } else {
+                    redisStrategy.LikeSaveStrategy(userLikeSaveDTO);
+                    logger.info("Like-save consumer record: User: {}, status: {}, objectId: {}",
+                            userLikeSaveDTO.getUserId(), status, userLikeSaveDTO.getObjectId());
+                }
             } catch (Exception e) {
                 logger.error("Error processing message for User: " + userLikeSaveDTO.getUserId(), e);
                 // Optionally, throw a custom exception or take other appropriate action

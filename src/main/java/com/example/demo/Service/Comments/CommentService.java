@@ -45,8 +45,8 @@ public class CommentService {
     private CommentOnPostMentionService commentOnPostMentionService;
 
     @Transactional
-    public CommentSavedVO SetComment(CommentReplyDTO commentReplyDTO) {
-        logger.info("Setting comment: {}");
+    public CommentSavedVO SaveComment(CommentReplyDTO commentReplyDTO) {
+        logger.info("Saving comment: {}");
         try {
             long commentId = Snowflake.generateUniqueId();
             commentReplyDTO.setCommentId(commentId);

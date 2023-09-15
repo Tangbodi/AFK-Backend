@@ -10,7 +10,7 @@ public enum ObjectNameEnum {
     COMMENT_LIKE_SET(1, "COMMENT_LIKE"),
     REPLY_LIKE_SET(2, "REPLY_LIKE"),
     POST_SAVE_SET(3, "POST_SAVE"),
-    GAME_SAVE_SET(4, "GAME_SAVE");
+    SAVED_GAME_SET(4, "SAVED_GAME");
 
     private int type;
 

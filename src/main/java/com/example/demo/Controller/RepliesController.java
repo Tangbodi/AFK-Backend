@@ -68,7 +68,7 @@ public class RepliesController {
             }
             commentReplyDTO.setFromUid(userId);
             commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
-            ReplySavedVO replySavedVO = replyService.SetReply(commentReplyDTO);
+            ReplySavedVO replySavedVO = replyService.SaveReply(commentReplyDTO);
             if (replySavedVO != null) {
                 apiResponse = ApiResponse.success(replySavedVO);
 

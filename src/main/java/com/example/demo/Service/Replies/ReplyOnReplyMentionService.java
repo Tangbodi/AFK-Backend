@@ -23,10 +23,11 @@ public class ReplyOnReplyMentionService {
     private MessageService messageService;
     @Autowired
     private MQSender mqSender;
+
     @Transactional
-    public void SaveReplyOnReplyMention(UserRegisterDTO userRegisterDTO){
+    public void SaveReplyOnReplyMention(UserRegisterDTO userRegisterDTO) {
         logger.info("Saving ReplyOnReplyMention:{}");
-        try{
+        try {
             ReplyOnReplyMention replyOnReplyMention = new ReplyOnReplyMention();
             replyOnReplyMention.setId(userRegisterDTO.getUserId());
             replyOnReplyMention.setMentionOn(true);
@@ -34,19 +35,20 @@ public class ReplyOnReplyMentionService {
             replyOnReplyMention.setModifiedAt(userRegisterDTO.getCreatedAt());
             replyOnReplyMentionRepository.save(replyOnReplyMention);
             logger.info("Saved reply on reply mention setting");
-        }catch (Exception e){
-            logger.error("Failed to save reply on reply mention setting: {}",e.getMessage(),e);
+        } catch (Exception e) {
+            logger.error("Failed to save reply on reply mention setting: {}", e.getMessage(), e);
         }
     }
-    public void CheckReplyOnReplyMention(CommentReplyDTO commentReplyDTO, Long toReplyAuthorId){
-        logger.info("Checking reply on reply mention setting for user:{}",toReplyAuthorId);
-        try{
+
+    public void CheckReplyOnReplyMention(CommentReplyDTO commentReplyDTO, Long toReplyAuthorId) {
+        logger.info("Checking reply on reply mention setting for user:{}", toReplyAuthorId);
+        try {
             ReplyOnReplyMention replyOnReplyMention = replyOnReplyMentionRepository.findById(toReplyAuthorId).orElse(null);
-            if(replyOnReplyMention == null){
+            if (replyOnReplyMention == null) {
                 logger.info("User not found");
             } else {
-                logger.info("User found: {}",replyOnReplyMention.getId());
-                if(replyOnReplyMention.getMentionOn() == false){
+                logger.info("User found: {}", replyOnReplyMention.getId());
+                if (replyOnReplyMention.getMentionOn() == false) {
                     logger.info("Reply on reply mention setting is off");
                 } else {
                     logger.info("Reply on reply mention setting is on");
@@ -59,14 +61,14 @@ public class ReplyOnReplyMentionService {
                     messageVO.setToUid(toReplyAuthorId.toString());
                     messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
                     //set message
-                    messageService.SaveMessage(commentReplyDTO,toReplyAuthorId);
+                    messageService.SaveMessage(commentReplyDTO, toReplyAuthorId);
                     //send message mention to MQ
                     mqSender.SendMentionMessage(messageVO);
                     logger.info("Sent reply on reply mention message to MQ");
                 }
             }
-        }catch (Exception e){
-            logger.error("Failed to check reply on reply mention setting: {}",e.getMessage(),e);
+        } catch (Exception e) {
+            logger.error("Failed to check reply on reply mention setting: {}", e.getMessage(), e);
         }
     }
 }

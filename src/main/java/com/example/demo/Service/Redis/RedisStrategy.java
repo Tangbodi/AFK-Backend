@@ -4,16 +4,27 @@ import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.StatusEnum;
 import com.example.demo.Model.DTO.*;
+import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.Games.GameGenreMapService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class RedisStrategy {
     private static final Logger logger = LoggerFactory.getLogger(RedisStrategy.class);
+    private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     protected RedisLikeSaveService redisLikeSaveService;
@@ -21,10 +32,52 @@ public class RedisStrategy {
     protected RedisMessageService redisMessageService;
     @Autowired
     protected ProcessEmailService processEmailService;
+    @Autowired
+    private RedisGameIconService redisGameIconService;
+    @Autowired
+    private GameGenreMapService gameGenreMapService;
 
     public void UserRegistrationStrategy(UserRegisterDTO userRegisterDTO){
         logger.info("Start UserRegistrationStrategy");
         processEmailService.ProcessRegistrationEmailValidation(userRegisterDTO);
+    }
+    public void UserFavoriteGameStrategy(UserLikeSaveDTO userLikeSaveDTO) throws IOException {
+        logger.info("Start UserFavoriteGameStrategy");
+        Long userId = userLikeSaveDTO.getUserId();
+        Short gameId = userLikeSaveDTO.getObjectId().shortValue();
+        String typeName = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());
+        String key = typeName + ":::" + userId;
+        Integer status = userLikeSaveDTO.getStatus();
+        //Get user favorite game list from Redis to update
+        List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId,userId);
+        logger.info("userFavoriteGameVOList: {}", userFavoriteGameVOList);
+        //Get all game icons list from Redis
+        List<GameIconVO> gameIconVOList = redisGameIconService.GetAllGameIconsCache();
+        //Find game in all game icons list
+        GameIconVO gameIconVO = gameIconVOList.stream()
+                .filter(gameIconVO1 -> gameIconVO1.getGameId().equals(gameId))
+                .findFirst()
+                .orElse(null);
+        //if user save the game
+        if(status == StatusEnum.TRUE.getCode()){
+            logger.info("Adding game to user favorite game list");
+            //Add game to UserFavoriteGameVO
+            UserFavoriteGameVO userFavoriteGameVO = new UserFavoriteGameVO();
+            userFavoriteGameVO.setGenreId(gameIconVO.getGenreId());
+            userFavoriteGameVO.setGameId(gameIconVO.getGameId());
+            userFavoriteGameVO.setGameName(gameIconVO.getGameName());
+            userFavoriteGameVO.setIconUrl(gameIconVO.getIconUrl());
+            userFavoriteGameVOList.add(userFavoriteGameVO);
+            redisGameIconService.SetUserFavoriteGameCache(key,userId,userFavoriteGameVOList);
+            logger.info("Added game to UserFavoriteGameVO");
+        } else {
+            //Remove game from UserFavoriteGameVO
+          logger.info("Removing game from user favorite game list");
+            userFavoriteGameVOList.removeIf(userFavoriteGameVO -> userFavoriteGameVO.getGameId().equals(gameId));
+            redisGameIconService.SetUserFavoriteGameCache(key,userId,userFavoriteGameVOList);
+            logger.info("Removed game from user favorite game list");
+        }
+//        redisGameIconService.SetUserFavoriteGameCache(userLikeSaveDTO.getUserId(), userFavoriteGameVOList);
     }
     public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
         logger.info("Start LikeSaveStrategy");
