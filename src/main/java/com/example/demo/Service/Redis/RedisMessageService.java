@@ -24,7 +24,7 @@ public class RedisMessageService {
     private RedisService redisService;
 
     public void SetUnreadMessage(MessageVO messageVO) {
-        logger.info("Setting user read status: userId = {}", messageVO.getToUid());
+        logger.info("Setting user read status cache: userId = {}", messageVO.getToUid());
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -51,7 +51,7 @@ public class RedisMessageService {
         }
     }
     public List<MessageVO> GetUnreadMessage(Long userId){
-        logger.info("Getting unread message");
+        logger.info("Getting unread message cache");
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -69,7 +69,7 @@ public class RedisMessageService {
     }
 
     public void DeleteUnreadMessage(Long userId) {
-        logger.info("Deleting user read status: userId = {}", userId);
+        logger.info("Deleting user read status cache: userId = {}", userId);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();

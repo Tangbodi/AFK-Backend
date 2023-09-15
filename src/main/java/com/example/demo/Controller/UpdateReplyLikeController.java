@@ -31,7 +31,7 @@ public class UpdateReplyLikeController {
     @Autowired
     private ReplyInfoService replyInfoService;
 
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-reply-like")
     public ResponseEntity UpdateReplyLike() {
         ApiResponse apiResponse;
@@ -58,6 +58,7 @@ public class UpdateReplyLikeController {
                     redisLikeSaveService.DeleteMember(REPLY_LIKE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
                         redisLikeSaveService.RemoveHashSet(REPLY_LIKE, objectId);
+                        logger.info("Removed hash set: {}", REPLY_LIKE);
                     } else {
                         //
                     }

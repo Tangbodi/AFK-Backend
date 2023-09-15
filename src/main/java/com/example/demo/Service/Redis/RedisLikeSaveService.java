@@ -20,7 +20,7 @@ public class RedisLikeSaveService {
 
 
     public Boolean MemberExists(String key, Object value) {
-        logger.info("Checking exists: {}", key, ":::", value);
+        logger.info("Checking exists in Redis: {}", key, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -37,7 +37,7 @@ public class RedisLikeSaveService {
     }
 
     public void AddSet(String typeNameInSet, Object objectId) {
-        logger.info("Adding set: {}", typeNameInSet, ":::", objectId);
+        logger.info("Adding set to Redis: {}", typeNameInSet, ":::", objectId);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -53,7 +53,7 @@ public class RedisLikeSaveService {
     }
 
     public void AddHashSet(String key, String hashKey, Object value) {
-        logger.info("Adding hash set: {}", key, ":::", hashKey, ":::", value);
+        logger.info("Adding hash set to Redis: {}", key, ":::", hashKey, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -69,11 +69,12 @@ public class RedisLikeSaveService {
     }
 
     public void DeleteMember(String key, String hashKey) {
-        logger.info("Deleting member: {}", key, ":::", hashKey);
+        logger.info("Deleting member from Redis: {}", key, ":::", hashKey);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
             jedis.hdel(key, hashKey);
+            logger.info("Deleted member from Redis: {}", key, ":::", hashKey);
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
@@ -85,7 +86,7 @@ public class RedisLikeSaveService {
     }
 
     public Long NumOfMembers(String key) {
-        logger.info("Getting number of members");
+        logger.info("Getting number of members from Redis");
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -103,7 +104,7 @@ public class RedisLikeSaveService {
     }
 
     public void RemoveHashSet(String key, Object value) {
-        logger.info("Removing hash set: {}", key, ":::", value);
+        logger.info("Removing hash set from Redis: {}", key, ":::", value);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();

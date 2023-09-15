@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class UserFavoriteGameService {
@@ -35,19 +32,18 @@ public class UserFavoriteGameService {
 
     @Async("MultiExecutor")
     @Transactional
-    public void SetUserFavoriteGame(List<ObjectUserDTO> objectUserDTOList) {
-        logger.info("Setting user favorite game for game ID: {}", objectUserDTOList.get(0).getObjectId());
+    public void SetUserFavoriteGame(List<UserFavoriteGameVO> userFavoriteGameVOList, Long userId) {
+        logger.info("Setting user favorite game for user: {}",userId);
         try {
-            for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+            //Delete all user favorite games
+            userFavoriteGameRepository.deleteAllGamesByUserId(userId);
+            //Create new user favorite games
+            for (UserFavoriteGameVO userFavoriteGameVO : userFavoriteGameVOList) {
                 UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
-                usersFavoriteGameId.setUserId(objectUserDTO.getUserId());
-                usersFavoriteGameId.setGameId(objectUserDTO.getObjectId().shortValue());
-                UsersFavoriteGame usersFavoriteGame = userFavoriteGameRepository.findById(usersFavoriteGameId)
-                        .orElseGet(() -> CreateUserFavoriteGame(usersFavoriteGameId));
-                usersFavoriteGame.setFavoriteStatus(objectUserDTO.getStatus() == 1);
-                usersFavoriteGame.setModifiedAt(Instant.now());
+                usersFavoriteGameId.setUserId(userId);
+                usersFavoriteGameId.setGameId(userFavoriteGameVO.getGameId());
+                UsersFavoriteGame usersFavoriteGame = CreateUserFavoriteGame(usersFavoriteGameId);
                 userFavoriteGameRepository.save(usersFavoriteGame);
-                logger.info("User favorite game saved successfully for user ID: {}, game ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
             }
         } catch (Exception e) {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
@@ -56,9 +52,9 @@ public class UserFavoriteGameService {
     @Transactional
     private UsersFavoriteGame CreateUserFavoriteGame(UsersFavoriteGameId usersFavoriteGameId) {
         logger.info("Creating user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
-
         UsersFavoriteGame usersFavoriteGame = new UsersFavoriteGame();
         usersFavoriteGame.setId(usersFavoriteGameId);
+        usersFavoriteGame.setFavoriteStatus(true);
         usersFavoriteGame.setCreatedAt(Instant.now());
         usersFavoriteGame.setModifiedAt(Instant.now());
         logger.info("Created user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
@@ -67,13 +63,12 @@ public class UserFavoriteGameService {
     public List<UserFavoriteGameVO> GetUserFavoriteGames(Long userId) {
         logger.info("Getting user favorite games for user ID: {}", userId);
         try {
-            List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findByUserId(userId);
-
+            List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findSavedGameByUserId(userId);
             String key = SAVED_GAME + ":::" + userId;
             if(redisLikeSaveService.MemberExists(SAVED_GAME,userId)){
-                logger.info("User favorite games exists in Redis cache for user ID: {}", userId);
+                logger.info("SAVED_GAME exists in Redis cache: {}");
             } else {
-                logger.info("User favorite games doesn't exist in Redis cache for user ID: {}", userId);
+                logger.info("SAVED_GAME doesn't exist in Redis cache: {}");
                 redisLikeSaveService.AddSet(SAVED_GAME,userId);
             }
             if (!userFavoriteGames.isEmpty()) {

@@ -31,7 +31,7 @@ public class UpdateCommentLikeController {
     @Autowired
     private CommentInfoService commentInfoService;
 
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-comment-like")
     public ResponseEntity UpdateCommentLike() {
         ApiResponse apiResponse;
@@ -60,6 +60,7 @@ public class UpdateCommentLikeController {
                     redisLikeSaveService.DeleteMember(COMMENT_LIKE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
                         redisLikeSaveService.RemoveHashSet(COMMENT_LIKE, objectId);
+                        logger.info("Removed hash set: {}", COMMENT_LIKE);
                     } else {
                         //
                     }

@@ -30,7 +30,7 @@ public class UpdatePostSaveController {
     @Autowired
     private PostInfoService postInfoService;
 
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-post-save")
     public ResponseEntity UpdatePostSave() {
         ApiResponse apiResponse;
@@ -58,6 +58,7 @@ public class UpdatePostSaveController {
                     redisLikeSaveService.DeleteMember(POST_SAVE + ":::" + objectId, userId);
                     if (redisLikeSaveService.NumOfMembers(objectId) == 0) {
                         redisLikeSaveService.RemoveHashSet(POST_SAVE, objectId);
+                        logger.info("Removed hash set: {}", POST_SAVE);
                     } else {
                         //
                     }

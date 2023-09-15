@@ -28,7 +28,7 @@ public class UpdateCommentReplyCountController {
     @Autowired
     private PostInfoService postInfoService;
 
-//    @Scheduled(fixedRate = 9000)
+    @Scheduled(fixedRate = 9000)
     @PutMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;
@@ -50,6 +50,7 @@ public class UpdateCommentReplyCountController {
                         redisLikeSaveService.DeleteMember(countName + ":::" + postId, commentReplyId);
                         if (redisLikeSaveService.NumOfMembers(postId) == 0) {
                             redisLikeSaveService.RemoveHashSet(countName, postId);
+                            logger.info("Removed hash set: {}", countName);
                         } else {
                             //
                         }
