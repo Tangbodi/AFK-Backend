@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,8 +66,6 @@ public class GamesController {
 
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
-    //@Scheduled(fixedRate = 4000)
     @GetMapping("/saved-games")
     public ResponseEntity GetSavedGames(HttpSession session) throws IOException {
         ApiResponse apiResponse;

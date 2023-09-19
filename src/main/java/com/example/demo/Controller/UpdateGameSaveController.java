@@ -31,7 +31,7 @@ public class UpdateGameSaveController {
     @Autowired
     private RedisGameIconService redisGameIconService;
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 600000)
     @PutMapping("/update-game-save")
     public ResponseEntity UpdateSavedGame() throws IOException {
         ApiResponse apiResponse;
