@@ -4,7 +4,10 @@ import com.example.demo.Annotation.ValidGameId;
 import com.example.demo.Annotation.ValidGenreId;
 import com.example.demo.Annotation.ValidPostId;
 import com.example.demo.Constant.Enum.ReturnCode;
-import com.example.demo.Model.DTO.*;
+import com.example.demo.Model.DTO.GameGenreMapIdDTO;
+import com.example.demo.Model.DTO.GetPostDTO;
+import com.example.demo.Model.DTO.PostDTO;
+import com.example.demo.Model.DTO.TypeDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreMapService;
@@ -76,20 +79,14 @@ public class PostsController {
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
+        page = page - 1;
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else if (page < 0 || size <= 0) {
-            apiResponse = ApiResponse.success(null);
+            apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
             List<PostInfoVO> showPostVOList = postInfoService.GetAllPostInfoInOneGame(gameGenreMapIdDTO);
             if (!showPostVOList.isEmpty()) {
-                page = page - 1;
-                if (page < 0 || size <= 0) {
-                    apiResponse = ApiResponse.success(Collections.emptyList());
-                    return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-                } else {
-                    //
-                }
                 Pageable pageable = PageRequest.of(page, size);
                 int startIdx = (int) pageable.getOffset();
                 int endIdx = Math.min((startIdx + pageable.getPageSize()), showPostVOList.size());
@@ -163,9 +160,12 @@ public class PostsController {
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);
         gameGenreMapIdDTO.setGenreId(genreId);
+        page = page - 1;
         Long userId = (Long) session.getAttribute("userId");
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else if (page < 0 || size <= 0) {
+            apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
             GetPostDTO getPostDTO = new GetPostDTO();
             getPostDTO.setPostId(postId);
@@ -177,15 +177,8 @@ public class PostsController {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
             } else {
                 //need pagination
-                List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId,userId);
+                List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId, userId);
                 if (!res.isEmpty()) {
-                    page = page - 1;
-                    if (page < 0 || size <= 0) {
-                        apiResponse = ApiResponse.success(Collections.emptyList());
-                        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-                    } else {
-                        //
-                    }
                     Pageable pageable = PageRequest.of(page, size);
                     int startIdx = (int) pageable.getOffset();
                     int endIdx = Math.min((startIdx + pageable.getPageSize()), res.size());
