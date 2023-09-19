@@ -151,12 +151,4 @@ public class NewsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-
-    @PostMapping("/game-news/reload")
-    public ResponseEntity ReloadEveryGameNewsCache() {
-        ApiResponse apiResponse;
-
-        apiResponse = ApiResponse.success("Reloaded every game news cache successfully");
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 }

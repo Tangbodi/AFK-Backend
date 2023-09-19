@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +31,7 @@ public class UpdateGameSaveController {
     @Autowired
     private RedisGameIconService redisGameIconService;
 
-//    @Scheduled(fixedRate = 900)
+    @Scheduled(fixedRate = 3000)
     @PutMapping("/update-game-save")
     public ResponseEntity UpdateSavedGame() throws IOException {
         ApiResponse apiResponse;

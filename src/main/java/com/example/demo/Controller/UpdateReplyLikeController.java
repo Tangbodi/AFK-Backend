@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +31,7 @@ public class UpdateReplyLikeController {
     @Autowired
     private ReplyInfoService replyInfoService;
 
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-reply-like")
     public ResponseEntity UpdateReplyLike() {
         ApiResponse apiResponse;
