@@ -6,7 +6,6 @@ import com.example.demo.Model.VO.*;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
-import com.example.demo.Service.Posts.PostImageService;
 import com.example.demo.Service.Posts.PostService;
 import com.example.demo.Service.Posts.PostUserMapService;
 import com.example.demo.Service.Redis.RedisEmailService;
@@ -71,6 +70,7 @@ public class UsersInfoController {
     private RedisMessageService redisMessageService;
     @Autowired
     private MQSender mqSender;
+
     @GetMapping("/")
     public ResponseEntity GetUserInfo(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");

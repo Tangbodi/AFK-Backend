@@ -2,13 +2,11 @@ package com.example.demo.Service.UserFavoriteGame;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
-import com.example.demo.Model.DTO.GameGenreMapIdDTO;
-import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Redis.RedisGameIconService;
-import com.example.demo.Service.Redis.RedisLikeSaveService;
+import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,7 @@ public class UserFavoriteGameService {
     @Autowired
     private RedisGameIconService redisGameIconService;
     @Autowired
-    private RedisLikeSaveService redisLikeSaveService;
+    private RedisService redisService;
 
     @Async("MultiExecutor")
     @Transactional
@@ -65,11 +63,11 @@ public class UserFavoriteGameService {
         try {
             List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findSavedGameByUserId(userId);
             String key = SAVED_GAME + ":::" + userId;
-            if(redisLikeSaveService.MemberExists(SAVED_GAME,userId)){
+            if(redisService.MemberExists(SAVED_GAME,userId)){
                 logger.info("SAVED_GAME exists in Redis cache: {}");
             } else {
                 logger.info("SAVED_GAME doesn't exist in Redis cache: {}");
-                redisLikeSaveService.AddSet(SAVED_GAME,userId);
+                redisService.AddSet(SAVED_GAME,userId);
             }
             if (!userFavoriteGames.isEmpty()) {
                 logger.info("User favorite games found for user ID: {}", userId);

@@ -14,13 +14,16 @@ import java.time.Instant;
 @Table(name = "news")
 public class News {
     @Id
-    @Size(max = 15)
-    @Column(name = "news_id", nullable = false, length = 15)
+    @Size(max = 20)
+    @Column(name = "news_id", nullable = false, length = 20)
     private String id;
 
-    @Size(max = 31)
     @NotNull
-    @Column(name = "source", nullable = false, length = 31)
+    @Column(name = "game_id", nullable = false)
+    private Short gameId;
+
+    @Size(max = 31)
+    @Column(name = "source", length = 31)
     private String source;
 
     @Size(max = 255)
@@ -33,14 +36,12 @@ public class News {
     @Column(name = "link", nullable = false)
     private String link;
 
-    @NotNull
-    @Lob
-    @Column(name = "description", nullable = false)
+    @Size(max = 255)
+    @Column(name = "description")
     private String description;
 
     @Size(max = 255)
-    @NotNull
-    @Column(name = "media_content_url", nullable = false)
+    @Column(name = "media_content_url")
     private String mediaContentUrl;
 
     @Size(max = 63)
@@ -55,5 +56,10 @@ public class News {
     @NotNull
     @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
+
+    @NotNull
+    @Lob
+    @Column(name = "content", nullable = false)
+    private String content;
 
 }

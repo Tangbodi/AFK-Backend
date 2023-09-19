@@ -33,7 +33,6 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/user")
 public class UsersController {
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
-
     @Autowired
     private UserRegistrationService userRegistrationService;
     @Autowired
@@ -50,6 +49,7 @@ public class UsersController {
     private UserLoginService userLoginService;
     @Autowired
     private MQSender mqSender;
+
 
     @PostMapping("/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) {
@@ -116,7 +116,6 @@ public class UsersController {
                 UserInfoVO userInfoVO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
                 logger.info("Set session attribute: {}" + "userId, " + userInfoVO.getLongUid());
                 session.setAttribute("userId", userInfoVO.getLongUid());
-                session.setAttribute("username", userInfoVO.getUsername());
                 userInfoVO.setJSESSIONID(session.getId());
                 logger.info("JSESSIONID: {}" + session.getId());
                 logger.info("User logged in successfully : {}");

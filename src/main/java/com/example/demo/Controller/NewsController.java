@@ -1,42 +1,111 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.ValidGameId;
+import com.example.demo.Annotation.ValidGenreId;
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.VO.NewsVO;
+import com.example.demo.Service.Games.GameGenreMapService;
+import com.example.demo.Service.News.GameRantNewsService;
 import com.example.demo.Service.News.NewsService;
+import com.example.demo.Service.News.SteamNewsService;
 import com.example.demo.Service.Redis.RedisNewsService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Util.ApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
-    private static final String NEWS_CACHE_KEY = "AFK_NEWS";
+    private static final String AFK_GAME_NEWS = "AFK_GAME_NEWS:";
+    private static final String ALL_AFK_GAME_NEWS = "ALL_AFK_GAME_NEWS";
+    private static final List<Integer> STEAM_SET = Arrays.asList(102, 123, 126, 129, 138, 201, 204, 225, 243, 405, 417, 423, 426, 315, 324, 231, 234, 207, 402, 249, 420, 507, 603, 609, 612, 618, 621, 624, 630, 135, 117);
+    private static final List<Integer> GAME_RANT_SET = Arrays.asList(447, 237, 111, 114, 210, 240, 516, 600);
+
     @Autowired
     private NewsService newsService;
     @Autowired
     private RedisService redisService;
     @Autowired
     private RedisNewsService redisNewsService;
+    @Autowired
+    private SteamNewsService steamNewsService;
+    @Autowired
+    private GameRantNewsService gameRantNewsService;
+    @Autowired
+    private GameGenreMapService gameGenreMapService;
 
-    @GetMapping("/get-news")
-    public ResponseEntity GetNews() {
+    @PostMapping("/set-game-news")
+    public ResponseEntity SetAllGameNewsCache() {
         ApiResponse apiResponse;
-        List<NewsVO> newsVOList;
-        if (redisService.CacheExists(NEWS_CACHE_KEY)) {
-            newsVOList = redisNewsService.GetNewsCache();
-        } else {
-            newsService.ProxyXML();
-            newsVOList = newsService.GetNews();
+        redisNewsService.DeleteAllGameNewsCache();
+        for (Integer gameId : STEAM_SET) {
+            steamNewsService.ProxyXML(gameId);
         }
-        apiResponse = ApiResponse.success(newsVOList);
+        //Delete all news by source = GameRant for avoiding duplicate news
+        gameRantNewsService.DeleteNews();
+        for (Integer gameId : GAME_RANT_SET) {
+            gameRantNewsService.ProxyXML(gameId);
+        }
+        newsService.SetAllNews();
+        apiResponse = ApiResponse.success("Set all game news cache successfully");
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @GetMapping("/all-game-news")
+    public ResponseEntity GetAllGameNewsCache() {
+        ApiResponse apiResponse;
+        if (redisService.CacheExists(ALL_AFK_GAME_NEWS)) {
+            logger.info("Getting all game news from Redis");
+            List<NewsVO> newsVOList = redisNewsService.GetAllGameNewsCache();
+            apiResponse = ApiResponse.success(newsVOList);
+        } else {
+            logger.info("Getting all game news from DB");
+            newsService.SetAllNews();
+            List<NewsVO> newsVOList = redisNewsService.GetAllGameNewsCache();
+            apiResponse = ApiResponse.success(newsVOList);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @GetMapping("/game-news")
+    public ResponseEntity GetOneGameNewsCache(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                              @RequestParam(value = "genre") @ValidGenreId Byte genreId) throws IOException {
+        ApiResponse apiResponse;
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else {
+            if(redisService.CacheExists(AFK_GAME_NEWS+gameId)){
+                logger.info("Getting one game news from Redis");
+                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsCache(gameId);
+                apiResponse = ApiResponse.success(newsVOList);
+            } else {
+                logger.info("Getting one game news from DB");
+                newsService.SetOneGameNews(genreId, gameId);
+                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsCache(gameId);
+                apiResponse = ApiResponse.success(newsVOList);
+            }
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+
+    @PostMapping("/game-news/reload")
+    public ResponseEntity ReloadEveryGameNewsCache() {
+        ApiResponse apiResponse;
+
+        apiResponse = ApiResponse.success("Reloaded every game news cache successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

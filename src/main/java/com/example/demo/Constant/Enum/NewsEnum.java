@@ -6,68 +6,64 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum NewsEnum {
-    STARDEW_VALLEY((short)102,"http://steamcommunity.com/games/413150/rss/"),//1
-    WORLD_OF_WARCRAFT((short)111,"https://www.wowhead.com/news/rss/all"),//3
-    FINAL_FANTASY_XVI((short)114,"http://steamcommunity.com/games/413150/rss/"),//3
-    ELDEN_RING((short)117,""),//3
-    DOTA2((short)123,"http://steamcommunity.com/games/dota2/rss/"),//1
-    THE_WITCHER_3((short)126,"http://steamcommunity.com/games/292030/rss/"),//1
-    MONSTER_HUNTER((short)129,"https://steamcommunity.com/games/582010/rss/"),//1
-    CYBERPUNK_2077((short)135,"https://www.youtube.com/feeds/videos.xml?channel_id=UC4zyoIAzmdsgpDZQfO1-lSA"),//2
-    BALDURS_GATE_3((short)138,"https://steamcommunity.com/games/1086940/rss/"),//1
-    COUNTER_STRIKE((short)201,"http://steamcommunity.com/games/CSGO/rss/"),//1
-    RAINBOW_SIX((short)204,"http://steamcommunity.com/games/359550/rss/"),//1
-    CALL_OF_DUTY((short)207,"https://www.youtube.com/feeds/videos.xml?channel_id=UC9YydG57epLqxA9cTzZXSeQ"),//2
-    VALORANT((short)210,"https://dotesports.com/valorant/feed"),//3
-    PUBG((short)225,"http://steamcommunity.com/games/578080/rss/"),//1
-    TITANFALL((short)231,"https://www.youtube.com/feeds/videos.xml?channel_id=UC-LDrQRCxSifhrqNwldwZ-A"),//2
-    APEX_LEGENDS((short)234,"https://www.youtube.com/feeds/videos.xml?channel_id=UC0ZV6M2THA81QT9hrVWJG3A"),//2
-    DENTINY_2((short)237,"https://www.youtube.com/feeds/videos.xml?channel_id=UC52XYgEExV9VG6Rt-6vnzVA"),//2
-    FORTNITE((short)240,"https://fortnitenews.com/rss/"),//3
-    GRAND_THEFT_AUTO_V((short)243,"http://steamcommunity.com/games/271590/rss/"),//1
-    STARFIELD((short)249,""),//3
-    NBA_2K((short)315,"https://www.youtube.com/feeds/videos.xml?channel_id=UCYAJjqIukwm4r3GHEpJDhVw"),//2
-    EA_SPORTS_FC((short)324,"https://www.youtube.com/feeds/videos.xml?channel_id=UCoyaxd5LQSuP4ChkxK0pnZQ"),//2
-    TOTAL_WAR((short)402,""),//3
-    CRUSADER_KINGS_3((short)405,"http://steamcommunity.com/games/203770/rss/"),//1
-    CIVILIZATION_VI((short)417,"http://steamcommunity.com/games/289070/rss/"),//1
-    SINS_OF_A_SOLAR_EMPIRE((short)420,""),//3
-    STELLARIS((short)423,"http://steamcommunity.com/games/281990/rss/"),//1
-    ENDLESS_LEGEND((short)426,"http://steamcommunity.com/games/289130/rss/"),//1
-    AGE_OF_WONDERS((short)432,"https://store.steampowered.com/feeds/news/app/718850/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    LEAGUE_OF_LEGENDS((short)447,"https://www.youtube.com/feeds/videos.xml?channel_id=UC2t5bjwHdUX4vM2g8TRDq5g"),//2
-    MARVEL_MIDNIGHT_SUNS((short)504,"http://steamcommunity.com/games/413150/rss/"),//3
-    YU_GI_OH((short)507,"https://store.steampowered.com/feeds/news/app/1449850/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    HEARTHSTONE((short)516,"http://www.hearthpwn.com/news.rss"),//3
-    THE_LEGEND_OF_ZELDA((short)600,"http://steamcommunity.com/games/413150/rss/"),//3
-    MOUNT_AND_BLADE((short)603,"https://store.steampowered.com/feeds/news/app/48700/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    DARK_SOULS((short)609,"https://store.steampowered.com/feeds/news/app/374320/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    HOGWARTS_LEGACY((short)612,"https://store.steampowered.com/feeds/news/app/990080/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    ASSASSINS_CREED((short)615,"https://store.steampowered.com/feeds/news/app/812140/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    PATH_OF_EXILE((short)618,"http://www.pathofexile.com/news/rss"),//3
-    GOD_OF_WAR((short)621,"https://store.steampowered.com/feeds/news/app/1593500/?cc=US&l=english&snr=1_2108_9__2107 "),//3
-    THE_ELDER_SCROLLS((short)624,"https://store.steampowered.com/feeds/news/app/489830/?cc=US&l=english&snr=1_2108_9__2107"),//3
-    DAVE_THE_DIVER((short)630,""),//3
-    STARS_WARS((short)633,"https://store.steampowered.com/feeds/news/app/1172380/?cc=US&l=english&snr=1_2108_9__2107");//3
+    STARDEW_VALLEY(102,"http://steamcommunity.com/games/413150/rss/"),//1
+    DOTA2(123,"http://steamcommunity.com/games/dota2/rss/"),//1
+    THE_WITCHER_3(126,"http://steamcommunity.com/games/292030/rss/"),//1
+    MONSTER_HUNTER(129,"https://steamcommunity.com/games/582010/rss/"),//1
+    BALDURS_GATE_3(138,"https://steamcommunity.com/games/1086940/rss/"),//1
+    COUNTER_STRIKE(201,"http://steamcommunity.com/games/CSGO/rss/"),//1
+    RAINBOW_SIX(204,"http://steamcommunity.com/games/359550/rss/"),//1
+    PUBG(225,"http://steamcommunity.com/games/578080/rss/"),//1
+    GRAND_THEFT_AUTO_V(243,"http://steamcommunity.com/games/271590/rss/"),//1
+    CRUSADER_KINGS_3(405,"http://steamcommunity.com/games/203770/rss/"),//1
+    CIVILIZATION_VI(417,"http://steamcommunity.com/games/289070/rss/"),//1
+    STELLARIS(423,"http://steamcommunity.com/games/281990/rss/"),//1
+    ENDLESS_LEGEND(426,"http://steamcommunity.com/games/289130/rss/"),//1
+    NBA_2K(315,"https://store.steampowered.com/feeds/news/app/2338770/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    EA_SPORTS_FC(324,"https://store.steampowered.com/feeds/news/app/2195250/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    TITANFALL(231,"https://store.steampowered.com/feeds/news/app/1237970/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    APEX_LEGENDS(234,"https://store.steampowered.com/feeds/news/app/1172470/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    CALL_OF_DUTY(207,"https://store.steampowered.com/feeds/news/app/1938090/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    TOTAL_WAR(402,"https://store.steampowered.com/feeds/news/app/1142710/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    STARFIELD(249,"https://store.steampowered.com/feeds/news/app/1716740/?cc=US&l=english&snr=1_2108_4__2107"),//1
+    SINS_OF_A_SOLAR_EMPIRE(420,"https://store.steampowered.com/feeds/news/app/204880/?cc=US&l=english&snr=1_2108_4__2107"),//1
+    YU_GI_OH(507,"https://store.steampowered.com/feeds/news/app/1449850/?cc=US&l=english&snr=1_2108_4__2107"),//1
+    MOUNT_AND_BLADE(603,"https://store.steampowered.com/feeds/news/app/261550/?cc=US&l=english&snr=1_2108_4__2107"),//1
+    DARK_SOULS(609,"https://store.steampowered.com/feeds/news/app/374320/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    HOGWARTS_LEGACY(612,"https://store.steampowered.com/feeds/news/app/990080/?cc=US&l=english&snr=1_2108_4__2107"),//1
+    PATH_OF_EXILE(618,"https://store.steampowered.com/feeds/news/app/238960/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    GOD_OF_WAR(621,"https://store.steampowered.com/feeds/news/app/1593500/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    THE_ELDER_SCROLLS(624,"https://store.steampowered.com/feeds/news/app/306130/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    DAVE_THE_DIVER(630,"https://store.steampowered.com/feeds/news/app/1868140/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    CYBERPUNK_2077(135,"https://store.steampowered.com/feeds/news/app/1091500/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    ELDEN_RING(117,"https://store.steampowered.com/feeds/news/app/1245620/?cc=US&l=english&snr=1_2108_9__2107"),//1
+    LEAGUE_OF_LEGENDS(447,"https://gamerant.com/feed/category/tag/league-of-legends/"),//2
+    DENTINY_2(237,"https://gamerant.com/feed/category/tag/destiny-2/"),//2
+    WORLD_OF_WARCRAFT(111,"https://gamerant.com/feed/category/tag/world-of-warcraft/"),//2
+    FINAL_FANTASY_XVI(114,"https://gamerant.com/feed/category/tag/final-fantasy-16/"),//2
+    VALORANT(210,"https://gamerant.com/feed/category/tag/valorant/"),//2
+    FORTNITE(240,"https://gamerant.com/feed/category/fortnite-news/"),//2
+    HEARTHSTONE(516,"https://gamerant.com/feed/category/tag/hearthstone/"),//2
+    THE_LEGEND_OF_ZELDA(600,"https://gamerant.com/feed/category/tag/the-legend-of-zelda/");//2
+    //https://gamerant.com/feed/category/tag/pokemon/
+    private final Integer gameId;
 
-    private Short gameId;
+    private final String RSSUrl;
 
-    private String RSSUrl;
-
-    public static String GetRSSUrl(Short gameId) {
+    public static String GetRSSUrl(Integer gameId) {
         for (NewsEnum newsEnum : NewsEnum.values()) {
             if (gameId.equals(newsEnum.getGameId())) {
-                return newsEnum.GetRSSUrl(gameId);
+                return newsEnum.getRSSUrl();
             }
         }
         return null;
     }
-    public static Short GetGameId (String RSSUrl) {
+    public static Integer GetGameId (String RSSUrl) {
         for (NewsEnum newsEnum : NewsEnum.values()) {
             if (RSSUrl.equals(newsEnum.getRSSUrl())) {
-                return newsEnum.GetGameId(RSSUrl);
+                return newsEnum.getGameId();
             }
         }
-        return -1;
+        return null;
     }
 }

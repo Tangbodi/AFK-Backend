@@ -9,6 +9,7 @@ import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Games.GameGenreMapService;
+import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -24,10 +25,8 @@ import java.util.Map;
 public class RedisStrategy {
     private static final Logger logger = LoggerFactory.getLogger(RedisStrategy.class);
     private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
     @Autowired
-    protected RedisLikeSaveService redisLikeSaveService;
+    private RedisService redisService;
     @Autowired
     protected RedisMessageService redisMessageService;
     @Autowired
@@ -35,7 +34,7 @@ public class RedisStrategy {
     @Autowired
     private RedisGameIconService redisGameIconService;
     @Autowired
-    private GameGenreMapService gameGenreMapService;
+    private UserFavoriteGameService userFavoriteGameService;
 
     public void UserRegistrationStrategy(UserRegisterDTO userRegisterDTO){
         logger.info("Start UserRegistrationStrategy");
@@ -44,13 +43,17 @@ public class RedisStrategy {
     public void UserFavoriteGameStrategy(UserLikeSaveDTO userLikeSaveDTO) throws IOException {
         logger.info("Start UserFavoriteGameStrategy");
         Long userId = userLikeSaveDTO.getUserId();
+
         Short gameId = userLikeSaveDTO.getObjectId().shortValue();
         String typeName = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());
         String key = typeName + ":::" + userId;
         Integer status = userLikeSaveDTO.getStatus();
+        if(!redisService.MemberExists(key,userId)){
+            logger.info("User favorite game list doesn't exist in Redis, getting from DB");
+            userFavoriteGameService.GetUserFavoriteGames(userId);
+        }
         //Get user favorite game list from Redis to update
         List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId,userId);
-        logger.info("userFavoriteGameVOList: {}", userFavoriteGameVOList);
         //Get all game icons list from Redis
         List<GameIconVO> gameIconVOList = redisGameIconService.GetAllGameIconsCache();
         //Find game in all game icons list
@@ -58,7 +61,7 @@ public class RedisStrategy {
                 .filter(gameIconVO1 -> gameIconVO1.getGameId().equals(gameId))
                 .findFirst()
                 .orElse(null);
-        //if user save the game
+        //if status is 1, add game to user favorite game list
         if(status == StatusEnum.TRUE.getCode()){
             logger.info("Adding game to user favorite game list");
             //Add game to UserFavoriteGameVO
@@ -77,7 +80,6 @@ public class RedisStrategy {
             redisGameIconService.SetUserFavoriteGameCache(key,userId,userFavoriteGameVOList);
             logger.info("Removed game from user favorite game list");
         }
-//        redisGameIconService.SetUserFavoriteGameCache(userLikeSaveDTO.getUserId(), userFavoriteGameVOList);
     }
     public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
         logger.info("Start LikeSaveStrategy");
@@ -93,16 +95,16 @@ public class RedisStrategy {
         String value = String.valueOf(userLikeSaveDTO.getStatus());
         //whatever the status is, add to set
             //if the Type name doesn't exist then add to set
-            if (!redisLikeSaveService.MemberExists(typeName, objectId)) {
+            if (!redisService.MemberExists(typeName, objectId)) {
                 //post_like/comment_like/reply_like/post_save
-                redisLikeSaveService.AddSet(typeName, objectId);
+                redisService.AddSet(typeName, objectId);
                 //like/save
 //                redisLikeSaveService.AddSet(typeName, objectId);
             } else {
                 //
             }
             //postId/commentId/replyId -> userId -> createdAt
-            redisLikeSaveService.AddHashSet(key, hashKey, value);
+        redisService.AddHashSet(key, hashKey, value);
     }
     public void CommentCountStrategy(CommentReplyDTO commentReplyDTO){
         logger.info("Start CommentCountStrategy");
@@ -111,14 +113,14 @@ public class RedisStrategy {
         String key = countName + ":::" + postId;
         String hashKey = String.valueOf(commentReplyDTO.getCommentId());
         String value = String.valueOf(commentReplyDTO.getFromUid());
-        if (!redisLikeSaveService.MemberExists(countName, postId)) {
+        if (!redisService.MemberExists(countName, postId)) {
             //COMMENT_COUNT
-            redisLikeSaveService.AddSet(countName, postId);
+            redisService.AddSet(countName, postId);
         } else {
             //
         }
         //postId -> commentId -> fromUid
-        redisLikeSaveService.AddHashSet(key, hashKey, value);
+        redisService.AddHashSet(key, hashKey, value);
     }
     public void ReplyCountStrategy(CommentReplyDTO commentReplyDTO){
         logger.info("Start ReplyCountStrategy");
@@ -127,14 +129,14 @@ public class RedisStrategy {
         String key = countName + ":::" + postId;
         String hashKey = String.valueOf(commentReplyDTO.getReplyId());
         String value = String.valueOf(commentReplyDTO.getFromUid());
-        if(!redisLikeSaveService.MemberExists(countName,postId)) {
+        if(!redisService.MemberExists(countName,postId)) {
             //REPLY_COUNT
-            redisLikeSaveService.AddSet(countName, postId);
+            redisService.AddSet(countName, postId);
         } else {
             //
         }
         //postId -> replyId -> fromUid
-        redisLikeSaveService.AddHashSet(key, hashKey, value);
+        redisService.AddHashSet(key, hashKey, value);
     }
     public void MessageMentionStrategy(MessageVO messageVO){
         logger.info("Start MessageMentionStrategy");
