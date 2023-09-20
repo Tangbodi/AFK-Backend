@@ -31,7 +31,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
             "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC", nativeQuery = true)
     List<Map<String, Object>> findAllByGameId(@Param("gameId") Short gameId);
 
-    @Query(value = "SELECT n.news_id, gi.icon_url, n.source, n.title, n.media_content_url, n.content, n.pub_date\n" +
+    @Query(value = "SELECT n.news_id, gi.game_name, gi.icon_url, n.source, n.title, n.media_content_url, n.content, n.pub_date\n" +
             " FROM afk.news n \n" +
             " LEFT JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
             " WHERE n.news_id = :newsId", nativeQuery = true)
