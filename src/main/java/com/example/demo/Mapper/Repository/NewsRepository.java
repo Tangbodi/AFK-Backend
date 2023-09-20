@@ -12,11 +12,12 @@ import java.util.Map;
 
 @Repository
 public interface NewsRepository extends JpaRepository<News, String> {
-    @Query(value = "SELECT n.news_id, gi.genre_id, n.game_id, gi.game_name, gi.icon_url,  n.source, n.title, ifnull(n.description,'') AS description, ifnull(n.media_content_url,'') AS media_content_url, n.content, n.pub_date\n" +
-            "FROM afk.news n \n" +
+    @Query(value = "SELECT n.news_id, gi.genre_id, n.game_id, gi.game_name, gi.icon_url, n.source, n.title, n.description, n.media_content_url, n.content, n.pub_date\n" +
+            "FROM afk.news n\n" +
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
             "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
-            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC", nativeQuery = true)
+            "AND (n.description IS NOT NULL AND n.media_content_url IS NOT NULL)\n" +
+            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') DESC;", nativeQuery = true)
     List<Map<String, Object>> findAllNewsByPublishDate();
 
     @Modifying
@@ -28,6 +29,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
             "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
             "AND n.game_id = :gameId\n" +
+            "AND (n.description IS NOT NULL AND n.media_content_url IS NOT NULL)\n" +
             "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC", nativeQuery = true)
     List<Map<String, Object>> findAllByGameId(@Param("gameId") Short gameId);
 
