@@ -3,6 +3,7 @@ package com.example.demo.Controller;
 import com.example.demo.Annotation.ValidGameId;
 import com.example.demo.Annotation.ValidGenreId;
 import com.example.demo.Constant.Enum.ReturnCode;
+import com.example.demo.Model.DTO.NewsDTO;
 import com.example.demo.Model.VO.NewsVO;
 import com.example.demo.Model.VO.PostInfoVO;
 import com.example.demo.Service.Games.GameGenreMapService;
@@ -20,10 +21,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -106,7 +105,7 @@ public class NewsController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-    @GetMapping("/game-news")
+    @GetMapping("/game-news-list")
     public ResponseEntity GetOneGameNewsCache(@RequestParam(value = "game") @ValidGameId Short gameId,
                                               @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                               @RequestParam(value = "page") int page,
@@ -120,7 +119,7 @@ public class NewsController {
         } else {
             if(redisService.CacheExists(AFK_GAME_NEWS+gameId)){
                 logger.info("Getting one game news from Redis");
-                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsCache(gameId);
+                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsListCache(gameId);
                 Pageable pageable = PageRequest.of(page, size);
                 int startIdx = (int) pageable.getOffset();
                 int endIdx = Math.min((startIdx + pageable.getPageSize()), newsVOList.size());
@@ -134,8 +133,8 @@ public class NewsController {
                 }
             } else {
                 logger.info("Getting one game news from DB");
-                newsService.SetOneGameNews(genreId, gameId);
-                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsCache(gameId);
+                newsService.SetOneGameNewsList(genreId, gameId);
+                List<NewsVO> newsVOList = redisNewsService.GetOneGameNewsListCache(gameId);
                 Pageable pageable = PageRequest.of(page, size);
                 int startIdx = (int) pageable.getOffset();
                 int endIdx = Math.min((startIdx + pageable.getPageSize()), newsVOList.size());
@@ -148,6 +147,17 @@ public class NewsController {
                     apiResponse = ApiResponse.success(currentPage);
                 }
             }
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+    }
+    @GetMapping("/game-news")
+    public ResponseEntity GetOneGameNewsCache(@Validated @RequestBody NewsDTO newsDTO) throws IOException {
+        ApiResponse apiResponse;
+        if (gameGenreMapService.FindGamesGenresMapById(newsDTO.getGenreId(), newsDTO.getGameId()) == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
+        } else {
+            NewsVO newsVO = newsService.GetOneGameNews(newsDTO);
+            apiResponse = ApiResponse.success(newsVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

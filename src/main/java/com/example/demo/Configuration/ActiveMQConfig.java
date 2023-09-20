@@ -16,7 +16,6 @@ public class ActiveMQConfig {
     public Queue LikeSaveQueue() {
         return new ActiveMQQueue("like-save-redis");
     }
-
     @Bean
     public Queue CommentCountQueue() {
         return new ActiveMQQueue("comment-count-redis");

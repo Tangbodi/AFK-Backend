@@ -80,7 +80,7 @@ public class RedisNewsService {
         return Collections.emptyList();
     }
 
-    public List<NewsVO> GetOneGameNewsCache(Short gameId) {
+    public List<NewsVO> GetOneGameNewsListCache(Short gameId) {
         logger.info("Getting game news cache: {}", gameId);
         Jedis jedis = null;
         try {

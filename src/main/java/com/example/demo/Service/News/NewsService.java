@@ -1,6 +1,7 @@
 package com.example.demo.Service.News;
 
 import com.example.demo.Mapper.Repository.NewsRepository;
+import com.example.demo.Model.DTO.NewsDTO;
 import com.example.demo.Model.Entity.News;
 import com.example.demo.Model.VO.NewsVO;
 import com.example.demo.Service.Redis.RedisNewsService;
@@ -51,7 +52,7 @@ public class NewsService {
             logger.error("Error getting all news: {}", e.getMessage(), e);
         }
     }
-    public void SetOneGameNews(Byte genreId, Short gameId){
+    public void SetOneGameNewsList(Byte genreId, Short gameId){
         logger.info("Starting GetOneGameNews for gameId: {}", gameId);
         try{
             List<Map<String, Object>> newsList = newsRepository.findAllByGameId(gameId);
@@ -75,6 +76,35 @@ public class NewsService {
             redisNewsService.SetOneGameNewsCache(gameId, newsVOList);
         } catch (Exception e) {
             logger.error("Error getting one game news: {}", e.getMessage(), e);
+        }
+    }
+    public NewsVO GetOneGameNews(NewsDTO newsDTO){
+        logger.info("Getting GetOneGameNews for gameId: {}", newsDTO.getGameId());
+        try{
+            List<Map<String, Object>> news = newsRepository.findByNewsId(newsDTO.getNewsId());
+            if(news.isEmpty()){
+                logger.info("News not found");
+                return null;
+            } else {
+                NewsVO newsVO = new NewsVO();
+                for(Map<String, Object> map : news) {
+                    newsVO.setNewsId((String) map.get("news_id"));
+                    newsVO.setGenreId(newsDTO.getGenreId());
+                    newsVO.setGameId(newsDTO.getGameId());
+                    newsVO.setGameName((String) map.get("game_name"));
+                    newsVO.setGameIconUrl((String) map.get("icon_url"));
+                    newsVO.setSource((String) map.get("source"));
+                    newsVO.setTitle((String) map.get("title"));
+                    newsVO.setDescription((String) map.get("description"));
+                    newsVO.setMediaContentUrl((String) map.get("media_content_url"));
+                    newsVO.setContent((String) map.get("content"));
+                    newsVO.setPubDate((String)map.get("pub_date"));
+                }
+                return newsVO;
+            }
+        } catch (Exception e) {
+            logger.error("Error getting one game news: {}", e.getMessage(), e);
+            return null;
         }
     }
 }
