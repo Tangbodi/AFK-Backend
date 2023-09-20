@@ -150,7 +150,7 @@ public class NewsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @GetMapping("/game-news")
+    @PostMapping("/game-news")
     public ResponseEntity GetOneGameNewsCache(@Validated @RequestBody NewsDTO newsDTO) throws IOException {
         ApiResponse apiResponse;
         if (gameGenreMapService.FindGamesGenresMapById(newsDTO.getGenreId(), newsDTO.getGameId()) == null) {
