@@ -150,12 +150,18 @@ public class NewsController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @PostMapping("/game-news")
-    public ResponseEntity GetOneGameNewsCache(@Validated @RequestBody NewsDTO newsDTO) throws IOException {
+    @GetMapping("/game-news")
+    public ResponseEntity GetOneGameNewsCache(@RequestParam(value = "game") @ValidGameId Short gameId,
+                                              @RequestParam(value = "genre") @ValidGenreId Byte genreId,
+                                              @RequestParam(value = "newsId") String newsId) throws IOException {
         ApiResponse apiResponse;
-        if (gameGenreMapService.FindGamesGenresMapById(newsDTO.getGenreId(), newsDTO.getGameId()) == null) {
+        if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
         } else {
+            NewsDTO newsDTO = new NewsDTO();
+            newsDTO.setNewsId(newsId);
+            newsDTO.setGameId(gameId);
+            newsDTO.setGenreId(genreId);
             NewsVO newsVO = newsService.GetOneGameNews(newsDTO);
             apiResponse = ApiResponse.success(newsVO);
         }
