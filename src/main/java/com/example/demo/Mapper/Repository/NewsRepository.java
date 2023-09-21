@@ -16,8 +16,8 @@ public interface NewsRepository extends JpaRepository<News, String> {
             "FROM afk.news n\n" +
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
             "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
-            "AND (n.description IS NOT NULL AND n.media_content_url IS NOT NULL)\n" +
-            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') DESC;", nativeQuery = true)
+            "AND (n.media_content_url IS NOT NULL AND n.media_content_url != '')\n" +
+            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') DESC", nativeQuery = true)
     List<Map<String, Object>> findAllNewsByPublishDate();
 
     @Modifying
