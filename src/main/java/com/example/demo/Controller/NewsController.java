@@ -153,7 +153,7 @@ public class NewsController {
     @GetMapping("/game-news")
     public ResponseEntity GetOneGameNewsCache(@RequestParam(value = "game") @ValidGameId Short gameId,
                                               @RequestParam(value = "genre") @ValidGenreId Byte genreId,
-                                              @RequestParam(value = "newsId") String newsId) throws IOException {
+                                              @RequestParam(value = "news") String newsId) throws IOException {
         ApiResponse apiResponse;
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
