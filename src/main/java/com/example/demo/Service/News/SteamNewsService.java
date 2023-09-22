@@ -111,16 +111,17 @@ public class SteamNewsService {
                     if (matcher.find()) {
                         newsId = matcher.group(1);
                     }
-                    mediaContentUrl = parseImg.ParseImage(content);
                 } else {
                     Pattern pattern = Pattern.compile("/view/(\\d+)$");
                     Matcher matcher = pattern.matcher(link);
                     if (matcher.find()) {
                         newsId = matcher.group(1);
                     }
-                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 }
-                if(mediaContentUrl == null || mediaContentUrl.equals("")){
+                NodeList enclosures = item.getElementsByTagName("enclosure");
+                if(enclosures.getLength() > 0){
+                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
+                } else {
                     mediaContentUrl = parseImg.ParseImage(content);
                 }
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
