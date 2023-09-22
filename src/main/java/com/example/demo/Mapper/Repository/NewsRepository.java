@@ -15,7 +15,8 @@ public interface NewsRepository extends JpaRepository<News, String> {
     @Query(value = "SELECT n.news_id, gi.genre_id, n.game_id, gi.game_name, gi.icon_url, n.source, n.title, n.description, n.media_content_url, n.content, n.pub_date\n" +
             "FROM afk.news n\n" +
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
-            "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
+            "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) >= YEAR(CURRENT_DATE()) - 1\n" +
+            "AND YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) <= YEAR(CURRENT_DATE())\n" +
             "AND (n.media_content_url IS NOT NULL AND n.media_content_url != '')\n" +
             "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s') DESC", nativeQuery = true)
     List<Map<String, Object>> findAllNewsByPublishDate();
@@ -27,9 +28,10 @@ public interface NewsRepository extends JpaRepository<News, String> {
     @Query(value = "SELECT n.news_id, gi.genre_id, n.game_id, gi.game_name, gi.icon_url,  n.source, n.title, ifnull(n.description,'') AS description, ifnull(n.media_content_url,'') AS media_content_url, n.content, n.pub_date\n" +
             "FROM afk.news n \n" +
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
-            "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
+            "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) >= YEAR(CURRENT_DATE()) - 1\n" +
+            "AND YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) <= YEAR(CURRENT_DATE())\n" +
             "AND n.game_id = :gameId\n" +
-            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC", nativeQuery = true)
+            "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC;", nativeQuery = true)
     List<Map<String, Object>> findAllByGameId(@Param("gameId") Short gameId);
 
     @Query(value = "SELECT n.news_id, gi.game_name, gi.icon_url, n.source, n.title, n.media_content_url, n.content, n.pub_date\n" +

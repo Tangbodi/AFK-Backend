@@ -30,7 +30,7 @@ public interface CommentRepository extends JpaRepository<PostComment, Long> {
             "JOIN afk.games gm ON pgm.game_id = gm.game_id\n" +
             "JOIN afk.games_genres_map ggm ON gm.game_id = ggm.game_id)\n" +
             "SELECT p.genre_id, p.game_id, p.post_id, p.content, p.game_name, p.created_at FROM PostsWithGame p ORDER BY created_at DESC\n" +
-            "LIMIT 9;", nativeQuery = true)
+            "LIMIT 6;", nativeQuery = true)
     List<Map<String, Object>> findNewestComments();
 
 

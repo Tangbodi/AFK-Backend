@@ -15,7 +15,7 @@ public interface PostInfoRepository extends JpaRepository<PostsInfo, Long> {
             "            JOIN afk.posts_games_map pgm ON p.post_id = pgm.post_id\n" +
             "            JOIN afk.games gm ON pgm.game_id = gm.game_id\n" +
             "            JOIN afk.games_genres_map ggm ON pgm.game_id = ggm.game_id\n" +
-            "            ORDER BY (c.comment_reply + c.view) DESC LIMIT 9", nativeQuery = true)
+            "            ORDER BY (c.comment_reply + c.view) DESC LIMIT 6", nativeQuery = true)
     List<Map<Short, Object>> findMostPopularPosts();
 
 }

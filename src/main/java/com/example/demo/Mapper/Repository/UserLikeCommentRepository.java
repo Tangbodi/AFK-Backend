@@ -12,8 +12,6 @@ import java.util.Map;
 @Repository
 public interface UserLikeCommentRepository extends JpaRepository<UsersLikeComment, UsersLikeCommentId> {
 
-    @Query(value = "SELECT * FROM afk.users_like_comments WHERE like_status = 1", nativeQuery = true)
-    List<UsersLikeComment> findAllByLikeStatus();
     @Query(value = "SELECT COUNT(*) AS total_like\n" +
             "FROM afk.users_like_comments\n" +
             "WHERE like_status = 1\n" +

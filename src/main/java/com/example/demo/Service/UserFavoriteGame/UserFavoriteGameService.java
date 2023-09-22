@@ -34,7 +34,7 @@ public class UserFavoriteGameService {
         logger.info("Setting user favorite game for user: {}",userId);
         try {
             //Delete all user favorite games
-            userFavoriteGameRepository.deleteAllGamesByUserId(userId);
+            userFavoriteGameRepository.deleteAllFavoriteGamesByUserId(userId);
             //Create new user favorite games
             for (UserFavoriteGameVO userFavoriteGameVO : userFavoriteGameVOList) {
                 UsersFavoriteGameId usersFavoriteGameId = new UsersFavoriteGameId();
