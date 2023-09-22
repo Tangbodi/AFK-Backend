@@ -28,9 +28,9 @@ import java.util.Map;
 @Service
 public class PostImageService {
     private static final Logger logger = LoggerFactory.getLogger(PostImageService.class);
-//    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
-    private static final String POST_IMAGE_URL = "http://31.220.21.110:81/IMAGE/POST/";
-    private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
+    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
+    private static final String POST_IMAGE_URL = "http://31.220.21.110:8180/IMAGE/POST/";
+//    private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
     private static final String IMAGE_TYPE = "jpg";
     @Autowired
     private PostImageRepository postImageRepository;
@@ -57,7 +57,7 @@ public class PostImageService {
 //                String imageType = imageName.substring(imageName.indexOf(".") + 1, imageName.length());
                 imageName = imageName+"."+IMAGE_TYPE;
                 postImage.setImageType(IMAGE_TYPE);
-                postImage.setImagePath(NGINX_POST_IMAGE_PATH + imageName);
+                postImage.setImagePath(TOMCAT_POST_IMAGE_PATH + imageName);
                 postImage.setImageUrl(POST_IMAGE_URL + imageName);
                 postImage.setCreatedAt(postDTO.getCreatedAt());
                 postImage.setModifiedAt(postDTO.getCreatedAt());
@@ -89,7 +89,7 @@ public class PostImageService {
                     logger.info("Saving PostImage to Tomcat and Nginx");
                     // Define paths for Tomcat and Nginx
 //                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                    Path nginxImagePath  = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+                    Path nginxImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
                     Thumbnails.of(new ByteArrayInputStream(imageData))
                             .scale(1f)
                             .outputQuality(0.5) // Adjust quality (0.0 to 1.0)

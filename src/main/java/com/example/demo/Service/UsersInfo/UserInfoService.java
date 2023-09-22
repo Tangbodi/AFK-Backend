@@ -32,9 +32,9 @@ import java.time.Instant;
 @Service
 public class UserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
-    private static final String AVATAR_URL = "http://31.220.21.110:81/IMAGE/AVATAR/";
+    private static final String AVATAR_URL = "http://31.220.21.110:8180/IMAGE/AVATAR/";
     private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat2/webapps/IMAGE/AVATAR/";
-    private static final String NGINX_AVATAR_PATH = "/usr/local/nginx2/html/IMAGE/AVATAR/";
+//    private static final String NGINX_AVATAR_PATH = "/usr/local/nginx2/html/IMAGE/AVATAR/";
     @Autowired
     private UserInfoRepository userInfoRepository;
     @Autowired
@@ -207,14 +207,14 @@ public class UserInfoService {
                 logger.info("AvatarURL: {}", avatarURL);
                 logger.info("Saving PostImage to Tomcat and Nginx");
                 Path Tomcat_imagePath = Paths.get(TOMCAT_AVATAR_PATH, avatarName);
-                Path Nginx_imagePath = Paths.get(NGINX_AVATAR_PATH, avatarName);
+//                Path Nginx_imagePath = Paths.get(NGINX_AVATAR_PATH, avatarName);
                 FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
-                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+//                FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
                 fos_tomcat.write(avatarData);
-                fos_nginx.write(avatarData);
+//                fos_nginx.write(avatarData);
                 fos_tomcat.close();
-                fos_nginx.close();
-                logger.info("Saved PostImage to Tomcat and Nginx");
+//                fos_nginx.close();
+                logger.info("Saved PostImage to Tomcat");
                 return SaveUserAvatar(userId, avatarURL);
             }
         } catch (FileNotFoundException e) {
