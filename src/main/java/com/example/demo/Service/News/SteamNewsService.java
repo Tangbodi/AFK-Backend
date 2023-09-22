@@ -120,6 +120,9 @@ public class SteamNewsService {
                     }
                     mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 }
+                if(mediaContentUrl == null || mediaContentUrl.equals("")){
+                    mediaContentUrl = parseImg.ParseImage(content);
+                }
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
                 news.setMediaContentUrl(mediaContentUrl);
                 news.setId(newsId);
