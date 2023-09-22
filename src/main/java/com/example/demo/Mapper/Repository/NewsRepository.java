@@ -29,7 +29,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
             "JOIN afk.game_icons gi ON n.game_id = gi.icon_id\n" +
             "WHERE YEAR(STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')) = 2023\n" +
             "AND n.game_id = :gameId\n" +
-            "AND (n.description IS NOT NULL AND n.media_content_url IS NOT NULL)\n" +
+            "AND (n.media_content_url IS NOT NULL AND n.media_content_url != '')\n" +
             "ORDER BY STR_TO_DATE(pub_date, '%a, %d %b %Y %H:%i:%s')DESC", nativeQuery = true)
     List<Map<String, Object>> findAllByGameId(@Param("gameId") Short gameId);
 

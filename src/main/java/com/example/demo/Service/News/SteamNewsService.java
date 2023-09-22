@@ -99,30 +99,31 @@ public class SteamNewsService {
                 link = RemoveCDATA(link);
                 logger.info("Link: {}" + link);
                 String newsId = "";
+                String mediaContentUrl = "";
+                String content = item.getElementsByTagName("description").item(0).getTextContent();
+                content = RemoveCDATA(content);
+                logger.info("Parsed Description: {}" + content);
+//                news.setDescription(description);
+                news.setContent(content);
                 if (res == 1) {
                     Pattern pattern = Pattern.compile("/detail/(\\d+)$");
                     Matcher matcher = pattern.matcher(link);
                     if (matcher.find()) {
                         newsId = matcher.group(1);
                     }
+                    mediaContentUrl = parseImg.ParseImage(content);
                 } else {
                     Pattern pattern = Pattern.compile("/view/(\\d+)$");
                     Matcher matcher = pattern.matcher(link);
                     if (matcher.find()) {
                         newsId = matcher.group(1);
                     }
+                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 }
-                news.setId(newsId);
-                news.setLink(link);
-
-                String content = item.getElementsByTagName("description").item(0).getTextContent();
-                content = RemoveCDATA(content);
-                logger.info("Parsed Description: {}" + content);
-//                news.setDescription(description);
-                news.setContent(content);
-                String mediaContentUrl = parseImg.ParseImage(content);
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
                 news.setMediaContentUrl(mediaContentUrl);
+                news.setId(newsId);
+                news.setLink(link);
 
                 String pubDate = item.getElementsByTagName("pubDate").item(0).getTextContent();
                 pubDate = ParsePubDate(pubDate);
