@@ -1,7 +1,9 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.*;
-import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Model.DTO.EmailDTO;
+import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Service.Redis.RedisStrategy;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.slf4j.Logger;
@@ -49,10 +51,15 @@ public class MQReceiver {
             Integer status = userLikeSaveDTO.getStatus();
 
             try {
-                if(userLikeSaveDTO.getTypeId() == 4 ){
+                if (userLikeSaveDTO.getTypeId() == 4) {
                     redisStrategy.UserFavoriteGameStrategy(userLikeSaveDTO);
                 } else {
                     redisStrategy.LikeSaveStrategy(userLikeSaveDTO);
+                    if (userLikeSaveDTO.getStatus() == 1) {
+                        redisStrategy.LikeSaveMentionStrategy(userLikeSaveDTO);
+                    } else {
+                        //
+                    }
                     logger.info("Like-save consumer record: User: {}, status: {}, objectId: {}",
                             userLikeSaveDTO.getUserId(), status, userLikeSaveDTO.getObjectId());
                 }
@@ -118,12 +125,12 @@ public class MQReceiver {
     public void MessageMentionHandle(Message message) {
         try {
             ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
-            MessageVO messageVO = (MessageVO) activeMqObjectMessage.getObject();
+            Long userId = (Long) activeMqObjectMessage.getObject();
             try {
-                redisStrategy.MessageMentionStrategy(messageVO);
-                logger.info("Message-mention consumer record: User: {}", messageVO.getToUid());
+                redisStrategy.MessageMentionStrategy(userId);
+                logger.info("Message-mention consumer record: User: {}", userId);
             } catch (Exception e) {
-                logger.error("Error processing message for User: " + messageVO.getToUid(), e);
+                logger.error("Error processing message for User: " + userId, e);
                 // Optionally, throw a custom exception or take other appropriate action
             }
         } catch (JMSException e) {
@@ -134,6 +141,7 @@ public class MQReceiver {
             // Optionally, throw a custom exception or take other appropriate action
         }
     }
+
     @JmsListener(destination = "update-email-redis", containerFactory = "activeMQFactory")
     public void UpdateEmailHandle(Message message) {
         try {
@@ -154,6 +162,7 @@ public class MQReceiver {
             // Optionally, throw a custom exception or take other appropriate action
         }
     }
+
     @JmsListener(destination = "forgot-password-redis", containerFactory = "activeMQFactory")
     public void ForgotPasswordHandle(Message message) {
         try {

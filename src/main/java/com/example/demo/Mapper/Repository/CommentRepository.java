@@ -33,5 +33,4 @@ public interface CommentRepository extends JpaRepository<PostComment, Long> {
             "LIMIT 6;", nativeQuery = true)
     List<Map<String, Object>> findNewestComments();
 
-
 }

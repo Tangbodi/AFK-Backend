@@ -35,6 +35,9 @@ public class Message {
     @Column(name = "to_uid", nullable = false)
     private Long toUid;
 
+    @Column(name = "type_id")
+    private Byte typeId;
+
     @NotNull
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

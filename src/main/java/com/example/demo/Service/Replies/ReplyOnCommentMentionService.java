@@ -7,6 +7,7 @@ import com.example.demo.Model.Entity.ReplyOnCommentMention;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
+import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,15 @@ import javax.transaction.Transactional;
 @Service
 public class ReplyOnCommentMentionService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyOnCommentMentionService.class);
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private ReplyOnCommentMentionRepository replyOnCommentMentionRepository;
     @Autowired
     private MessageService messageService;
     @Autowired
     private MQSender mqSender;
+    @Autowired
+    private RedisService redisService;
 
     @Transactional
     public void SaveReplyOnCommentMention(UserRegisterDTO userRegisterDTO) {
@@ -54,19 +58,15 @@ public class ReplyOnCommentMentionService {
                     return;
                 } else {
                     logger.info("Reply on comment mention setting is on");
-                    //set message mention
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(commentReplyDTO.getReplyId().toString());
-                    messageVO.setContent(commentReplyDTO.getContent());
-                    messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
-                    messageVO.setFromUsername(commentReplyDTO.getFromUsername());
-                    messageVO.setToUid(commentAuthorId.toString());
-                    messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
                     //set message
                     messageService.SaveMessage(commentReplyDTO,commentAuthorId);
                     //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
-                    logger.info("Sent reply on comment mention message to MQ");
+                    if(redisService.CacheExists(MESSAGE_MENTION_KEY + commentAuthorId)){
+                        mqSender.SendMentionMessage(commentAuthorId);
+                        logger.info("Sent reply on comment mention message to MQ");
+                    } else {
+                        //
+                    }
                 }
             }
         } catch (Exception e) {

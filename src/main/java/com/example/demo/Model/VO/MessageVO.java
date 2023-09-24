@@ -7,10 +7,13 @@ import java.time.Instant;
 
 @Data
 public class MessageVO implements Serializable {
-    private String commentReplyId;
+    private String messageId;
+    private String objectId;
     private String content;
     private String fromUid;
     private String toUid;
     private String fromUsername;
+    private String fromAvatarUrl;
+    private String typeId;
     private String createdAt;
 }

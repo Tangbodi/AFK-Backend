@@ -7,6 +7,7 @@ import com.example.demo.Model.Entity.ReplyOnReplyMention;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
+import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,15 @@ import javax.transaction.Transactional;
 @Service
 public class ReplyOnReplyMentionService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyOnReplyMentionService.class);
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private ReplyOnReplyMentionRepository replyOnReplyMentionRepository;
     @Autowired
     private MessageService messageService;
     @Autowired
     private MQSender mqSender;
-
+    @Autowired
+    private RedisService redisService;
     @Transactional
     public void SaveReplyOnReplyMention(UserRegisterDTO userRegisterDTO) {
         logger.info("Saving ReplyOnReplyMention:{}");
@@ -52,19 +55,15 @@ public class ReplyOnReplyMentionService {
                     logger.info("Reply on reply mention setting is off");
                 } else {
                     logger.info("Reply on reply mention setting is on");
-                    //set message mention
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setCommentReplyId(commentReplyDTO.getReplyId().toString());
-                    messageVO.setContent(commentReplyDTO.getContent());
-                    messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
-                    messageVO.setFromUsername(commentReplyDTO.getFromUsername());
-                    messageVO.setToUid(toReplyAuthorId.toString());
-                    messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
                     //set message
                     messageService.SaveMessage(commentReplyDTO, toReplyAuthorId);
                     //send message mention to MQ
-                    mqSender.SendMentionMessage(messageVO);
-                    logger.info("Sent reply on reply mention message to MQ");
+                    if(redisService.CacheExists(MESSAGE_MENTION_KEY + toReplyAuthorId)){
+                        mqSender.SendMentionMessage(toReplyAuthorId);
+                        logger.info("Sent reply on reply mention message to MQ");
+                    } else {
+                        //
+                    }
                 }
             }
         } catch (Exception e) {

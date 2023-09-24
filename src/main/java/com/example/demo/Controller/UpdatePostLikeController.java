@@ -31,7 +31,7 @@ public class UpdatePostLikeController {
     @Autowired
     private PostInfoService postInfoService;
 
-    @Scheduled(fixedRate = 4000)
+//    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-post-like")
     public ResponseEntity UpdatePostLike() {
         ApiResponse apiResponse;

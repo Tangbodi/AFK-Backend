@@ -12,7 +12,7 @@ public enum ObjectNameEnum {
     POST_SAVE_SET(3, "POST_SAVE"),
     SAVED_GAME_SET(4, "SAVED_GAME");
 
-    private int type;
+    private int typeCode;
 
     private String typeName;
 
@@ -21,7 +21,7 @@ public enum ObjectNameEnum {
      */
     public static String GetTypeName(Integer typeId) {
         for (ObjectNameEnum objectNameEnum : ObjectNameEnum.values()) {
-            if (typeId.equals(objectNameEnum.getType())) {
+            if (typeId.equals(objectNameEnum.getTypeCode())) {
                 return objectNameEnum.getTypeName();
             }
         }
@@ -30,7 +30,7 @@ public enum ObjectNameEnum {
     public static Integer GetTypeCode(String typeName) {
         for (ObjectNameEnum objectNameEnum : ObjectNameEnum.values()) {
             if (typeName.equals(objectNameEnum.getTypeName())) {
-                return objectNameEnum.getType();
+                return objectNameEnum.getTypeCode();
             }
         }
         return null;

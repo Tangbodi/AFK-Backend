@@ -78,7 +78,7 @@ public class UsersInfoController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            UserInfoVO userInfoVO = userInfoService.GetUserInfoByUserId(userId);
+            UserInfoVO userInfoVO = userInfoService.GetUserInfo(userId);
             apiResponse = ApiResponse.success(userInfoVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -283,10 +283,12 @@ public class UsersInfoController {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
             if (redisService.CacheExists(MESSAGE_MENTION_KEY + userId)) {
-                List<MessageVO> messageVOList = redisMessageService.GetUnreadMessage(userId);
+                List<MessageVO> messageVOList = redisMessageService.GetUnreadMessageFromRedis(userId);
                 apiResponse = ApiResponse.success(messageVOList);
             } else {
-                apiResponse = ApiResponse.success(Collections.emptyList());
+                redisMessageService.GetUnreadMessageByUserId(userId);
+                List<MessageVO> messageVOList = redisMessageService.GetUnreadMessageFromRedis(userId);
+                apiResponse = ApiResponse.success(messageVOList);
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

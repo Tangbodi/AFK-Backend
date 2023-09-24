@@ -122,7 +122,7 @@ public class UserInfoService {
         }
     }
 
-    public UserInfoVO GetUserInfoByUsername(String username) {
+    public UserInfoVO GetUserInfo(String username) {
         logger.info("Getting UsersInfo: {}" + username);
         try {
             UsersInfo usersInfo = userInfoRepository.findByUsername(username).orElse(null);
@@ -147,7 +147,7 @@ public class UserInfoService {
         return null;
     }
 
-    public UserInfoVO GetUserInfoByUserId(Long userId) {
+    public UserInfoVO GetUserInfo(Long userId) {
         logger.info("Getting UsersInfo: {}" + userId);
         try {
             UsersInfo usersInfo = userInfoRepository.findById(userId).orElse(null);

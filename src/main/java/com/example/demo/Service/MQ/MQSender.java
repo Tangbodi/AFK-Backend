@@ -1,7 +1,9 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.*;
-import com.example.demo.Model.VO.MessageVO;
+import com.example.demo.Model.DTO.CommentReplyDTO;
+import com.example.demo.Model.DTO.EmailDTO;
+import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Model.DTO.UserRegisterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,21 +42,23 @@ public class MQSender {
         jmsMessagingTemplate.convertAndSend(queueName, userRegisterDTO);
         logger.info("Message sent, User: " + userRegisterDTO.getUsername());
     }
+
     @Async("MultiExecutor")
-    public void SendSaveLikeMessage(UserLikeSaveDTO userLikeSaveDTO,Long userId) throws JMSException, InterruptedException {
+    public void SendSaveLikeMessage(UserLikeSaveDTO userLikeSaveDTO, Long userId) throws JMSException, InterruptedException {
         String queueName = LikeSaveQueue.getQueueName();
         userLikeSaveDTO.setUserId(userId);
         userLikeSaveDTO.setCreatedAt(Instant.now());
         jmsMessagingTemplate.convertAndSend(queueName, userLikeSaveDTO);
-        logger.info("Message sent, User: " + userLikeSaveDTO.getUserId() +"," +
+        logger.info("Message sent, User: " + userLikeSaveDTO.getUserId() + "," +
                 "status: " + userLikeSaveDTO.getStatus() + "，" +
                 "objectId: " + userLikeSaveDTO.getObjectId());
     }
+
     @Async("MultiExecutor")
     public void SendCommentCountMessage(CommentReplyDTO commentReplyDTO) throws JMSException, InterruptedException {
         String queueName = CommentCountQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, commentReplyDTO);
-        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() +"," +
+        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() + "," +
                 "commentId: " + commentReplyDTO.getCommentId() + "," +
                 "postId: " + commentReplyDTO.getPostId());
     }
@@ -63,23 +67,25 @@ public class MQSender {
     public void SendReplyCountMessage(CommentReplyDTO commentReplyDTO) throws JMSException, InterruptedException {
         String queueName = ReplyCountQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, commentReplyDTO);
-        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() +"," +
+        logger.info("Message sent, User: " + commentReplyDTO.getFromUid() + "," +
                 "replyId: " + commentReplyDTO.getReplyId() + "," +
                 "postId: " + commentReplyDTO.getPostId());
     }
 
     @Async("MultiExecutor")
-    public void SendMentionMessage(MessageVO messageVO) throws JMSException {
+    public void SendMentionMessage(Long userId) throws JMSException {
         String queueName = MessageMentionQueue.getQueueName();
-        jmsMessagingTemplate.convertAndSend(queueName, messageVO);
-        logger.info("Message sent, User: " + messageVO.getToUid());
+        jmsMessagingTemplate.convertAndSend(queueName, userId);
+        logger.info("Message sent, User: " + userId);
     }
+
     @Async("MultiExecutor")
     public void SendUserUpdateEmailMessage(EmailDTO emailDTO) throws JMSException {
         String queueName = UpdateEmailQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, emailDTO);
         logger.info("Message sent, User: " + emailDTO.getUserId());
     }
+
     @Async("MultiExecutor")
     public void SendForgotPasswordMessage(EmailDTO emailDTO) throws JMSException {
         String queueName = ForgotPasswordQueue.getQueueName();

@@ -30,7 +30,7 @@ public class UpdatePostSaveController {
     @Autowired
     private PostInfoService postInfoService;
 
-    @Scheduled(fixedRate = 4000)
+//    @Scheduled(fixedRate = 4000)
     @PutMapping("/update-post-save")
     public ResponseEntity UpdatePostSave() {
         ApiResponse apiResponse;

@@ -8,6 +8,7 @@ import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class CommentService {
     //For response entity map
     private static final String COMMENT = "comment";
     private static final String REPLY = "reply";
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private CommentRepository commentRepository;
     @Lazy
@@ -43,6 +45,8 @@ public class CommentService {
     private MessageService messageService;
     @Autowired
     private CommentOnPostMentionService commentOnPostMentionService;
+    @Autowired
+    private RedisService redisService;
 
     @Transactional
     public CommentSavedVO SaveComment(CommentReplyDTO commentReplyDTO) {
@@ -73,18 +77,16 @@ public class CommentService {
                         return TransferToVO(commentReplyDTO);
                     } else {
                         logger.info("Comment on post mention setting is on");
-                        //set message mention
-                        MessageVO messageVO = new MessageVO();
-                        messageVO.setCommentReplyId(commentReplyDTO.getCommentId().toString());
-                        messageVO.setContent(commentReplyDTO.getContent());
-                        messageVO.setFromUid(commentReplyDTO.getFromUid().toString());
-                        messageVO.setFromUsername(commentReplyDTO.getFromUsername());
-                        messageVO.setToUid(commentReplyDTO.getToUid().toString());
-                        messageVO.setCreatedAt(commentReplyDTO.getCreatedAt().toString());
                         //set message
                         messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
                         //send message mention to MQ
-                        mqSender.SendMentionMessage(messageVO);
+                        if(redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())){
+                            mqSender.SendMentionMessage(commentReplyDTO.getToUid());
+                            logger.info("Sent comment on post mention message to MQ");
+                        } else {
+                            //
+                        }
+
                     }
                 } else {
                     logger.info("FromUid is equal to ToUid");

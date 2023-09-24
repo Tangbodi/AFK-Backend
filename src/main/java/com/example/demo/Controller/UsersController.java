@@ -7,6 +7,8 @@ import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.MQ.MQSender;
+import com.example.demo.Service.Redis.RedisMessageService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
@@ -49,6 +51,8 @@ public class UsersController {
     private UserLoginService userLoginService;
     @Autowired
     private MQSender mqSender;
+    @Autowired
+    private RedisMessageService redisMessageService;
 
 
     @PostMapping("/registration")
@@ -113,7 +117,7 @@ public class UsersController {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but blocked");
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
-                UserInfoVO userInfoVO = userInfoService.GetUserInfoByUsername(userLoginDTO.getUsername());
+                UserInfoVO userInfoVO = userInfoService.GetUserInfo(userLoginDTO.getUsername());
                 logger.info("Set session attribute: {}" + "userId, " + userInfoVO.getLongUid());
                 session.setAttribute("userId", userInfoVO.getLongUid());
                 session.setAttribute("username", userInfoVO.getUsername());

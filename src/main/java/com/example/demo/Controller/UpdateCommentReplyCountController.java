@@ -28,7 +28,7 @@ public class UpdateCommentReplyCountController {
     @Autowired
     private PostInfoService postInfoService;
 
-    @Scheduled(fixedRate = 9000)
+//    @Scheduled(fixedRate = 9000)
     @PutMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;
