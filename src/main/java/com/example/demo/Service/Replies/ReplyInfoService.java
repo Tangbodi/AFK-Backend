@@ -1,17 +1,19 @@
 package com.example.demo.Service.Replies;
 
 import com.example.demo.Mapper.Repository.PostUserMapRepository;
+import com.example.demo.Mapper.Repository.ReplyInfoRepository;
+import com.example.demo.Mapper.Repository.UserLikeReplyRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.Entity.RepliesInfo;
-import com.example.demo.Model.Entity.UsersLikeReply;
-import com.example.demo.Mapper.Repository.ReplyInfoRepository;
-import com.example.demo.Mapper.Repository.UserLikeReplyRepository;
+import com.example.demo.Service.Comments.CommentOnPostMentionService;
 import com.example.demo.Service.Comments.CommentService;
+import com.example.demo.Service.MQ.MQSender;
+import com.example.demo.Service.Message.MessageService;
+import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 @Service
 public class ReplyInfoService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyInfoService.class);
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private ReplyInfoRepository replyInfoRepository;
     @Autowired
@@ -30,25 +33,29 @@ public class ReplyInfoService {
     @Autowired
     private PostUserMapRepository postUserMapRepository;
     @Autowired
-    private CommentService commentService;
-    @Autowired
     private ReplyOnCommentMentionService replyOnCommentMentionService;
     @Autowired
-    private ReplyOnReplyMentionService replyOnReplyMentionService;
+    private MessageService messageService;
     @Autowired
-    private ReplyOnPostMentionService replyOnPostMentionService;
+    private MQSender mqSender;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private CommentOnPostMentionService commentOnPostMentionService;
+    @Autowired
+    private CommentService commentService;
 
-    public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList){
+    public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Finding all users like replies list with like status = 1");
-        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
+        for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
             Long replyId = objectUserDTO.getObjectId();
-            Map<String,Object> map = userLikeReplyRepository.findReplyTotalLikeByLikeStatus(replyId);
-            Integer totalLike= ((BigInteger) map.get("total_like")).intValue();
+            Map<String, Object> map = userLikeReplyRepository.findReplyTotalLikeByLikeStatus(replyId);
+            Integer totalLike = ((BigInteger) map.get("total_like")).intValue();
             UpdateReplyLikeCount(replyId, totalLike);
         }
     }
 
-    private void UpdateReplyLikeCount(Long replyId, Integer totalLike){
+    private void UpdateReplyLikeCount(Long replyId, Integer totalLike) {
         logger.info("Updating reply like count");
         RepliesInfo repliesInfo = replyInfoRepository.findById(replyId)
                 .orElseGet(() -> CreateReplyInfo(replyId));
@@ -56,7 +63,8 @@ public class ReplyInfoService {
         replyInfoRepository.save(repliesInfo);
         logger.info("Updated reply like count");
     }
-    private static RepliesInfo CreateReplyInfo(Long replyId){
+
+    private static RepliesInfo CreateReplyInfo(Long replyId) {
         logger.info("Creating reply info");
         RepliesInfo repliesInfo = new RepliesInfo();
         repliesInfo.setId(replyId);
@@ -67,25 +75,41 @@ public class ReplyInfoService {
 
     @Async("MultiExecutor")
     public void SetReplyMention(CommentReplyDTO commentReplyDTO) throws JMSException {
-        Long toReplyAuthorId = commentReplyDTO.getToUid();
-        Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
         Long postAuthorId = postUserMapRepository.findByPostId(commentReplyDTO.getPostId()).get().getId().getUserId();
+        Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
+        boolean sameUser = false;
+        boolean mentionOn = false;
         if (commentReplyDTO.getToReplyId() != null) {
             logger.info("This is a reply on reply");
-            if (!commentReplyDTO.getFromUid().equals(toReplyAuthorId)) {
-                logger.info("fromUid is not equal to the toUid");
-                replyOnReplyMentionService.CheckReplyOnReplyMention(commentReplyDTO, toReplyAuthorId);
+            sameUser = commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid());
+            mentionOn = replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentReplyDTO.getToUid());
+            if (!sameUser && mentionOn) {
+                messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
+                if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())) {
+                    mqSender.SendMentionMessage(commentReplyDTO.getToUid());
+                    logger.info("Sent reply mention message for toUid to MQ");
+                } else {
+                    //
+                }
+            } else {
+                logger.info("FromUid is equal to ToUid or mention setting for toUid is off");
             }
         } else {
-            logger.info("This is a reply on comment");
+            //
         }
-        if (!commentReplyDTO.getFromUid().equals(commentAuthorId)) {
-            logger.info("fromUid is not equal to the commentAuthorId");
-            replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
-        }
-        if (!commentReplyDTO.getFromUid().equals(postAuthorId)) {
-            logger.info("fromUid is not equal to the postAuthorId");
-            replyOnPostMentionService.CheckReplyOnPostMention(commentReplyDTO, postAuthorId);
+        sameUser = commentReplyDTO.getFromUid().equals(commentAuthorId);
+        mentionOn = replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
+        if (!sameUser && mentionOn) {
+            messageService.SaveMessage(commentReplyDTO, commentAuthorId);
+            if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentAuthorId)) {
+                mqSender.SendMentionMessage(commentAuthorId);
+                logger.info("Sent reply mention message for commentAuthorId to MQ");
+            } else {
+                //
+            }
+        } else {
+            logger.info("FromUid is equal to ToUid or mention setting for commentAuthorId is off");
         }
     }
 }
+

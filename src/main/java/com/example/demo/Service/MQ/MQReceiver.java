@@ -51,10 +51,12 @@ public class MQReceiver {
             Integer status = userLikeSaveDTO.getStatus();
 
             try {
+                //save game active
                 if (userLikeSaveDTO.getTypeId() == 4) {
                     redisStrategy.UserFavoriteGameStrategy(userLikeSaveDTO);
                 } else {
                     redisStrategy.LikeSaveStrategy(userLikeSaveDTO);
+                    //if user like save, then send mention message
                     if (userLikeSaveDTO.getStatus() == 1) {
                         redisStrategy.LikeSaveMentionStrategy(userLikeSaveDTO);
                     } else {
@@ -122,7 +124,7 @@ public class MQReceiver {
     }
 
     @JmsListener(destination = "message-mention-redis", containerFactory = "activeMQFactory")
-    public void MessageMentionHandle(Message message) {
+    public void SendMentionMessageHandle(Message message) {
         try {
             ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
             Long userId = (Long) activeMqObjectMessage.getObject();

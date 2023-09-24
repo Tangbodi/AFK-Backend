@@ -6,6 +6,7 @@ import com.example.demo.Model.Entity.CommentOnPostMention;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -16,6 +17,7 @@ public class CommentOnPostMentionService {
     @Autowired
     private CommentOnPostMentionRepository commentOnPostMentionRepository;
 
+    @Async("MultiExecutor")
     @Transactional
     public void SaveCommentOnPostMention(UserRegisterDTO userRegisterDTO){
         logger.info("Saving CommentOnPostMention:{}");

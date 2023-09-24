@@ -7,8 +7,9 @@ import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Service.Comments.CommentOnPostMentionService;
 import com.example.demo.Service.Replies.ReplyOnCommentMentionService;
-import com.example.demo.Service.Replies.ReplyOnPostMentionService;
-import com.example.demo.Service.Replies.ReplyOnReplyMentionService;
+import com.example.demo.Service.UserLikeSave.LikeOnCommentMentionService;
+import com.example.demo.Service.UserLikeSave.LikeOnPostMentionService;
+import com.example.demo.Service.UserLikeSave.SaveOnPostMentionService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -40,9 +41,11 @@ public class UserRegistrationService {
     @Autowired
     private ReplyOnCommentMentionService replyOnCommentMentionService;
     @Autowired
-    private ReplyOnReplyMentionService replyOnReplyMentionService;
+    private LikeOnCommentMentionService likeOnCommentMentionService;
     @Autowired
-    private ReplyOnPostMentionService replyOnPostMentionService;
+    private LikeOnPostMentionService likeOnPostMentionService;
+    @Autowired
+    private SaveOnPostMentionService saveOnPostMentionService;
     public UsersInfo CheckUsernameExists(String username) {
         UsersInfo usersInfo = userInfoService.CheckUsernameExists(username);
         return usersInfo;
@@ -71,10 +74,14 @@ public class UserRegistrationService {
             user.setModifiedAt(userRegisterDTO.getCreatedAt());
             userAuthService.SaveUsersAuth(userRegisterDTO);
             userInfoService.SaveUserInfo(userRegisterDTO);
+            //user mention setting
             commentOnPostMentionService.SaveCommentOnPostMention(userRegisterDTO);
             replyOnCommentMentionService.SaveReplyOnCommentMention(userRegisterDTO);
-            replyOnReplyMentionService.SaveReplyOnReplyMention(userRegisterDTO);
-            replyOnPostMentionService.SaveReplyOnPostMention(userRegisterDTO);
+//            replyOnReplyMentionService.SaveReplyOnReplyMention(userRegisterDTO);
+//            replyOnPostMentionService.SaveReplyOnPostMention(userRegisterDTO);
+            likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
+            likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
+            saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
             return usersLoginRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);

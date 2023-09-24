@@ -64,32 +64,25 @@ public class CommentService {
             postComment.setModifiedAt(commentReplyDTO.getCreatedAt());
             PostComment savedComment = commentRepository.save(postComment);
             if (savedComment != null) {
-                logger.info("Comment saved successfully: {}", savedComment);
+                logger.info("Comment saved successfully: {}");
                 //set comment reply ip address
                 ipAddressService.SetCommentIpAddress(commentReplyDTO);
                 //send comment count message to ActiveMQ
                 mqSender.SendCommentCountMessage(commentReplyDTO);
                 //Set mention message after saved comment if the user is not the author of the post
-                if (!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())) {
-                    logger.info("FromUid is not equal to ToUid");
-                    if (!commentOnPostMentionService.CheckCommentOnPostMention(commentReplyDTO.getToUid())) {
-                        logger.info("Comment on post mention setting is off");
-                        return TransferToVO(commentReplyDTO);
+                boolean sameUser = commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid());
+                boolean commentOnPostMention = commentOnPostMentionService.CheckCommentOnPostMention(commentReplyDTO.getToUid());
+                if (!sameUser && commentOnPostMention) {
+                    logger.info("FromUid is not equal to ToUid and comment on post mention setting is on");
+                    messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
+                    if(redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())){
+                        mqSender.SendMentionMessage(commentReplyDTO.getToUid());
+                        logger.info("Sent comment on post mention message to MQ");
                     } else {
-                        logger.info("Comment on post mention setting is on");
-                        //set message
-                        messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
-                        //send message mention to MQ
-                        if(redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())){
-                            mqSender.SendMentionMessage(commentReplyDTO.getToUid());
-                            logger.info("Sent comment on post mention message to MQ");
-                        } else {
-                            //
-                        }
-
+                        //
                     }
                 } else {
-                    logger.info("FromUid is equal to ToUid");
+                    logger.info("FromUid is equal to ToUid or comment on post mention setting is off");
                 }
                 return TransferToVO(commentReplyDTO);
             } else {

@@ -12,6 +12,7 @@ import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.Entity.PostReply;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
+import com.example.demo.Service.Comments.CommentOnPostMentionService;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
@@ -32,9 +33,9 @@ public class RedisStrategy {
     @Autowired
     private RedisService redisService;
     @Autowired
-    protected RedisMessageService redisMessageService;
+    private RedisMessageService redisMessageService;
     @Autowired
-    protected ProcessEmailService processEmailService;
+    private ProcessEmailService processEmailService;
     @Autowired
     private RedisGameIconService redisGameIconService;
     @Autowired
@@ -46,9 +47,9 @@ public class RedisStrategy {
     @Autowired
     private PostRepository postRepository;
     @Autowired
-    private UserInfoService userInfoService;
-    @Autowired
     private MessageService messageService;
+    @Autowired
+    private CommentOnPostMentionService commentOnPostMentionService;
 
     public void UserRegistrationStrategy(UserRegisterDTO userRegisterDTO) {
         logger.info("Start UserRegistrationStrategy");
@@ -126,6 +127,7 @@ public class RedisStrategy {
         //if user likes comment
         int typeId = userLikeSaveDTO.getTypeId();
         Long objectId = userLikeSaveDTO.getObjectId();
+        boolean mention = false;
         MessageDTO messageDTO = new MessageDTO();
         if (typeId == ObjectNameEnum.COMMENT_LIKE_SET.getTypeCode()) {
             //find comment content and author id by commentId
@@ -136,6 +138,7 @@ public class RedisStrategy {
             messageDTO.setToUid(commentAuthorId);
             messageDTO.setFromUid(userLikeSaveDTO.getUserId());
             messageDTO.setContent(commentContent);
+
         } else if (typeId == ObjectNameEnum.REPLY_LIKE_SET.getTypeCode()) {
             //find reply content and author id by replyId
             PostReply postReply = replyRepository.findById(objectId).orElse(null);

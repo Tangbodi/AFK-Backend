@@ -44,7 +44,7 @@ public class UserLikeSaveController {
             } else {
                 apiResponse = ApiResponse.success(0);
             }
-            mqSender.SendSaveLikeMessage(userLikeSaveDTO, userId);
+            mqSender.SendLikeSaveMessage(userLikeSaveDTO, userId);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

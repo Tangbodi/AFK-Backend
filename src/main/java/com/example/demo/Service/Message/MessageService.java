@@ -12,6 +12,7 @@ import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -25,6 +26,8 @@ import java.util.Map;
 public class MessageService {
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
+    private static final int MENTIONED_MESSAGE_LENGTH = 33;
+    private static final String MENTIONED_MESSAGE_SUFFIX = "...";
     @Autowired
     private MessageRepository messageRepository;
     @Autowired
@@ -34,6 +37,7 @@ public class MessageService {
     @Autowired
     private RedisService redisService;
 
+    @Async("MultiExecutor")
     @Transactional
     public Message SaveMessage(CommentReplyDTO commentReplyDTO, Long toUid) {
         logger.info("Saving message");
@@ -45,7 +49,9 @@ public class MessageService {
                 message.setCommentReplyId(commentReplyDTO.getCommentId());
             }
             //set message
-            message.setContent(commentReplyDTO.getContent().substring(0, 37));
+            int maxLength = commentReplyDTO.getContent().length();
+            String content =commentReplyDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            message.setContent(content);
             message.setFromUid(commentReplyDTO.getFromUid());
             message.setToUid(toUid);
             message.setCreatedAt(commentReplyDTO.getCreatedAt());
@@ -59,7 +65,7 @@ public class MessageService {
         }
         return null;
     }
-
+    @Async("MultiExecutor")
     @Transactional
     public Message SaveMessage(MessageDTO messageDTO) {
         logger.info("Saving message");
@@ -67,8 +73,9 @@ public class MessageService {
         try {
             message.setCommentReplyId(Long.valueOf(messageDTO.getCommentReplyId()));
             //set message
-            int contentLength = messageDTO.getContent().length();
-            message.setContent(messageDTO.getContent().substring(0, contentLength/2));
+            int maxLength = messageDTO.getContent().length();
+            String content =messageDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            message.setContent(content);
             message.setFromUid(Long.valueOf(messageDTO.getFromUid()));
             message.setToUid(Long.valueOf(messageDTO.getToUid()));
             message.setCreatedAt(messageDTO.getCreatedAt());
@@ -146,7 +153,7 @@ public class MessageService {
         for (Map<Short, Object> map : messagesList) {
             MessageVO messageVO = new MessageVO();
             messageVO.setMessageId(map.get("message_id").toString());
-            messageVO.setObjectId(map.get("object_id").toString());
+            messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
             messageVO.setFromUid(map.get("from_uid").toString());
             messageVO.setToUid(map.get("to_uid").toString());
             messageVO.setFromUsername(map.get("from_username").toString());

@@ -49,7 +49,7 @@ public class RedisMessageService {
                 for (Map<Short, Object> map : messagesList) {
                     MessageVO messageVO = new MessageVO();
                     messageVO.setMessageId(map.get("message_id").toString());
-                    messageVO.setObjectId(map.get("object_id").toString());
+                    messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
                     messageVO.setFromUid(map.get("from_uid").toString());
                     messageVO.setToUid(map.get("to_uid").toString());
                     messageVO.setFromUsername(map.get("from_username").toString());

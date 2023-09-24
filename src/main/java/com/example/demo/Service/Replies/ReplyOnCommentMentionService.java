@@ -11,6 +11,7 @@ import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
@@ -19,16 +20,10 @@ import javax.transaction.Transactional;
 @Service
 public class ReplyOnCommentMentionService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyOnCommentMentionService.class);
-    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     @Autowired
     private ReplyOnCommentMentionRepository replyOnCommentMentionRepository;
-    @Autowired
-    private MessageService messageService;
-    @Autowired
-    private MQSender mqSender;
-    @Autowired
-    private RedisService redisService;
 
+    @Async("MultiExecutor")
     @Transactional
     public void SaveReplyOnCommentMention(UserRegisterDTO userRegisterDTO) {
         logger.info("Saving ReplyOnCommentMention:{}");
@@ -45,7 +40,7 @@ public class ReplyOnCommentMentionService {
         }
     }
 
-    public void CheckReplyOnCommentMention(CommentReplyDTO commentReplyDTO, Long commentAuthorId) throws JMSException {
+    public boolean CheckReplyOnCommentMention(CommentReplyDTO commentReplyDTO, Long commentAuthorId) throws JMSException {
         logger.info("Checking reply on comment mention setting for user:{}", commentAuthorId);
         try {
             ReplyOnCommentMention replyOnCommentMention = replyOnCommentMentionRepository.findById(commentAuthorId).orElse(null);
@@ -55,23 +50,16 @@ public class ReplyOnCommentMentionService {
                 logger.info("User found: {}", replyOnCommentMention.getId());
                 if (replyOnCommentMention.getMentionOn() == false) {
                     logger.info("Reply on comment mention setting is off");
-                    return;
+                    return false;
                 } else {
                     logger.info("Reply on comment mention setting is on");
-                    //set message
-                    messageService.SaveMessage(commentReplyDTO,commentAuthorId);
-                    //send message mention to MQ
-                    if(redisService.CacheExists(MESSAGE_MENTION_KEY + commentAuthorId)){
-                        mqSender.SendMentionMessage(commentAuthorId);
-                        logger.info("Sent reply on comment mention message to MQ");
-                    } else {
-                        //
-                    }
+                    return true;
                 }
             }
         } catch (Exception e) {
             logger.error("Failed to check reply on comment mention setting: {}", e.getMessage(), e);
 
         }
+        return false;
     }
 }

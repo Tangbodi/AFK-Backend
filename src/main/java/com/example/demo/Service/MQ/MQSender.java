@@ -44,7 +44,7 @@ public class MQSender {
     }
 
     @Async("MultiExecutor")
-    public void SendSaveLikeMessage(UserLikeSaveDTO userLikeSaveDTO, Long userId) throws JMSException, InterruptedException {
+    public void SendLikeSaveMessage(UserLikeSaveDTO userLikeSaveDTO, Long userId) throws JMSException, InterruptedException {
         String queueName = LikeSaveQueue.getQueueName();
         userLikeSaveDTO.setUserId(userId);
         userLikeSaveDTO.setCreatedAt(Instant.now());
