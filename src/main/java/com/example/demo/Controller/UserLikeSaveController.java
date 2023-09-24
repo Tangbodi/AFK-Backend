@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.jms.JMSException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @RestController
@@ -31,9 +32,9 @@ public class UserLikeSaveController {
     @Autowired
     private ReplyInfoService replyInfoService;
     @PostMapping("/genre/user-like-save")
-    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpSession session) throws JMSException, InterruptedException {
+    public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpServletRequest request) throws JMSException, InterruptedException {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to make your opinion count");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

@@ -72,8 +72,8 @@ public class UsersInfoController {
     private MQSender mqSender;
 
     @GetMapping("/")
-    public ResponseEntity GetUserInfo(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity GetUserInfo(HttpServletRequest request) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
@@ -86,8 +86,8 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-avatar")
-    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile[] images, HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile[] images, HttpServletRequest request) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
@@ -111,9 +111,9 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity UpdateUserPassword(@Validated @RequestBody UpdatePasswordDTO updatePasswordDTO, HttpSession session) {
+    public ResponseEntity UpdateUserPassword(@Validated @RequestBody UpdatePasswordDTO updatePasswordDTO, HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -175,9 +175,9 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-email")
-    public ResponseEntity UpdateUserInfo(@Validated @RequestBody EmailDTO emailDTO, HttpServletRequest request, HttpSession session) throws JMSException {
+    public ResponseEntity UpdateUserInfo(@Validated @RequestBody EmailDTO emailDTO, HttpServletRequest request) throws JMSException {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -206,9 +206,9 @@ public class UsersInfoController {
     }
 
     @PutMapping("/update-mail-address")
-    public ResponseEntity UpdateUserMailAddress(@Validated @RequestBody UserMailDTO userMailDTO, HttpSession session) {
+    public ResponseEntity UpdateUserMailAddress(@Validated @RequestBody UserMailDTO userMailDTO, HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -220,9 +220,9 @@ public class UsersInfoController {
     }
 
     @GetMapping("/mail-address")
-    public ResponseEntity GetMailAddress(HttpSession session) {
+    public ResponseEntity GetMailAddress(HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
@@ -233,11 +233,11 @@ public class UsersInfoController {
     }
 
     @GetMapping("/post-history")
-    public ResponseEntity GetUserPostHistory(HttpSession session,
+    public ResponseEntity GetUserPostHistory(HttpServletRequest request,
                                              @RequestParam(value = "page") int page,
                                              @RequestParam(value = "size") int size) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         page = page - 1;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Post history isn't viewable when signed out");
@@ -261,9 +261,9 @@ public class UsersInfoController {
 
 
     @GetMapping("/saved-post")
-    public ResponseEntity GetSavedPostByUser(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpSession session) {
+    public ResponseEntity GetSavedPostByUser(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
@@ -276,9 +276,9 @@ public class UsersInfoController {
     }
 
     @GetMapping("/unread-message")
-    public ResponseEntity GetUnreadMessages(HttpSession session) {
+    public ResponseEntity GetUnreadMessages(HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
@@ -295,9 +295,9 @@ public class UsersInfoController {
     }
 
     @PutMapping("/mark-all-as-read")
-    public ResponseEntity ReadMessages(HttpSession session) {
+    public ResponseEntity ReadMessages(HttpServletRequest request) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to see unread messages");
         } else {
@@ -308,8 +308,8 @@ public class UsersInfoController {
     }
 
     @GetMapping("/notification")
-    public ResponseEntity GetNotification(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity GetNotification(HttpServletRequest request) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");

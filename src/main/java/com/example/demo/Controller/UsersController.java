@@ -93,7 +93,7 @@ public class UsersController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request, HttpSession session) {
+    public ResponseEntity UserLogin(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
         ApiResponse apiResponse;
         // If all checks are passed, check if user exists and user's auth via UsersAuth
         //-2 --- Internal Server Error
@@ -119,10 +119,11 @@ public class UsersController {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoVO userInfoVO = userInfoService.GetUserInfo(userLoginDTO.getUsername());
                 logger.info("Set session attribute: {}" + "userId, " + userInfoVO.getLongUid());
-                session.setAttribute("userId", userInfoVO.getLongUid());
-                session.setAttribute("username", userInfoVO.getUsername());
-                userInfoVO.setJSESSIONID(session.getId());
-                logger.info("JSESSIONID: {}" + session.getId());
+                request.getSession().setAttribute("userId", userInfoVO.getLongUid());
+                request.getSession().setAttribute("username", userInfoVO.getUsername());
+                userInfoVO.setJSESSIONID(request.getSession().getId());
+                logger.info("JSESSIONID: {}" + userInfoVO.getJSESSIONID());
+                redisMessageService.GetUnreadMessageByUserId(userInfoVO.getLongUid());
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
             } else {
@@ -136,8 +137,9 @@ public class UsersController {
     @PostMapping("/logout")
     public ResponseEntity UserLogout(HttpServletRequest request) {
         logger.info("Logging out");
-        request.getSession().invalidate();
+        redisMessageService.DeleteUnreadMessage((Long) request.getSession().getAttribute("userId"));
         ApiResponse apiResponse = ApiResponse.success("Logged out successfully");
+        request.getSession().invalidate();
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

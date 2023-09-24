@@ -42,9 +42,9 @@ public class RepliesController {
 
 
     @PostMapping("/edit-reply")
-    public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
+    public ResponseEntity EditReply(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO) {
         ApiResponse apiResponse;
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to share your opinion");
         } else {
@@ -67,7 +67,7 @@ public class RepliesController {
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
-            commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
+            commentReplyDTO.setFromUsername((String) request.getSession().getAttribute("username"));
             ReplySavedVO replySavedVO = replyService.SaveReply(commentReplyDTO);
             if (replySavedVO != null) {
                 apiResponse = ApiResponse.success(replySavedVO);

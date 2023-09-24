@@ -103,26 +103,23 @@ public class MessageService {
             logger.error("Failed to set message user map", e.getMessage(), e);
         }
     }
-
     @Transactional
-    public void UpdateMessageUserMap(Long userId) {
-        logger.info("Updating read status");
-        List<MessagesUsersMap> messagesUsersMapList;
-        try {
-            messagesUsersMapList = messageUserMapRepository.findUnreadMessagesByMentionedUid(userId);
-            if (!messagesUsersMapList.isEmpty()) {
-                messagesUsersMapList.stream()
-                        .forEach(messagesUsersMap -> {
-                            messagesUsersMap.setReadStatus(true);
-                            messageUserMapRepository.save(messagesUsersMap);
-                        });
+    public void UpdateMessageUserMap(Long userId){
+        logger.info("Updating UpdateMessageUserMap read status");
+        try{
+            List<MessageVO> unreadMessageVOList = redisMessageService.GetUnreadMessageFromRedis(userId);
+            if(!unreadMessageVOList.isEmpty()){
+                List<Long> messageIds = new ArrayList<>();
+                for(MessageVO messageVO : unreadMessageVOList){
+                    messageIds.add(Long.valueOf(messageVO.getMessageId()));
+                }
+                messageUserMapRepository.updateReadStatusByMessageId(messageIds);
+                redisMessageService.GetUnreadMessageByUserId(userId);
             } else {
                 //
             }
-            redisMessageService.DeleteUnreadMessage(userId);
-        } catch (Exception e) {
-            logger.error("Failed to update read status", e.getMessage(), e);
-            throw new RuntimeException("Failed to update read status " + e);
+        }catch (Exception e){
+            logger.error("Failed to update UpdateMessageUserMap read status", e.getMessage(), e);
         }
     }
 

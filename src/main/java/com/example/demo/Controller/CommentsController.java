@@ -45,7 +45,7 @@ public class CommentsController {
     @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         logger.info("EditComment");
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your opinion");
@@ -70,7 +70,7 @@ public class CommentsController {
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             commentReplyDTO.setFromUid(userId);
-            commentReplyDTO.setFromUsername((String) session.getAttribute("username"));
+            commentReplyDTO.setFromUsername((String) request.getSession().getAttribute("username"));
             CommentSavedVO commentSavedVO = commentService.SaveComment(commentReplyDTO);
             if (commentSavedVO != null) {
                 apiResponse = ApiResponse.success(commentSavedVO);
