@@ -48,9 +48,13 @@ public class MessageService {
             } else {
                 message.setCommentReplyId(commentReplyDTO.getCommentId());
             }
-            //set message
             int maxLength = commentReplyDTO.getContent().length();
-            String content =commentReplyDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            String content;
+            if (maxLength > MENTIONED_MESSAGE_LENGTH) {
+                content = commentReplyDTO.getContent().substring(0, Math.min(maxLength, MENTIONED_MESSAGE_LENGTH)) + MENTIONED_MESSAGE_SUFFIX;
+            } else {
+                content = commentReplyDTO.getContent();
+            }
             message.setContent(content);
             message.setFromUid(commentReplyDTO.getFromUid());
             message.setToUid(toUid);
@@ -65,6 +69,7 @@ public class MessageService {
         }
         return null;
     }
+
     @Async("MultiExecutor")
     @Transactional
     public Message SaveMessage(MessageDTO messageDTO) {
@@ -76,8 +81,8 @@ public class MessageService {
             //set message
             int maxLength = messageDTO.getContent().length();
             String content;
-            if(maxLength>MENTIONED_MESSAGE_LENGTH){
-                content =messageDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            if (maxLength > MENTIONED_MESSAGE_LENGTH) {
+                content = messageDTO.getContent().substring(0, Math.min(maxLength, MENTIONED_MESSAGE_LENGTH)) + MENTIONED_MESSAGE_SUFFIX;
             } else {
                 content = messageDTO.getContent();
             }
@@ -91,7 +96,7 @@ public class MessageService {
             logger.info("Saved message");
             //set message user map
             SaveMessageUserMap(savedMessage);
-            if(redisService.CacheExists(MESSAGE_MENTION_KEY+savedMessage.getToUid())){
+            if (redisService.CacheExists(MESSAGE_MENTION_KEY + savedMessage.getToUid())) {
                 GetUnreadMessageByUserId(savedMessage.getToUid());
             } else {
                 //
@@ -126,14 +131,15 @@ public class MessageService {
             logger.error("Failed to set message user map", e.getMessage(), e);
         }
     }
+
     @Transactional
-    public void UpdateMessageUserMap(Long userId){
+    public void UpdateMessageUserMap(Long userId) {
         logger.info("Updating UpdateMessageUserMap read status");
-        try{
+        try {
             List<MessageVO> unreadMessageVOList = redisMessageService.GetUnreadMessageFromRedis(userId);
-            if(!unreadMessageVOList.isEmpty()){
+            if (!unreadMessageVOList.isEmpty()) {
                 List<Long> messageIds = new ArrayList<>();
-                for(MessageVO messageVO : unreadMessageVOList){
+                for (MessageVO messageVO : unreadMessageVOList) {
                     messageIds.add(Long.valueOf(messageVO.getMessageId()));
                 }
                 messageUserMapRepository.updateReadStatusByMessageId(messageIds);
@@ -141,7 +147,7 @@ public class MessageService {
             } else {
                 //
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to update UpdateMessageUserMap read status", e.getMessage(), e);
         }
     }
