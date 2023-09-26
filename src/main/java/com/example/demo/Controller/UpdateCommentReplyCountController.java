@@ -37,9 +37,7 @@ public class UpdateCommentReplyCountController {
             Set<String> postIds = redisService.GetAllSetMembers(countName);
             if (postIds.isEmpty()) {
                 logger.info("postIds is empty");
-                continue;
             } else {
-                logger.info("postIds: {}", postIds);
                 for (String postId : postIds) {
                     Map<String, String> hashSetMap = redisService.GetHashValue(countName + ":::" + postId);
                     Integer total = (int) redisService.GetHashSetSize(countName + ":::" + postId);

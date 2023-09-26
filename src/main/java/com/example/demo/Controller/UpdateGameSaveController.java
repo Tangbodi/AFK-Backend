@@ -42,17 +42,15 @@ public class UpdateGameSaveController {
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
         } else {
-            logger.info("objectIds: {}", objectIds);
-            List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId, userFavoriteGameVOList
                 Long userId = Long.valueOf(objectId);
                 //HashSet key is SAVED_GAME:::userId in Redis
-                List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + objectId, userId);
+                List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId.toString(), userId);
                 userFavoriteGameService.SetUserFavoriteGame(userFavoriteGameVOList, userId);
-                redisService.DeleteMember(SAVED_GAME + ":::" + objectId, userId.toString());
-                if (redisService.NumOfMembers(objectId) == 0) {
-                    redisService.RemoveHashSet(SAVED_GAME, objectId);
+                redisService.DeleteMember(SAVED_GAME + ":::" + userId.toString(), userId.toString());
+                if (redisService.NumOfMembers(userId.toString()) == 0) {
+                    redisService.RemoveHashSet(SAVED_GAME, userId.toString());
                     logger.info("Removed hash set: {}", SAVED_GAME);
                 } else {
                     //

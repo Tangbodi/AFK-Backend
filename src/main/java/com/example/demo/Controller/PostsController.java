@@ -272,7 +272,7 @@ public class PostsController {
     @PostMapping("/genre/latest-popular-newest")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
-        logger.info("TypeDTO:::" + typeDTO.getType());
+
         switch (typeDTO.getType()) {
             case "latest":
                 List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();

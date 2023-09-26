@@ -42,7 +42,6 @@ public class UpdateReplyLikeController {
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
         } else {
-            logger.info("objectIds: {}", objectIds);
             List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId,date

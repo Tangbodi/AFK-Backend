@@ -32,7 +32,8 @@ public class ActiveMQConfig {
     public Queue UpdateEmailQueue() {return new ActiveMQQueue("update-email-redis");}
     @Bean
     public Queue ForgotPasswordQueue() {return new ActiveMQQueue("forgot-password-redis");}
-
+    @Bean
+    public Queue UserSettingQueue() {return new ActiveMQQueue("user-setting-redis");}
     @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();

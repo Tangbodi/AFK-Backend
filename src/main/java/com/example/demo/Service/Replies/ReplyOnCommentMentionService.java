@@ -39,27 +39,4 @@ public class ReplyOnCommentMentionService {
             logger.error("Failed to save reply on comment mention setting: {}", e.getMessage(), e);
         }
     }
-
-    public boolean CheckReplyOnCommentMention(CommentReplyDTO commentReplyDTO, Long commentAuthorId) throws JMSException {
-        logger.info("Checking reply on comment mention setting for user:{}", commentAuthorId);
-        try {
-            ReplyOnCommentMention replyOnCommentMention = replyOnCommentMentionRepository.findById(commentAuthorId).orElse(null);
-            if (replyOnCommentMention == null) {
-                logger.info("User not found");
-            } else {
-                logger.info("User found: {}", replyOnCommentMention.getId());
-                if (replyOnCommentMention.getMentionOn() == false) {
-                    logger.info("Reply on comment mention setting is off");
-                    return false;
-                } else {
-                    logger.info("Reply on comment mention setting is on");
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed to check reply on comment mention setting: {}", e.getMessage(), e);
-
-        }
-        return false;
-    }
 }

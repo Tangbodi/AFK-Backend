@@ -1,5 +1,6 @@
 package com.example.demo.Service.Replies;
 
+import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Mapper.Repository.PostUserMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
@@ -10,6 +11,7 @@ import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,8 @@ public class ReplyService {
     private MQSender mqSender;
     @Autowired
     private ReplyInfoService replyInfoService;
+    @Autowired
+    private RedisService redisService;
 
     public ReplySavedVO SaveReply(CommentReplyDTO commentReplyDTO) {
         logger.info("Saving reply");

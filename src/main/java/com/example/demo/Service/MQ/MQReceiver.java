@@ -1,9 +1,6 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.EmailDTO;
-import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.DTO.*;
 import com.example.demo.Service.Redis.RedisStrategy;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.slf4j.Logger;
@@ -185,4 +182,24 @@ public class MQReceiver {
             // Optionally, throw a custom exception or take other appropriate action
         }
     }
+//    @JmsListener(destination = "user-setting-redis", containerFactory = "activeMQFactory")
+//    public void UserSettingHandle(Message message){
+//        try{
+//            ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
+//            UserSettingDTO userSettingDTO = (UserSettingDTO) activeMqObjectMessage.getObject();
+//            try {
+//                redisStrategy.UserSettingStrategy(userSettingDTO);
+//                logger.info("User-setting consumer record: User: {}", userSettingDTO.getUserId());
+//            } catch (Exception e) {
+//                logger.error("Error processing message for User: " + userSettingDTO.getUserId(), e);
+//                // Optionally, throw a custom exception or take other appropriate action
+//            }
+//        } catch (JMSException e) {
+//            logger.error("JMS Exception while processing message: " + e.getMessage(), e);
+//            // Optionally, throw a custom exception or take other appropriate action
+//        } catch (Exception e) {
+//            logger.error("Unhandled Exception while processing message: " + e.getMessage(), e);
+//            // Optionally, throw a custom exception or take other appropriate action
+//        }
+//    }
 }

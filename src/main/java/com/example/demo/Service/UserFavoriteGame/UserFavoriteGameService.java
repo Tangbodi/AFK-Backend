@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserFavoriteGameService {
@@ -31,7 +34,7 @@ public class UserFavoriteGameService {
     @Async("MultiExecutor")
     @Transactional
     public void SetUserFavoriteGame(List<UserFavoriteGameVO> userFavoriteGameVOList, Long userId) {
-        logger.info("Setting user favorite game for user: {}",userId);
+        logger.info("Setting user favorite game for user: {}", userId);
         try {
             //Delete all user favorite games
             userFavoriteGameRepository.deleteAllFavoriteGamesByUserId(userId);
@@ -47,6 +50,7 @@ public class UserFavoriteGameService {
             logger.error("Error setting user favorite game: {}", e.getMessage(), e);
         }
     }
+
     @Transactional
     private UsersFavoriteGame CreateUserFavoriteGame(UsersFavoriteGameId usersFavoriteGameId) {
         logger.info("Creating user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
@@ -58,30 +62,30 @@ public class UserFavoriteGameService {
         logger.info("Created user favorite game for user ID: {}, game ID: {}", usersFavoriteGameId.getUserId(), usersFavoriteGameId.getGameId());
         return usersFavoriteGame;
     }
+
     public List<UserFavoriteGameVO> GetUserFavoriteGames(Long userId) {
         logger.info("Getting user favorite games for user ID: {}", userId);
         try {
-            List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findSavedGameByUserId(userId);
             String key = SAVED_GAME + ":::" + userId;
-            if(redisService.MemberExists(SAVED_GAME,userId)){
+            if (redisService.MemberExists(SAVED_GAME, userId)) {
                 logger.info("SAVED_GAME exists in Redis cache: {}");
             } else {
                 logger.info("SAVED_GAME doesn't exist in Redis cache: {}");
-                redisService.AddSet(SAVED_GAME,userId);
+                redisService.AddSet(SAVED_GAME, userId);
             }
+            List<Map<Short, Object>> userFavoriteGames = userFavoriteGameRepository.findSavedGameByUserId(userId);
+            List<UserFavoriteGameVO> userFavoriteGameVOList = new ArrayList<>();
             if (!userFavoriteGames.isEmpty()) {
                 logger.info("User favorite games found for user ID: {}", userId);
-                List<UserFavoriteGameVO> userFavoriteGameVOList = TransferToUserFavoriteGameVO(userFavoriteGames);
+                userFavoriteGameVOList = TransferToUserFavoriteGameVO(userFavoriteGames);
                 //Save user saved game to Redis
-                redisGameIconService.SetUserFavoriteGameCache(key, userId,userFavoriteGameVOList);
-                return userFavoriteGameVOList;
+                redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
             } else {
                 logger.info("No user favorite games found for user ID: {}", userId);
-                List<UserFavoriteGameVO> userFavoriteGameVOList = Collections.emptyList();
-                redisGameIconService.SetUserFavoriteGameCache(key, userId,userFavoriteGameVOList);
-                return Collections.emptyList();
+                userFavoriteGameVOList = Collections.emptyList();
+                redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
             }
-
+            return userFavoriteGameVOList;
         } catch (Exception e) {
             logger.error("Error getting user favorite games: {}", e.getMessage(), e);
             return Collections.emptyList();
@@ -106,4 +110,5 @@ public class UserFavoriteGameService {
         }
         return Collections.emptyList();
     }
+
 }

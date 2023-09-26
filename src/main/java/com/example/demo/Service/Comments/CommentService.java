@@ -1,5 +1,6 @@
 package com.example.demo.Service.Comments;
 
+import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostComment;
@@ -10,6 +11,7 @@ import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyService;
+import com.example.demo.Service.UsersInfo.UserSettingService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,8 @@ public class CommentService {
     private CommentOnPostMentionService commentOnPostMentionService;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private UserSettingService userSettingService;
 
     @Transactional
     public CommentSavedVO SaveComment(CommentReplyDTO commentReplyDTO) {
@@ -71,7 +75,7 @@ public class CommentService {
                 mqSender.SendCommentCountMessage(commentReplyDTO);
                 //Set mention message after saved comment if the user is not the author of the post
                 boolean sameUser = commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid());
-                boolean commentOnPostMention = commentOnPostMentionService.CheckCommentOnPostMention(commentReplyDTO.getToUid());
+                boolean commentOnPostMention = userSettingService.CheckCommentOnPostMention(commentReplyDTO.getToUid());
                 if (!sameUser && commentOnPostMention) {
                     logger.info("FromUid is not equal to ToUid and comment on post mention setting is on");
                     messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());

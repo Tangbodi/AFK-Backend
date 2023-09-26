@@ -72,13 +72,12 @@ public class UserRegistrationService {
             user.setPassword(encodedPassword);
             user.setCreatedAt(userRegisterDTO.getCreatedAt());
             user.setModifiedAt(userRegisterDTO.getCreatedAt());
+            //user info setting
             userAuthService.SaveUsersAuth(userRegisterDTO);
             userInfoService.SaveUserInfo(userRegisterDTO);
             //user mention setting
             commentOnPostMentionService.SaveCommentOnPostMention(userRegisterDTO);
             replyOnCommentMentionService.SaveReplyOnCommentMention(userRegisterDTO);
-//            replyOnReplyMentionService.SaveReplyOnReplyMention(userRegisterDTO);
-//            replyOnPostMentionService.SaveReplyOnPostMention(userRegisterDTO);
             likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
             likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
             saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);

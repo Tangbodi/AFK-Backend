@@ -33,21 +33,4 @@ public class CommentOnPostMentionService {
             logger.error("Failed to save comment on post mention setting: {}",e.getMessage(),e);
         }
     }
-    public boolean CheckCommentOnPostMention(Long userId){
-        logger.info("Checking comment on post mention setting for user:{}",userId);
-        try{
-            CommentOnPostMention commentOnPostMention = commentOnPostMentionRepository.findById(userId).orElse(null);
-            if(commentOnPostMention == null){
-                logger.info("User not found");
-                return false;
-            } else {
-                logger.info("User found");
-                logger.info("Comment on post mention setting is:{}",commentOnPostMention.getMentionOn());
-                return commentOnPostMention.getMentionOn();
-            }
-        }catch (Exception e){
-            logger.error("Failed to check comment on post mention setting: {}",e.getMessage(),e);
-            return false;
-        }
-    }
 }

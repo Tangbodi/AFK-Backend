@@ -11,6 +11,7 @@ import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.UsersInfo.UserSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,8 @@ public class ReplyInfoService {
     private CommentOnPostMentionService commentOnPostMentionService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private UserSettingService userSettingService;
 
     public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList) {
         logger.info("Finding all users like replies list with like status = 1");
@@ -77,38 +80,65 @@ public class ReplyInfoService {
     public void SetReplyMention(CommentReplyDTO commentReplyDTO) throws JMSException {
         Long postAuthorId = postUserMapRepository.findByPostId(commentReplyDTO.getPostId()).get().getId().getUserId();
         Long commentAuthorId = commentService.GetCommentAuthorByCommentId(commentReplyDTO.getCommentId());
-        boolean sameUser = false;
-        boolean mentionOn = false;
-        if (commentReplyDTO.getToReplyId() != null) {
-            logger.info("This is a reply on reply");
-            sameUser = commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid());
-            mentionOn = replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentReplyDTO.getToUid());
-            if (!sameUser && mentionOn) {
-                messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
-                if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())) {
-                    mqSender.SendMentionMessage(commentReplyDTO.getToUid());
-                    logger.info("Sent reply mention message for toUid to MQ");
+        if (!commentReplyDTO.getFromUid().equals(postAuthorId)) {
+            //check post author mention setting
+            boolean commentOnPostMention = userSettingService.CheckCommentOnPostMention(postAuthorId);
+            if (commentOnPostMention) {
+                logger.info("Comment on post mention setting is on");
+                messageService.SaveMessage(commentReplyDTO, postAuthorId);
+                if (redisService.CacheExists(MESSAGE_MENTION_KEY + postAuthorId)) {
+                    mqSender.SendMentionMessage(postAuthorId);
+                    logger.info("Sent mention message for postAuthorId to MQ");
                 } else {
                     //
                 }
             } else {
-                logger.info("FromUid is equal to ToUid or mention setting for toUid is off");
+                logger.info("FromUid mention setting is off");
             }
         } else {
-            //
+            logger.info("FromUid is equal to postAuthorId");
         }
-        sameUser = commentReplyDTO.getFromUid().equals(commentAuthorId);
-        mentionOn = replyOnCommentMentionService.CheckReplyOnCommentMention(commentReplyDTO, commentAuthorId);
-        if (!sameUser && mentionOn) {
-            messageService.SaveMessage(commentReplyDTO, commentAuthorId);
-            if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentAuthorId)) {
-                mqSender.SendMentionMessage(commentAuthorId);
-                logger.info("Sent reply mention message for commentAuthorId to MQ");
+        if (!commentReplyDTO.getFromUid().equals(commentAuthorId) && !commentAuthorId.equals(postAuthorId)) {
+            //check comment author mention setting
+            boolean mentionOn = userSettingService.CheckReplyOnCommentMention(commentAuthorId);
+            if (mentionOn) {
+                logger.info("Reply on comment mention setting is on");
+                messageService.SaveMessage(commentReplyDTO, commentAuthorId);
+                if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentAuthorId)) {
+                    mqSender.SendMentionMessage(commentAuthorId);
+                    logger.info("Sent mention message for commentAuthorId to MQ");
+                } else {
+                    //
+                }
             } else {
-                //
+                logger.info("FromUid mention setting is off");
             }
         } else {
-            logger.info("FromUid is equal to ToUid or mention setting for commentAuthorId is off");
+            logger.info("FromUid is equal to commentAuthorId or commentAuthorId is equal to postAuthorId");
+        }
+        //if it is reply on reply
+        if (commentReplyDTO.getToReplyId() != null) {
+            logger.info("Reply on reply");
+            if (!commentReplyDTO.getFromUid().equals(commentReplyDTO.getToUid())
+                    && !commentReplyDTO.getToUid().equals(commentAuthorId)
+                    && !commentReplyDTO.getToUid().equals(postAuthorId)) {
+                //check toUid mention setting
+                boolean mentionOn = userSettingService.CheckReplyOnCommentMention(commentReplyDTO.getToUid());
+                if (mentionOn) {
+                    logger.info("reply on comment mention setting is on");
+                    messageService.SaveMessage(commentReplyDTO, commentReplyDTO.getToUid());
+                    if (redisService.CacheExists(MESSAGE_MENTION_KEY + commentReplyDTO.getToUid())) {
+                        mqSender.SendMentionMessage(commentReplyDTO.getToUid());
+                        logger.info("Sent mention message for toReplyUid to MQ");
+                    } else {
+                        //
+                    }
+                } else {
+                    logger.info("FromUid mention setting is off");
+                }
+            }
+        } else {
+            logger.info("Not reply on reply");
         }
     }
 }

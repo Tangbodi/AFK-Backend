@@ -1,12 +1,18 @@
 package com.example.demo.Service.UserLikeSave;
 
+import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Mapper.Repository.*;
+import com.example.demo.Model.DTO.MessageDTO;
 import com.example.demo.Model.DTO.ObjectUserDTO;
+import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Model.Entity.*;
 import com.example.demo.Model.VO.ShowSavedPostVO;
 import com.example.demo.Service.Comments.CommentInfoService;
+import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
+import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyInfoService;
+import com.example.demo.Service.UsersInfo.UserSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +44,14 @@ public class UserLikeSaveService {
     private CommentInfoService commentInfoService;
     @Autowired
     private ReplyInfoService replyInfoService;
+    @Autowired
+    private MessageService messageService;
+    @Autowired
+    private UserSettingService userSettingService;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private RedisService redisService;
 
     @Transactional
     public void SetUserLikePost(List<ObjectUserDTO> objectUserDTOList) {

@@ -1,9 +1,6 @@
 package com.example.demo.Service.MQ;
 
-import com.example.demo.Model.DTO.CommentReplyDTO;
-import com.example.demo.Model.DTO.EmailDTO;
-import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Model.DTO.UserRegisterDTO;
+import com.example.demo.Model.DTO.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +32,8 @@ public class MQSender {
     private Queue UpdateEmailQueue;
     @Autowired
     private Queue ForgotPasswordQueue;
+    @Autowired
+    private Queue UserSettingQueue;
 
     @Async("MultiExecutor")
     public void SendUserRegistrationMessage(UserRegisterDTO userRegisterDTO) throws JMSException, InterruptedException {
@@ -91,5 +90,11 @@ public class MQSender {
         String queueName = ForgotPasswordQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, emailDTO);
         logger.info("Message sent, User: " + emailDTO.getUserId());
+    }
+    @Async("MultiExecutor")
+    public void SendUserSettingMessage(UserSettingDTO userSettingDTO) throws JMSException {
+        String queueName = UserSettingQueue.getQueueName();
+        jmsMessagingTemplate.convertAndSend(queueName, userSettingDTO);
+        logger.info("Message sent, User: " + userSettingDTO.getUserId());
     }
 }

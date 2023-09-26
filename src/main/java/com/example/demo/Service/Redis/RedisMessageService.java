@@ -22,22 +22,11 @@ public class RedisMessageService {
     private static final Logger logger = LoggerFactory.getLogger(RedisMessageService.class);
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    @Autowired
-    private MessageRepository messageRepository;
+
     @Autowired
     private JedisPool jedisPool;
     @Autowired
     private RedisService redisService;
-
-    public void GetUnreadMessageByUserId(Long userId) {
-        logger.info("Setting unread messages by user id");
-        try {
-            List<Map<Short, Object>> messagesList = messageRepository.getUnreadMessagesByUserId(userId);
-            SetUnreadMessageToRedis(messagesList, userId);
-        } catch (Exception e) {
-            logger.error("Failed to get unread messages by user id", e.getMessage(), e);
-        }
-    }
 
     public void SetUnreadMessageToRedis(List<Map<Short, Object>> messagesList, Long userId) {
         logger.info("Setting unread message cache: userId = {}", userId);

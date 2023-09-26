@@ -86,7 +86,7 @@ public class MessageService {
             //set message user map
             SaveMessageUserMap(savedMessage);
             if(redisService.CacheExists(MESSAGE_MENTION_KEY+savedMessage.getToUid())){
-                redisMessageService.GetUnreadMessageByUserId(savedMessage.getToUid());
+                GetUnreadMessageByUserId(savedMessage.getToUid());
             } else {
                 //
             }
@@ -94,6 +94,16 @@ public class MessageService {
             logger.error("Failed to set reply mention", e.getMessage(), e);
         }
         return null;
+    }
+
+    public void GetUnreadMessageByUserId(Long userId) {
+        logger.info("Setting unread messages by user id");
+        try {
+            List<Map<Short, Object>> messagesList = messageRepository.getUnreadMessagesByUserId(userId);
+            redisMessageService.SetUnreadMessageToRedis(messagesList, userId);
+        } catch (Exception e) {
+            logger.error("Failed to get unread messages by user id", e.getMessage(), e);
+        }
     }
 
     @Transactional
@@ -121,7 +131,7 @@ public class MessageService {
                     messageIds.add(Long.valueOf(messageVO.getMessageId()));
                 }
                 messageUserMapRepository.updateReadStatusByMessageId(messageIds);
-                redisMessageService.GetUnreadMessageByUserId(userId);
+                GetUnreadMessageByUserId(userId);
             } else {
                 //
             }

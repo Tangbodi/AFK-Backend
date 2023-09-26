@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
@@ -7,13 +8,17 @@ import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.MQ.MQSender;
+import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
 import com.example.demo.Service.Redis.RedisUsernameService;
+import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
+import com.example.demo.Service.UsersInfo.UserSettingService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -29,12 +34,15 @@ import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 @RestController
 @Validated
 @RequestMapping("/user")
 public class UsersController {
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
+    private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
+    private static final String USER_SETTING = "USER_SETTING";
     @Autowired
     private UserRegistrationService userRegistrationService;
     @Autowired
@@ -53,8 +61,16 @@ public class UsersController {
     private MQSender mqSender;
     @Autowired
     private RedisMessageService redisMessageService;
-
-
+    @Autowired
+    private MessageService messageService;
+    @Autowired
+    private UserFavoriteGameService userFavoriteGameService;
+    @Autowired
+    private UserSettingService userSettingService;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private RedisUserFavoriteGameService redisUserFavoriteGameService;
     @PostMapping("/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) {
         // Encode email for avoiding email scraping and spam bots
@@ -123,7 +139,9 @@ public class UsersController {
                 request.getSession().setAttribute("username", userInfoVO.getUsername());
                 userInfoVO.setJSESSIONID(request.getSession().getId());
                 logger.info("JSESSIONID: {}" + userInfoVO.getJSESSIONID());
-                redisMessageService.GetUnreadMessageByUserId(userInfoVO.getLongUid());
+                messageService.GetUnreadMessageByUserId(userInfoVO.getLongUid());
+                userFavoriteGameService.GetUserFavoriteGames(userInfoVO.getLongUid());
+                userSettingService.GetUserSetting(userInfoVO.getLongUid());
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
             } else {
@@ -135,9 +153,12 @@ public class UsersController {
 
 
     @PostMapping("/logout")
-    public ResponseEntity UserLogout(HttpServletRequest request) {
+    public ResponseEntity UserLogout(HttpServletRequest request) throws IOException {
         logger.info("Logging out");
-        redisMessageService.DeleteUnreadMessage((Long) request.getSession().getAttribute("userId"));
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        redisMessageService.DeleteUnreadMessage(userId);
+        redisUserFavoriteGameService.UpdateUserFavoriteGameFromCacheToDB(userId);
+        redisService.DeleteMember(USER_SETTING + ":::" + userId.toString(), userId.toString());
         ApiResponse apiResponse = ApiResponse.success("Logged out successfully");
         request.getSession().invalidate();
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
