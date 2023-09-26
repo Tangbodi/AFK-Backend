@@ -1,8 +1,6 @@
 package com.example.demo.Service.UserLikeSave;
 
-import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Mapper.Repository.*;
-import com.example.demo.Model.DTO.MessageDTO;
 import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Model.Entity.*;
@@ -54,27 +52,27 @@ public class UserLikeSaveService {
     private RedisService redisService;
 
     @Transactional
-    public void SetUserLikePost(List<ObjectUserDTO> objectUserDTOList) {
+    public void SetUserLikePost(UserLikeSaveDTO userLikeSaveDTO, Integer likeSaveStatus) {
         logger.info("Setting user like post");
         try {
-            for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
-                logger.info("Setting user like post for user ID: {}, post ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
-                UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-                usersFavoritePostId.setPostId(objectUserDTO.getObjectId());
-                usersFavoritePostId.setUserId(objectUserDTO.getUserId());
-                //create user favorite post if not exist
-                UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
-                        .orElseGet(() -> CreateUserLikePost(usersFavoritePostId));
-                usersFavoritePost.setLikeStatus(objectUserDTO.getStatus() == 1);
-                usersFavoritePost.setModifiedAt(Instant.now());
-                userFavoritePostRepository.save(usersFavoritePost);
-                logger.info("User like post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
-            }
+
+            logger.info("Setting user like post for user ID: {}, post ID: {}", userLikeSaveDTO.getUserId(), userLikeSaveDTO.getObjectId());
+            UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
+            usersFavoritePostId.setPostId(userLikeSaveDTO.getObjectId());
+            usersFavoritePostId.setUserId(userLikeSaveDTO.getUserId());
+            //create user favorite post if not exist
+            UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
+                    .orElseGet(() -> CreateUserLikePost(usersFavoritePostId));
+            usersFavoritePost.setLikeStatus(likeSaveStatus == 1);
+            usersFavoritePost.setModifiedAt(Instant.now());
+            userFavoritePostRepository.save(usersFavoritePost);
+            logger.info("User like post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
 
         } catch (Exception e) {
             logger.error("Error setting user like post: {}", e.getMessage(), e);
         }
     }
+
     @Transactional
     private static UsersFavoritePost CreateUserLikePost(UsersFavoritePostId usersFavoritePostId) {
         logger.info("Creating user like post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
@@ -91,27 +89,28 @@ public class UserLikeSaveService {
     }
 
     @Transactional
-    public void SetUserSavePost(List<ObjectUserDTO> objectUserDTOList) {
+    public void SetUserSavePost(UserLikeSaveDTO userLikeSaveDTO, Integer likeSaveStatus) {
         logger.info("Setting user save post");
         try {
-            for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
-                logger.info("Setting user save post for user ID: {}, post ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
-                UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-                usersFavoritePostId.setPostId(objectUserDTO.getObjectId());
-                usersFavoritePostId.setUserId(objectUserDTO.getUserId());
 
-                UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
-                        .orElseGet(() -> CreateUserSavePost(usersFavoritePostId));
-                usersFavoritePost.setSaveStatus(objectUserDTO.getStatus() == 1);
-                usersFavoritePost.setModifiedAt(Instant.now());
-                userFavoritePostRepository.save(usersFavoritePost);
-                logger.info("User save post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
-            }
+            logger.info("Setting user save post for user ID: {}, post ID: {}", userLikeSaveDTO.getUserId(), userLikeSaveDTO.getObjectId());
+            UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
+            usersFavoritePostId.setPostId(userLikeSaveDTO.getObjectId());
+            usersFavoritePostId.setUserId(userLikeSaveDTO.getUserId());
+
+            UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId)
+                    .orElseGet(() -> CreateUserSavePost(usersFavoritePostId));
+            usersFavoritePost.setSaveStatus(likeSaveStatus == 1);
+            usersFavoritePost.setModifiedAt(Instant.now());
+            userFavoritePostRepository.save(usersFavoritePost);
+            logger.info("User save post saved successfully for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
+
         } catch (Exception e) {
             logger.error("Error setting user save post: {}", e.getMessage(), e);
         }
 
     }
+
     @Transactional
     public UsersFavoritePost CreateUserSavePost(UsersFavoritePostId usersFavoritePostId) {
         logger.info("Creating user save post for user ID: {}, post ID: {}", usersFavoritePostId.getUserId(), usersFavoritePostId.getPostId());
@@ -128,26 +127,26 @@ public class UserLikeSaveService {
     }
 
     @Transactional
-    public void SetUserLikeComment(List<ObjectUserDTO> objectUserDTOList) {
+    public void SetUserLikeComment(UserLikeSaveDTO userLikeSaveDTO, Integer likeSaveStatus) {
         logger.info("Setting user like comment");
         try {
-            for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
-                logger.info("Setting user like comment for user ID: {}, comment ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
-                UsersLikeCommentId usersLikeCommentId = new UsersLikeCommentId();
-                usersLikeCommentId.setCommentId(objectUserDTO.getObjectId());
-                usersLikeCommentId.setUserId(objectUserDTO.getUserId());
+            logger.info("Setting user like comment for user ID: {}, comment ID: {}", userLikeSaveDTO.getUserId(), userLikeSaveDTO.getObjectId());
+            UsersLikeCommentId usersLikeCommentId = new UsersLikeCommentId();
+            usersLikeCommentId.setCommentId(userLikeSaveDTO.getObjectId());
+            usersLikeCommentId.setUserId(userLikeSaveDTO.getUserId());
 
-                UsersLikeComment usersLikeComment = userLikeCommentRepository.findById(usersLikeCommentId)
-                        .orElseGet(() -> CreateUserLikeComment(usersLikeCommentId));
-                usersLikeComment.setLikeStatus(objectUserDTO.getStatus() == 1);
-                usersLikeComment.setModifiedAt(Instant.now());
-                userLikeCommentRepository.save(usersLikeComment);
-                logger.info("User like comment saved successfully for user ID: {}, comment ID: {}", usersLikeCommentId.getUserId(), usersLikeCommentId.getCommentId());
-            }
+            UsersLikeComment usersLikeComment = userLikeCommentRepository.findById(usersLikeCommentId)
+                    .orElseGet(() -> CreateUserLikeComment(usersLikeCommentId));
+            usersLikeComment.setLikeStatus(likeSaveStatus == 1);
+            usersLikeComment.setModifiedAt(Instant.now());
+            userLikeCommentRepository.save(usersLikeComment);
+            logger.info("User like comment saved successfully for user ID: {}, comment ID: {}", usersLikeCommentId.getUserId(), usersLikeCommentId.getCommentId());
+
         } catch (Exception e) {
             logger.error("Error setting user like comment: {}", e.getMessage(), e);
         }
     }
+
     @Transactional
     public UsersLikeComment CreateUserLikeComment(UsersLikeCommentId usersLikeCommentId) {
         logger.info("Creating user like comment for user ID: {}, comment ID: {}", usersLikeCommentId.getUserId(), usersLikeCommentId.getCommentId());
@@ -162,28 +161,27 @@ public class UserLikeSaveService {
     }
 
     @Transactional
-    public void SetUserLikeReply(List<ObjectUserDTO> objectUserDTOList) {
+    public void SetUserLikeReply(UserLikeSaveDTO userLikeSaveDTO, Integer likeSaveStatus) {
         logger.info("Setting user like reply");
         try {
-            for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
-                logger.info("Setting user like reply for user ID: {}, reply ID: {}", objectUserDTO.getUserId(), objectUserDTO.getObjectId());
-                UsersLikeReplyId usersLikeReplyId = new UsersLikeReplyId();
-                usersLikeReplyId.setReplyId(objectUserDTO.getObjectId());
-                usersLikeReplyId.setUserId(objectUserDTO.getUserId());
 
-                UsersLikeReply usersLikeReply = userLikeReplyRepository.findById(usersLikeReplyId)
-                        .orElseGet(() -> CreateUserLikeReply(usersLikeReplyId));
-                usersLikeReply.setLikeStatus(objectUserDTO.getStatus() == 1);
-                usersLikeReply.setModifiedAt(Instant.now());
-                userLikeReplyRepository.save(usersLikeReply);
-                logger.info("User like reply saved successfully for user ID: {}, reply ID: {}", usersLikeReplyId.getUserId(), usersLikeReplyId.getReplyId());
-                List<Map<String, Object>> postInfo = replyRepository.findPostIdByReplyId(objectUserDTO.getObjectId());
-            }
+            logger.info("Setting user like reply for user ID: {}, reply ID: {}", userLikeSaveDTO.getUserId(), userLikeSaveDTO.getObjectId());
+            UsersLikeReplyId usersLikeReplyId = new UsersLikeReplyId();
+            usersLikeReplyId.setReplyId(userLikeSaveDTO.getObjectId());
+            usersLikeReplyId.setUserId(userLikeSaveDTO.getUserId());
+
+            UsersLikeReply usersLikeReply = userLikeReplyRepository.findById(usersLikeReplyId)
+                    .orElseGet(() -> CreateUserLikeReply(usersLikeReplyId));
+            usersLikeReply.setLikeStatus(likeSaveStatus == 1);
+            usersLikeReply.setModifiedAt(Instant.now());
+            userLikeReplyRepository.save(usersLikeReply);
+            logger.info("User like reply saved successfully for user ID: {}, reply ID: {}", usersLikeReplyId.getUserId(), usersLikeReplyId.getReplyId());
         } catch (Exception e) {
             logger.error("Error setting user like reply: {}", e.getMessage(), e);
         }
 
     }
+
     @Transactional
     public UsersLikeReply CreateUserLikeReply(UsersLikeReplyId usersLikeReplyId) {
         logger.info("Creating user like reply for user ID: {}, reply ID: {}", usersLikeReplyId.getUserId(), usersLikeReplyId.getReplyId());
@@ -216,10 +214,10 @@ public class UserLikeSaveService {
         }
     }
 
-    private static List<ShowSavedPostVO> TransferToUserFavoritePostVO( List<Map<String, Object>> savedPosts, ObjectUserDTO objectUserDTO) {
+    private static List<ShowSavedPostVO> TransferToUserFavoritePostVO(List<Map<String, Object>> savedPosts, ObjectUserDTO objectUserDTO) {
         logger.info("Transferring saved posts to VO for user ID: {}", objectUserDTO.getUserId());
         List<ShowSavedPostVO> showSavedPostVOList = new ArrayList<>();
-        for(Map<String, Object> savedPost : savedPosts){
+        for (Map<String, Object> savedPost : savedPosts) {
             ShowSavedPostVO showSavedPostVO = new ShowSavedPostVO();
             showSavedPostVO.setPostId(savedPost.get("post_id").toString());
             showSavedPostVO.setTitle((String) savedPost.get("title"));

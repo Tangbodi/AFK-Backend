@@ -9,7 +9,6 @@ import java.time.Instant;
 
 @Data
 public class UserLikeSaveDTO implements Serializable {
-    private Long postId;
 
     //post id, comment id, reply id, game id
     @NotNull(message = "objectId is required")

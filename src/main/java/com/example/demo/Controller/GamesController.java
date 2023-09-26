@@ -10,6 +10,7 @@ import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Util.ApiResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,6 +49,8 @@ public class GamesController {
     @Autowired
     private RedisGameIconService redisGameIconService;
     @Autowired
+    private RedisUserFavoriteGameService redisUserFavoriteGameService;
+    @Autowired
     private MQSender mqSender;
 
     @GetMapping("/")
@@ -80,7 +83,7 @@ public class GamesController {
             String key = SAVED_GAME + ":::" + userId;
             if(redisService.CacheExists(key)){
                 logger.info("User favorite games exists in Redis cache");
-                userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(key,userId);
+                userFavoriteGameVOList = redisUserFavoriteGameService.GetUserFavoriteGameCache(key,userId);
             } else {
                 logger.info("User favorite games doesn't exist in Redis cache");
                 userFavoriteGameVOList = userFavoriteGameService.GetUserFavoriteGames(userId);

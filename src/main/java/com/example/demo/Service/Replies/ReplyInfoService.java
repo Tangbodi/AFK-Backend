@@ -48,10 +48,9 @@ public class ReplyInfoService {
     @Autowired
     private UserSettingService userSettingService;
 
-    public void CalculateReplyTotalLike(List<ObjectUserDTO> objectUserDTOList) {
+    public void CalculateReplyTotalLike(List<Long> replyIds) {
         logger.info("Finding all users like replies list with like status = 1");
-        for (ObjectUserDTO objectUserDTO : objectUserDTOList) {
-            Long replyId = objectUserDTO.getObjectId();
+        for (Long replyId : replyIds) {
             Map<String, Object> map = userLikeReplyRepository.findReplyTotalLikeByLikeStatus(replyId);
             Integer totalLike = ((BigInteger) map.get("total_like")).intValue();
             UpdateReplyLikeCount(replyId, totalLike);

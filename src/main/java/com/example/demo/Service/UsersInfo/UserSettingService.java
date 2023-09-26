@@ -1,7 +1,6 @@
 package com.example.demo.Service.UsersInfo;
 
 import com.example.demo.Mapper.Repository.*;
-import com.example.demo.Model.DTO.UserSettingDTO;
 import com.example.demo.Model.Entity.CommentOnPostMention;
 import com.example.demo.Model.Entity.ReplyOnCommentMention;
 import com.example.demo.Model.VO.UserSettingVO;
@@ -10,13 +9,12 @@ import com.example.demo.Service.Redis.RedisUserSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,49 +36,27 @@ public class UserSettingService {
     private PostOnSavedGameMentionRepository postOnSavedGameMentionRepository;
     @Autowired
     private RedisService redisService;
+    @Lazy
     @Autowired
     private RedisUserSettingService redisUserSettingService;
+
     @Async("MultiExecutor")
     @Transactional
-    public void UpdateUserSetting(UserSettingDTO userSettingDTO) {
-        logger.info("Changing User Setting");
+    public void SaveUserSetting(UserSettingVO userSettingVO, Long userId) {
+        logger.info("Saving User Setting");
         try {
-            switch (userSettingDTO.getType()) {
-                //Mention of username
-                case "mou":
-                    break;
-                //likes on your post
-                case "loyp":
-                    likeOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                //likes on your comments
-                case "loyc":
-                    likeOnCommentMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                //new posts on your saved games
-                case "npoysg":
-                    postOnSavedGameMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                //saved your posts
-                case "syp":
-                    saveOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                //replies on your posts
-                case "royp":
-                    commentOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                //replies on your comments
-                case "royc":
-                    replyOnCommentMentionRepository.UpdateStatus(userSettingDTO.getStatus().byteValue(), userSettingDTO.getUserId());
-                    break;
-                default:
-                    break;
-            }
+            likeOnPostMentionRepository.UpdateStatus(userSettingVO.getLikeOnPost(), userId);
+            likeOnCommentMentionRepository.UpdateStatus(userSettingVO.getLikeOnComment(), userId);
+            saveOnPostMentionRepository.UpdateStatus(userSettingVO.getSaveOnPost(), userId);
+            commentOnPostMentionRepository.UpdateStatus(userSettingVO.getCommentOnPost(), userId);
+            replyOnCommentMentionRepository.UpdateStatus(userSettingVO.getReplyOnComment(), userId);
+            postOnSavedGameMentionRepository.UpdateStatus(userSettingVO.getPostOnSavedGame(), userId);
         } catch (Exception e) {
             logger.error("Failed to change user setting: {}", e.getMessage(), e);
         }
     }
-    public List<UserSettingVO> GetUserSetting(Long userId) {
+
+    public UserSettingVO GetUserSetting(Long userId) {
         logger.info("Getting User Setting: {}", userId);
         try {
             String key = USER_SETTING + ":::" + userId;
@@ -93,37 +69,36 @@ public class UserSettingService {
             List<Map<Short, Object>> userSetting = commentOnPostMentionRepository.findSettingByUserId(userId);
             if (!userSetting.isEmpty()) {
                 logger.info("User Setting found: {}", userId);
-                List<UserSettingVO> userSettingVOList = TransferToUserSettingVO(userSetting);
-                redisUserSettingService.SetUserSettingCache(key, userId, userSettingVOList);
-                return userSettingVOList;
+                UserSettingVO userSettingVO = TransferToUserSettingVO(userSetting);
+                redisService.AddHashSet(key, userId.toString(), userSettingVO);
+                return userSettingVO;
             } else {
                 logger.info("No User Setting found: {}", userId);
-                return Collections.emptyList();
+                return null;
             }
         } catch (Exception e) {
             logger.error("Failed to get User Setting: {}", e.getMessage(), e);
-            return Collections.emptyList();
+            return null;
         }
     }
 
-    private List<UserSettingVO> TransferToUserSettingVO(List<Map<Short, Object>> usersSetting) {
+    private UserSettingVO TransferToUserSettingVO(List<Map<Short, Object>> usersSetting) {
         logger.info("Transferring User Setting to VO");
         try {
-            List<UserSettingVO> userSettingVOList = new ArrayList<>();
+            UserSettingVO userSettingVO = new UserSettingVO();
             for (Map<Short, Object> map : usersSetting) {
-                UserSettingVO userSettingVO = new UserSettingVO();
                 userSettingVO.setCommentOnPost(map.get("comment_on_post") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setLikeOnComment(map.get("like_on_comment") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setLikeOnPost(map.get("like_on_post") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setPostOnSavedGame(map.get("post_on_saved_game") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setReplyOnComment(map.get("reply_on_comment") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setSaveOnPost(map.get("save_on_post") == Boolean.TRUE ? 1 : 0);
-                userSettingVOList.add(userSettingVO);
+
             }
-            return userSettingVOList;
+            return userSettingVO;
         } catch (Exception e) {
             logger.error("Failed to transfer User Setting to VO: {}", e.getMessage(), e);
-            return Collections.emptyList();
+            return null;
         }
     }
 
@@ -136,8 +111,13 @@ public class UserSettingService {
                 return false;
             } else {
                 logger.info("User found");
-                logger.info("Comment on post mention setting is:{}", commentOnPostMention.getMentionOn());
-                return commentOnPostMention.getMentionOn();
+                if (commentOnPostMention.getMentionOn() == false) {
+                    logger.info("Comment on post mention setting is off");
+                    return false;
+                } else {
+                    logger.info("Comment on post mention setting is on");
+                    return true;
+                }
             }
         } catch (Exception e) {
             logger.error("Failed to check comment on post mention setting: {}", e.getMessage(), e);
@@ -152,7 +132,7 @@ public class UserSettingService {
             if (replyOnCommentMention == null) {
                 logger.info("User not found");
             } else {
-                logger.info("User found: {}", replyOnCommentMention.getId());
+                logger.info("User found");
                 if (replyOnCommentMention.getMentionOn() == false) {
                     logger.info("Reply on comment mention setting is off");
                     return false;
@@ -173,10 +153,10 @@ public class UserSettingService {
         try {
             boolean status = likeOnPostMentionRepository.findById(userId).orElse(null).getMentionOn();
             if (status == false) {
-                logger.info("No like on post mention setting found for user ID: {}", userId);
+                logger.info("Like on post mention setting is off");
                 return false;
             } else {
-                logger.info("Like on post mention setting found for user ID: {}", userId);
+                logger.info("Like on post mention setting is on");
                 return true;
             }
         } catch (Exception e) {
@@ -190,10 +170,10 @@ public class UserSettingService {
         try {
             boolean status = likeOnCommentMentionRepository.findById(userId).orElse(null).getMentionOn();
             if (status == false) {
-                logger.info("No like on comment mention setting found for user ID: {}", userId);
+                logger.info("Like on comment mention is off");
                 return false;
             } else {
-                logger.info("Like on comment mention setting found for user ID: {}", userId);
+                logger.info("Like on comment mention is on");
                 return true;
             }
         } catch (Exception e) {
@@ -207,10 +187,10 @@ public class UserSettingService {
         try {
             boolean status = saveOnPostMentionRepository.findById(userId).orElse(null).getMentionOn();
             if (status == false) {
-                logger.info("No save on post mention setting found for user ID: {}", userId);
+                logger.info("Save on post mention setting is off");
                 return false;
             } else {
-                logger.info("Save on post mention setting found for user ID: {}", userId);
+                logger.info("Save on post mention setting is on");
                 return true;
             }
         } catch (Exception e) {
@@ -224,10 +204,10 @@ public class UserSettingService {
         try {
             boolean status = postOnSavedGameMentionRepository.findById(userId).orElse(null).getMentionOn();
             if (status == false) {
-                logger.info("No post on saved game mention setting found for user ID: {}", userId);
+                logger.info("Post on saved game mention setting is off");
                 return false;
             } else {
-                logger.info("Post on saved game mention setting found for user ID: {}", userId);
+                logger.info("Post on saved game mention setting is on");
                 return true;
             }
         } catch (Exception e) {

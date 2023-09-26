@@ -22,10 +22,9 @@ public class CommentInfoService {
     @Autowired
     private UserLikeCommentRepository userLikeCommentRepository;
 
-    public void CalculateCommentTotalLike(List<ObjectUserDTO> objectUserDTOList){
+    public void CalculateCommentTotalLike( List<Long> commentIds){
         logger.info("Finding all users like comments list with like status = 1");
-        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
-            Long commentId = objectUserDTO.getObjectId();
+        for(Long commentId : commentIds){
             Map<String,Object> map = userLikeCommentRepository.findCommentTotalLikeByLikeStatus(commentId);
             Integer totalLike= ((BigInteger) map.get("total_like")).intValue();
             UpdateCommentLikeCount(commentId, totalLike);

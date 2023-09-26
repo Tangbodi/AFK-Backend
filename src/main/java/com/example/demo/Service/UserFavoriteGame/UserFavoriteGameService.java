@@ -7,9 +7,11 @@ import com.example.demo.Model.Entity.UsersFavoriteGameId;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Redis.RedisGameIconService;
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -26,12 +28,13 @@ public class UserFavoriteGameService {
     private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
     @Autowired
     private UserFavoriteGameRepository userFavoriteGameRepository;
+    @Lazy
     @Autowired
-    private RedisGameIconService redisGameIconService;
+    private RedisUserFavoriteGameService redisUserFavoriteGameService;
     @Autowired
     private RedisService redisService;
 
-    @Async("MultiExecutor")
+
     @Transactional
     public void SetUserFavoriteGame(List<UserFavoriteGameVO> userFavoriteGameVOList, Long userId) {
         logger.info("Setting user favorite game for user: {}", userId);
@@ -79,12 +82,11 @@ public class UserFavoriteGameService {
                 logger.info("User favorite games found for user ID: {}", userId);
                 userFavoriteGameVOList = TransferToUserFavoriteGameVO(userFavoriteGames);
                 //Save user saved game to Redis
-                redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
             } else {
                 logger.info("No user favorite games found for user ID: {}", userId);
                 userFavoriteGameVOList = Collections.emptyList();
-                redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
             }
+            redisService.AddHashSet(key, userId.toString(), userFavoriteGameVOList);
             return userFavoriteGameVOList;
         } catch (Exception e) {
             logger.error("Error getting user favorite games: {}", e.getMessage(), e);
@@ -100,8 +102,8 @@ public class UserFavoriteGameService {
                 UserFavoriteGameVO userFavoriteGameVO = new UserFavoriteGameVO();
                 userFavoriteGameVO.setGameId((Short) map.get("icon_id"));
                 userFavoriteGameVO.setGenreId((Byte) map.get("genre_id"));
-                userFavoriteGameVO.setGameName((String) map.get("game_name"));
-                userFavoriteGameVO.setIconUrl((String) map.get("icon_url"));
+                userFavoriteGameVO.setGameName(String.valueOf( map.get("game_name")));
+                userFavoriteGameVO.setIconUrl(String.valueOf( map.get("icon_url")));
                 userFavoriteGameVOList.add(userFavoriteGameVO);
             }
             return userFavoriteGameVOList;

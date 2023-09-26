@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class UpdateCommentReplyCountController {
-    private static final Logger logger = LoggerFactory.getLogger(UpdateCommentReplyCountController.class);
+public class UpdateCommentReplyCountForPost {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateCommentReplyCountForPost.class);
     private static final String COMMENT_COUNT = CountNameEnum.COMMENT_COUNT.getCountName();
     private static final String REPLY_COUNT = CountNameEnum.REPLY_COUNT.getCountName();
     private static final List<String> COUNT_NAME_LIST = Arrays.asList(COMMENT_COUNT, REPLY_COUNT);
@@ -28,7 +28,7 @@ public class UpdateCommentReplyCountController {
     @Autowired
     private PostInfoService postInfoService;
 
-//    @Scheduled(fixedRate = 9000)
+    @Scheduled(fixedRate = 9000)
     @PutMapping("/update-comment-reply-count")
     public ResponseEntity UpdateCommentReplyCountForPost() {
         ApiResponse apiResponse;
@@ -41,10 +41,10 @@ public class UpdateCommentReplyCountController {
                 for (String postId : postIds) {
                     Map<String, String> hashSetMap = redisService.GetHashValue(countName + ":::" + postId);
                     Integer total = (int) redisService.GetHashSetSize(countName + ":::" + postId);
+                    logger.info("HashSet Size: {}", total);
                     postInfoService.UpdatePostCommentReplyCount(Long.valueOf(postId), total);
                     hashSetMap.entrySet().stream().forEach(entry -> {
                         String commentReplyId = entry.getKey();
-                        logger.info("HashSet Size: {}", total);
                         redisService.DeleteMember(countName + ":::" + postId, commentReplyId);
                         if (redisService.NumOfMembers(postId) == 0) {
                             redisService.RemoveHashSet(countName, postId);

@@ -6,11 +6,17 @@ import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,9 +25,13 @@ import java.util.List;
 public class RedisUserFavoriteGameService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUserFavoriteGameService.class);
     private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
+    private JedisPool jedisPool;
+    @Autowired
     private RedisGameIconService redisGameIconService;
+    @Lazy
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired
@@ -39,7 +49,7 @@ public class RedisUserFavoriteGameService {
 //            GetUserFavoriteGames(userId);
 //        }
         //Get user favorite game list from Redis to update
-        List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId, userId);
+        List<UserFavoriteGameVO> userFavoriteGameVOList = GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId, userId);
         //Get all game icons list from Redis
         List<GameIconVO> gameIconVOList = redisGameIconService.GetAllGameIconsCache();
         //Find game in all game icons list
@@ -57,29 +67,44 @@ public class RedisUserFavoriteGameService {
             userFavoriteGameVO.setGameName(gameIconVO.getGameName());
             userFavoriteGameVO.setIconUrl(gameIconVO.getIconUrl());
             userFavoriteGameVOList.add(userFavoriteGameVO);
-            redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
+            redisService.AddHashSet(key, userId.toString(), userFavoriteGameVOList);
             logger.info("Added game to UserFavoriteGameVO");
         } else {
             //Remove game from UserFavoriteGameVO
             logger.info("Removing game from user favorite game list");
             userFavoriteGameVOList.removeIf(userFavoriteGameVO -> userFavoriteGameVO.getGameId().equals(gameId));
-            redisGameIconService.SetUserFavoriteGameCache(key, userId, userFavoriteGameVOList);
+            redisService.AddHashSet(key, userId.toString(), userFavoriteGameVOList);
             logger.info("Removed game from user favorite game list");
         }
     }
+
     @Async("MultiExecutor")
     public void UpdateUserFavoriteGameFromCacheToDB(Long userId) throws IOException {
         logger.info("Updating user favorite game from cache to DB");
+        List<UserFavoriteGameVO> userFavoriteGameVOList = GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId, userId);
         //HashSet key is SAVED_GAME:::userId in Redis
-        List<UserFavoriteGameVO> userFavoriteGameVOList = redisGameIconService.GetUserFavoriteGameCache(SAVED_GAME + ":::" + userId.toString(), userId);
         userFavoriteGameService.SetUserFavoriteGame(userFavoriteGameVOList, userId);
         redisService.DeleteMember(SAVED_GAME + ":::" + userId.toString(), userId.toString());
-        logger.info("Deleted member: {}", userId.toString());
-        if (redisService.NumOfMembers(userId.toString()) == 0) {
-            redisService.RemoveHashSet(SAVED_GAME, userId.toString());
-            logger.info("Removed hash set: {}", SAVED_GAME);
-        } else {
-            //
+    }
+
+    public List<UserFavoriteGameVO> GetUserFavoriteGameCache(String key, Long userId) throws IOException {
+        logger.info("Getting user favorite game cache: {}", userId);
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String gameIconVOListJson = jedis.hget(key, userId.toString());
+            if (gameIconVOListJson != null) {
+                return objectMapper.readValue(gameIconVOListJson, new TypeReference<List<UserFavoriteGameVO>>() {
+                });
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get user favorite game cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
         }
+        return null; // Handle cache miss or any other errors
     }
 }

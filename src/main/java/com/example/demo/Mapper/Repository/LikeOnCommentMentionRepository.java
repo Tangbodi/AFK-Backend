@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface LikeOnCommentMentionRepository extends JpaRepository<LikeOnCommentMention, Long> {
     @Modifying
     @Query(value = "UPDATE afk.like_on_comment_mentions SET mention_on = :status WHERE user_id = :userId", nativeQuery = true)
-    void UpdateStatus(@Param("status") Byte status, @Param("userId") Long userId);
+    void UpdateStatus(@Param("status") Integer status, @Param("userId") Long userId);
 }

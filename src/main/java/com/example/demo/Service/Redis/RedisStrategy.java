@@ -72,7 +72,7 @@ public class RedisStrategy {
         redisUserFavoriteGameService.HandleUserFavoriteGameStrategy(userLikeSaveDTO);
     }
 
-    public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
+    public void LikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) throws InterruptedException {
         logger.info("Start LikeSaveStrategy");
         redisUserLikeSaveService.HandleLikeSaveStrategy(userLikeSaveDTO);
     }
@@ -106,8 +106,8 @@ public class RedisStrategy {
         logger.info("Start ForgotPasswordStrategy");
         processEmailService.ProcessForgotPasswordEmailValidation(emailDTO);
     }
-//    public void UserSettingStrategy(UserSettingDTO userSettingDTO) throws IOException {
-//        logger.info("Start UserSettingStrategy");
-//        redisUserSettingService.HandleUserSettingStrategy(userSettingDTO);
-//    }
+    public void UserSettingStrategy(UserSettingDTO userSettingDTO) throws IOException {
+        logger.info("Start UserSettingStrategy");
+        redisUserSettingService.HandleUserSettingStrategy(userSettingDTO);
+    }
 }

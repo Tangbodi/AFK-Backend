@@ -71,10 +71,16 @@ public class MessageService {
         logger.info("Saving message");
         Message message = new Message();
         try {
+
             message.setCommentReplyId(Long.valueOf(messageDTO.getCommentReplyId()));
             //set message
             int maxLength = messageDTO.getContent().length();
-            String content =messageDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            String content;
+            if(maxLength>MENTIONED_MESSAGE_LENGTH){
+                content =messageDTO.getContent().substring(0, Math.min(maxLength,MENTIONED_MESSAGE_LENGTH))+MENTIONED_MESSAGE_SUFFIX;
+            } else {
+                content = messageDTO.getContent();
+            }
             message.setContent(content);
             message.setFromUid(Long.valueOf(messageDTO.getFromUid()));
             message.setToUid(Long.valueOf(messageDTO.getToUid()));
@@ -162,16 +168,16 @@ public class MessageService {
         List<MessageVO> messageVOList = new ArrayList<>();
         for (Map<Short, Object> map : messagesList) {
             MessageVO messageVO = new MessageVO();
-            messageVO.setMessageId(map.get("message_id").toString());
-            messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
-            messageVO.setFromUid(map.get("from_uid").toString());
-            messageVO.setToUid(map.get("to_uid").toString());
-            messageVO.setFromUsername(map.get("from_username").toString());
-            messageVO.setFromAvatarUrl(map.get("from_avatar_url").toString());
-            messageVO.setContent(map.get("content").toString());
-            messageVO.setTypeId((map.get("type_id").toString()));
+            messageVO.setMessageId(String.valueOf(map.get("message_id")));
+            messageVO.setCommentReplyId(String.valueOf(map.get("comment_reply_id")));
+            messageVO.setFromUid(String.valueOf(map.get("from_uid")));
+            messageVO.setToUid(String.valueOf(map.get("to_uid")));
+            messageVO.setFromUsername(String.valueOf(map.get("from_username")));
+            messageVO.setFromAvatarUrl(String.valueOf(map.get("from_avatar_url")));
+            messageVO.setContent(String.valueOf(map.get("content")));
+            messageVO.setTypeId((String.valueOf(map.get("type_id"))));
             Timestamp timestamp = (Timestamp) map.get("created_at");
-            messageVO.setCreatedAt(timestamp.toInstant().toString());
+            messageVO.setCreatedAt(String.valueOf(timestamp.toInstant()));
             messageVOList.add(messageVO);
         }
         return messageVOList;

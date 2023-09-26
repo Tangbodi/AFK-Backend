@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
-import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
@@ -20,9 +19,10 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class UpdatePostLikeController {
-    private static final Logger logger = LoggerFactory.getLogger(UpdatePostLikeController.class);
-    private static final String POST_LIKE = ObjectNameEnum.POST_LIKE_SET.getTypeName();
+public class UpdatePostTotalSave {
+    private static final Logger logger = LoggerFactory.getLogger(UpdatePostTotalSave.class);
+    private static final String POST_SAVE = ObjectNameEnum.POST_SAVE_SET.getTypeName();
+    private static final String UPDATE = "UPDATE_";
 
     @Autowired
     private RedisService redisService;
@@ -31,45 +31,39 @@ public class UpdatePostLikeController {
     @Autowired
     private PostInfoService postInfoService;
 
-//    @Scheduled(fixedRate = 4000)
-    @PutMapping("/update-post-like")
-    public ResponseEntity UpdatePostLike() {
+    @Scheduled(fixedRate = 9000)
+    @PutMapping("/update-post-save")
+    public ResponseEntity UpdatePostTotalSave() {
         ApiResponse apiResponse;
         //get all post ids under POST_LIKE set in Redis
-        Integer objectCode = ObjectNameEnum.GetTypeCode(POST_LIKE);
+        Integer objectCode = ObjectNameEnum.GetTypeCode(POST_SAVE);
         logger.info("objectCode: {}", objectCode);
         //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisService.GetAllSetMembers(POST_LIKE);
+        Set<String> objectIds = redisService.GetAllSetMembers(UPDATE+POST_SAVE);
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
         } else {
-            List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
+            List<Long> postIds = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId,date
                 //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisService.GetHashValue(POST_LIKE + ":::" + objectId);
+                Map<String, String> hashSetMap = redisService.GetHashValue(UPDATE+POST_SAVE + ":::" + objectId);
                 hashSetMap.entrySet().stream().forEach(entry -> {
-                    ObjectUserDTO objectUserDTO = new ObjectUserDTO();
-                    objectUserDTO.setObjectId(Long.valueOf(objectId));
+                    Long postId = Long.valueOf(objectId);
                     String userId = entry.getKey();
-                    objectUserDTO.setUserId(Long.valueOf(userId));
-                    objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
-                    objectUserDTOList.add(objectUserDTO);
-                    redisService.DeleteMember(POST_LIKE + ":::" + objectId, userId);
+                    postIds.add(postId);
+                    redisService.DeleteMember(UPDATE+POST_SAVE + ":::" + objectId, userId);
                     if (redisService.NumOfMembers(objectId) == 0) {
-                        redisService.RemoveHashSet(POST_LIKE, objectId);
-                        logger.info("Removed hash set: {}", POST_LIKE);
+                        redisService.RemoveHashSet(UPDATE+POST_SAVE, objectId);
+                        logger.info("Removed hash set: {}", UPDATE+POST_SAVE);
                     } else {
                         //
                     }
                 });
             }
-            //update like status in database
-            userLikeSaveService.SetUserLikePost(objectUserDTOList);
-            //update total like count in database
-            postInfoService.CalculatePostTotalLike(objectUserDTOList);
+            postInfoService.CalculatePostTotalSave(postIds);
         }
-        apiResponse = ApiResponse.success("Updated post like status successfully");
+        apiResponse = ApiResponse.success("Updated post save status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

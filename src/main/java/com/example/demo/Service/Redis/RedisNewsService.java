@@ -98,24 +98,6 @@ public class RedisNewsService {
         }
         return null; // Handle cache miss or any other errors
     }
-//    public String GetEmailByToken(String token) {
-//        logger.info("Getting email by token: {}" + token);
-//        Jedis jedis = null;
-//        try {
-//            jedis = jedisPool.getResource();
-//            return jedis.get(EMAIL_VALIDATION + token);
-//        } catch (Exception e) {
-//            logger.error("Failed to get email by token", e.getMessage(), e);
-//            // Handle exceptions
-//        } finally {
-//            if (null != jedis) {
-//                logger.info("Closing the jedis connection:::");
-//                jedis.close();
-//            }
-//        }
-//        return "";
-//    }
-
     public void DeleteAllGameNewsCache() {
         logger.info("Updating all game news cache");
         Jedis jedis = null;

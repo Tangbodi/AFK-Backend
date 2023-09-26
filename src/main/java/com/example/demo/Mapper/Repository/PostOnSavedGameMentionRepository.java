@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface PostOnSavedGameMentionRepository extends JpaRepository<PostOnSavedGameMention,Long> {
     @Modifying
     @Query(value = "UPDATE afk.post_on_saved_game_mentions SET mention_on = :status WHERE user_id = :userId", nativeQuery = true)
-    void UpdateStatus(@Param("status") Byte status, @Param("userId") Long userId);
+    void UpdateStatus(@Param("status") Integer status, @Param("userId") Long userId);
 }

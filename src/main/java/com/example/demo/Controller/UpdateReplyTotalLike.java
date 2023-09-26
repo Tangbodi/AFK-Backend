@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
-import com.example.demo.Model.DTO.ObjectUserDTO;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyInfoService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
@@ -20,10 +19,10 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-public class UpdateReplyLikeController {
-    private static final Logger logger = LoggerFactory.getLogger(UpdateReplyLikeController.class);
+public class UpdateReplyTotalLike {
+    private static final Logger logger = LoggerFactory.getLogger(UpdateReplyTotalLike.class);
     private static final String REPLY_LIKE = ObjectNameEnum.REPLY_LIKE_SET.getTypeName();
-
+    private static final String UPDATE = "UPDATE_";
     @Autowired
     private RedisService redisService;
     @Autowired
@@ -31,40 +30,36 @@ public class UpdateReplyLikeController {
     @Autowired
     private ReplyInfoService replyInfoService;
 
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 9000)
     @PutMapping("/update-reply-like")
-    public ResponseEntity UpdateReplyLike() {
+    public ResponseEntity UpdateReplyTotalLike() {
         ApiResponse apiResponse;
         Integer objectCode = ObjectNameEnum.GetTypeCode(REPLY_LIKE);
         logger.info("objectCode: {}", objectCode);
         //get all object ids under objectName set in Redis
-        Set<String> objectIds = redisService.GetAllSetMembers(REPLY_LIKE);
+        Set<String> objectIds = redisService.GetAllSetMembers(UPDATE+REPLY_LIKE);
         if (objectIds.isEmpty()) {
             logger.info("objectIds is empty");
         } else {
-            List<ObjectUserDTO> objectUserDTOList = new ArrayList<>();
+            List<Long> replyIds = new ArrayList<>();
             for (String objectId : objectIds) {
                 //userId,date
                 //HashSet key is post_like:::postId in Redis
-                Map<String, String> hashSetMap = redisService.GetHashValue(REPLY_LIKE + ":::" + objectId);
+                Map<String, String> hashSetMap = redisService.GetHashValue(UPDATE+REPLY_LIKE + ":::" + objectId);
                 hashSetMap.entrySet().stream().forEach(entry -> {
-                    ObjectUserDTO objectUserDTO = new ObjectUserDTO();
-                    objectUserDTO.setObjectId(Long.valueOf(objectId));
+                    Long replyId = Long.valueOf(objectId);
                     String userId = entry.getKey();
-                    objectUserDTO.setUserId(Long.valueOf(userId));
-                    objectUserDTO.setStatus(Integer.valueOf(entry.getValue()));
-                    objectUserDTOList.add(objectUserDTO);
-                    redisService.DeleteMember(REPLY_LIKE + ":::" + objectId, userId);
+                    replyIds.add(replyId);
+                    redisService.DeleteMember(UPDATE+REPLY_LIKE + ":::" + objectId, userId);
                     if (redisService.NumOfMembers(objectId) == 0) {
-                        redisService.RemoveHashSet(REPLY_LIKE, objectId);
-                        logger.info("Removed hash set: {}", REPLY_LIKE);
+                        redisService.RemoveHashSet(UPDATE+REPLY_LIKE, objectId);
+                        logger.info("Removed hash set: {}", UPDATE+REPLY_LIKE);
                     } else {
                         //
                     }
                 });
             }
-            userLikeSaveService.SetUserLikeReply(objectUserDTOList);
-            replyInfoService.CalculateReplyTotalLike(objectUserDTOList);
+            replyInfoService.CalculateReplyTotalLike(replyIds);
         }
         apiResponse = ApiResponse.success("Updated reply like status successfully");
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

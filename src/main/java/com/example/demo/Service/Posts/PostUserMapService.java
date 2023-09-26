@@ -71,8 +71,8 @@ public class PostUserMapService {
             for (Map<Short, Object> map : allPostsByUserId) {
                 PostInfoVO postHistoryVO = new PostInfoVO();
                 postHistoryVO.setPostId(map.get("post_id").toString());
-                postHistoryVO.setTitle((String) map.get("title"));
-                postHistoryVO.setUsername((String) map.get("username"));
+                postHistoryVO.setTitle(String.valueOf(map.get("title")));
+                postHistoryVO.setUsername(String.valueOf( map.get("username")));
                 postHistoryVO.setView((Integer) map.get("view"));
                 postHistoryVO.setComment((Integer) map.get("comment"));
                 postHistoryVO.setLike((Integer) map.get("like"));

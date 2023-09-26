@@ -61,40 +61,4 @@ public class RedisGameIconService {
         }
         return Collections.emptyList();
     }
-
-    public void SetUserFavoriteGameCache(String key, Long userId, List<UserFavoriteGameVO> userFavoriteGameVOList) throws JsonProcessingException {
-        logger.info("Setting up user favorite game cache: {}", userId);
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            String gameIconVOList_json = objectMapper.writeValueAsString(userFavoriteGameVOList);
-            jedis.hset(key, String.valueOf(userId), gameIconVOList_json);
-        } catch (Exception e) {
-            logger.error("Failed to set user favorite game cache: {}", e.getMessage(), e);
-        } finally {
-            if (null != jedis) {
-                logger.info("Closing the jedis connection:::");
-                jedis.close();
-            }
-        }
-    }
-    public List<UserFavoriteGameVO> GetUserFavoriteGameCache(String key, Long userId) throws IOException {
-        logger.info("Getting user favorite game cache: {}", userId);
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            String gameIconVOListJson = jedis.hget(key, String.valueOf(userId));
-            if (gameIconVOListJson != null) {
-                return objectMapper.readValue(gameIconVOListJson, new TypeReference<List<UserFavoriteGameVO>>() {});
-            }
-        } catch (Exception e) {
-            logger.error("Failed to get user favorite game cache: {}", e.getMessage(), e);
-        } finally {
-            if (null != jedis) {
-                logger.info("Closing the jedis connection:::");
-                jedis.close();
-            }
-        }
-        return null; // Handle cache miss or any other errors
-    }
 }

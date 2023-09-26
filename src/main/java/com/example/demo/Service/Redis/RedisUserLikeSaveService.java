@@ -3,24 +3,35 @@ package com.example.demo.Service.Redis;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
+import com.example.demo.Mapper.Repository.PostUserMapRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.MessageDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
 import com.example.demo.Model.Entity.Post;
 import com.example.demo.Model.Entity.PostComment;
 import com.example.demo.Model.Entity.PostReply;
+import com.example.demo.Model.Entity.PostsUsersMap;
 import com.example.demo.Service.Message.MessageService;
+import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UsersInfo.UserSettingService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.time.Instant;
 
 @Service
 public class RedisUserLikeSaveService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUserLikeSaveService.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String UPDATE = "UPDATE_";
+    @Autowired
+    private JedisPool jedisPool;
     @Autowired
     private RedisService redisService;
     @Autowired
@@ -33,7 +44,12 @@ public class RedisUserLikeSaveService {
     private ReplyRepository replyRepository;
     @Autowired
     private PostRepository postRepository;
-    public void HandleLikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) {
+    @Autowired
+    private PostUserMapRepository postUserMapRepository;
+    @Autowired
+    private UserLikeSaveService userLikeSaveService;
+
+    public void HandleLikeSaveStrategy(UserLikeSaveDTO userLikeSaveDTO) throws InterruptedException {
         logger.info("Handling like save strategy");
         //post_like/comment_like/reply_like/post_save/game_save/0/1/2/3/4
         String typeName = ObjectNameEnum.GetTypeName(userLikeSaveDTO.getTypeId());
@@ -43,8 +59,11 @@ public class RedisUserLikeSaveService {
         String key = typeName + ":::" + objectId;
         String hashKey = String.valueOf(userLikeSaveDTO.getUserId());
         String value = String.valueOf(userLikeSaveDTO.getStatus());
+        String updateTypeName = UPDATE+typeName;
+        String updateKey = updateTypeName + ":::" + objectId;
         //whatever the status is, add to set
         //if the Type name doesn't exist then add to set
+        //for update status of like and save LIMITED TIME
         if (!redisService.MemberExists(typeName, objectId)) {
             //post_like/comment_like/reply_like/post_save
             redisService.AddSet(typeName, objectId);
@@ -53,10 +72,61 @@ public class RedisUserLikeSaveService {
         } else {
             //
         }
-        //postId/commentId/replyId -> userId -> createdAt
-        redisService.AddHashSet(key, hashKey, value);
+        //For update count of like and save
+        if(!redisService.MemberExists(updateTypeName, objectId)){
+            redisService.AddSet(updateTypeName, objectId);
+        } else {
+            //
+        }
+        //postId/commentId/replyId -> userId -> 1/0
+        redisService.AddTimeLimitedHashSet(key, hashKey, value);
+        redisService.AddHashSet(updateKey, hashKey, value);
+        //update status from Redis to DB
+        UpdateUserLikeSaveStatusFromRedisToDB(key, userLikeSaveDTO);
     }
-    public void HandleLikeSaveMentionStrategy(UserLikeSaveDTO userLikeSaveDTO){
+
+    @Async("MultiExecutor")
+    public void UpdateUserLikeSaveStatusFromRedisToDB(String key, UserLikeSaveDTO userLikeSaveDTO) throws InterruptedException {
+        logger.info("Updating user like save status from Redis to DB");
+        Thread.sleep(3000);
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String userId = userLikeSaveDTO.getUserId().toString();
+            //1/0
+            String userLikeSaveStatus_json = jedis.hget(key, userId);
+            if (userLikeSaveStatus_json != null) {
+                Integer likeSaveStatus = objectMapper.readValue(userLikeSaveStatus_json, Integer.class);
+                switch (userLikeSaveDTO.getTypeId()) {
+                    case 0:
+                        userLikeSaveService.SetUserLikePost(userLikeSaveDTO, likeSaveStatus);
+                        break;
+                    case 1:
+                        userLikeSaveService.SetUserLikeComment(userLikeSaveDTO, likeSaveStatus);
+                        break;
+                    case 2:
+                        userLikeSaveService.SetUserLikeReply(userLikeSaveDTO, likeSaveStatus);
+                        break;
+                    case 3:
+                        userLikeSaveService.SetUserSavePost(userLikeSaveDTO, likeSaveStatus);
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                logger.info("No user like save status found");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update user like save status from Redis to DB: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
+
+    public void HandleLikeSaveMentionStrategy(UserLikeSaveDTO userLikeSaveDTO) {
         logger.info("Handling like save mention strategy");
         //if user likes comment
         int typeId = userLikeSaveDTO.getTypeId();
@@ -65,9 +135,10 @@ public class RedisUserLikeSaveService {
         switch (typeId) {
             //POST_LIKE
             case 0:
+                PostsUsersMap postsUsersMap = postUserMapRepository.findByPostId(objectId).orElse(null);
                 Post post = postRepository.findById(objectId).orElse(null);
-                Long postAuthorId = post.getId();
-                if(!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnPostMention(postAuthorId)){
+                Long postAuthorId = postsUsersMap.getId().getUserId();
+                if (!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnPostMention(postAuthorId)) {
                     String postTitle = post.getTitle();
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
@@ -80,11 +151,11 @@ public class RedisUserLikeSaveService {
                     //
                 }
                 break;
-                //COMMENT_LIKE
+            //COMMENT_LIKE
             case 1:
                 PostComment postComment = commentRepository.findById(objectId).orElse(null);
                 Long commentAuthorId = postComment.getFromUid();
-                if(!commentAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(commentAuthorId)){
+                if (!commentAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(commentAuthorId)) {
                     String commentContent = postComment.getContent();
                     //set mention message
                     messageDTO.setToUid(commentAuthorId);
@@ -98,11 +169,11 @@ public class RedisUserLikeSaveService {
                     //
                 }
                 break;
-                //REPLY_LIKE
+            //REPLY_LIKE
             case 2:
                 PostReply postReply = replyRepository.findById(objectId).orElse(null);
                 Long replyAuthorId = postReply.getFromUid();
-                if(!replyAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(replyAuthorId)){
+                if (!replyAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(replyAuthorId)) {
                     String replyContent = postReply.getContent();
                     messageDTO.setToUid(replyAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
@@ -115,11 +186,12 @@ public class RedisUserLikeSaveService {
                     //
                 }
                 break;
-                //POST_SAVE
+            //POST_SAVE
             case 3:
+                postsUsersMap = postUserMapRepository.findByPostId(objectId).orElse(null);
                 post = postRepository.findById(objectId).orElse(null);
-                postAuthorId = post.getId();
-                if(!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckSaveOnPostMention(postAuthorId)){
+                postAuthorId = postsUsersMap.getId().getUserId();
+                if (!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckSaveOnPostMention(postAuthorId)) {
                     String postTitle = post.getTitle();
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());

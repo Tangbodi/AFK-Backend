@@ -81,6 +81,7 @@ public class UserRegistrationService {
             likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
             likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
             saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
+            //postOnSavedGame
             return usersLoginRepository.save(user);
         } catch (Exception e) {
             logger.error("Failed to register user: {}", e.getMessage(),e);

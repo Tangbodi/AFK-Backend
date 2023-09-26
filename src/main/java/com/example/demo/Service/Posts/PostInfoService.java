@@ -83,8 +83,8 @@ public class PostInfoService {
                 popularPostVO.setGenreId(Byte.valueOf(popularPost.get("genre_id").toString()));
                 popularPostVO.setGameId(Short.valueOf(popularPost.get("game_id").toString()));
                 popularPostVO.setPostId(popularPost.get("post_id").toString());
-                popularPostVO.setTitle((String) popularPost.get("title"));
-                popularPostVO.setGameName((String) popularPost.get("game_name"));
+                popularPostVO.setTitle(String.valueOf( popularPost.get("title")));
+                popularPostVO.setGameName(String.valueOf(popularPost.get("game_name")));
                 popularPostVOList.add(popularPostVO);
             } catch (Exception e) {
                 logger.error("Failed to transfer popular posts to VO", e);
@@ -118,12 +118,12 @@ public class PostInfoService {
             for (Map<String, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
                 postInfoVO.setPostId(map.get("post_id").toString());
-                postInfoVO.setTitle((String) map.get("title"));
+                postInfoVO.setTitle(String.valueOf( map.get("title")));
                 postInfoVO.setView((Integer) map.get("view"));
                 postInfoVO.setComment((Integer) map.get("comment"));
                 postInfoVO.setLike((Integer) map.get("like"));
                 postInfoVO.setSave((Integer) map.get("save"));
-                postInfoVO.setUsername((String) map.get("username"));
+                postInfoVO.setUsername(String.valueOf( map.get("username")));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 postInfoVO.setCreatedAt(timestamp.toInstant());
                 postInfoVOList.add(postInfoVO);
@@ -134,12 +134,10 @@ public class PostInfoService {
             return Collections.emptyList();
         }
     }
-    public void CalculatePostTotalLike(List<ObjectUserDTO> objectUserDTOList){
+    public void CalculatePostTotalLike(List<Long> postIds){
         logger.info("Finding all users favorite post list with like status = 1");
         //transverse all users favorite post list
-        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
-            Long postId = objectUserDTO.getObjectId();
-            logger.info("PostId: {}",postId);
+        for(Long postId : postIds){
             Map<String,Object> map = userFavoritePostRepository.findPostTotalLikeByLikeStatus(postId);
             Integer totalLike = ((BigInteger) map.get("total_like")).intValue();
             logger.info("Total like: {}",totalLike);
@@ -155,11 +153,9 @@ public class PostInfoService {
             return postInfoRepository.save(postInfo);
         }).orElseThrow(()-> new RuntimeException("Failed to update post like count"));
     }
-    public void CalculatePostTotalSave(List<ObjectUserDTO> objectUserDTOList){
+    public void CalculatePostTotalSave(List<Long> postIds){
         logger.info("Finding all users favorite post list with save status = 1");
-        for(ObjectUserDTO objectUserDTO : objectUserDTOList){
-            Long postId = objectUserDTO.getObjectId();
-            logger.info("PostId: {}",postId);
+        for(Long postId: postIds){
             Map<String,Object> map = userFavoritePostRepository.findPostTotalLikeBySaveStatus(postId);
             Integer totalSave = ((BigInteger) map.get("total_save")).intValue();
             logger.info("Total save: {}",totalSave);

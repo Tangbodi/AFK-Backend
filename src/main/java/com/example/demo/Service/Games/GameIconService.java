@@ -44,8 +44,8 @@ public class GameIconService {
                 GameIconVO gameIconVO = new GameIconVO();
                 gameIconVO.setGenreId((Byte) gameIcon.get("genre_id"));
                 gameIconVO.setGameId((Short) gameIcon.get("game_id"));
-                gameIconVO.setGameName((String) gameIcon.get("game_name"));
-                gameIconVO.setIconUrl((String) gameIcon.get("icon_url"));
+                gameIconVO.setGameName(String.valueOf( gameIcon.get("game_name")));
+                gameIconVO.setIconUrl(String.valueOf(gameIcon.get("icon_url")));
                 gameIconVOList.add(gameIconVO);
             }
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class GameIconService {
             for (Map<Short, Object> homeGameImage : homeGameImageList) {
                 HomeGameImageVO homeGameImageVO = new HomeGameImageVO();
                 homeGameImageVO.setImageId((Short) homeGameImage.get("image_id"));
-                homeGameImageVO.setImageUrl((String) homeGameImage.get("image_url"));
+                homeGameImageVO.setImageUrl(String.valueOf(homeGameImage.get("image_url")));
                 homeGameImageVOList.add(homeGameImageVO);
             }
         }catch (Exception e){

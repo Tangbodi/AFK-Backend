@@ -50,8 +50,8 @@ public class PostGameMapService {
                 latestPostVO.setGenreId(Byte.valueOf(map.get("genre_id").toString()));
                 latestPostVO.setGameId(Short.valueOf(map.get("game_id").toString()));
                 latestPostVO.setPostId(map.get("post_id").toString());
-                latestPostVO.setTitle((String) map.get("title"));
-                latestPostVO.setGameName((String) map.get("game_name"));
+                latestPostVO.setTitle(String.valueOf( map.get("title")));
+                latestPostVO.setGameName(String.valueOf(map.get("game_name")));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 latestPostVO.setCreatedAt(timestamp.toInstant());
                 latestPostVOList.add(latestPostVO);

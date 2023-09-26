@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,11 +33,26 @@ public class UserSettingController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-
-            List<UserSettingVO> userSettingVOList = redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
-            apiResponse = ApiResponse.success(userSettingVOList);
+            UserSettingVO userSettingVO= redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
+            apiResponse = ApiResponse.success(userSettingVO);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-
+    }
+    @PutMapping("/setting")
+    public ResponseEntity UpdateUserSetting(HttpServletRequest request, @RequestBody UserSettingDTO userSettingDTO) throws IOException, JMSException {
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        ApiResponse apiResponse;
+        if (userId == null) {
+            apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
+        } else {
+            if (userSettingDTO.getStatus() == 0) {
+                apiResponse = ApiResponse.success(1);
+            } else {
+                apiResponse = ApiResponse.success(0);
+            }
+            userSettingDTO.setUserId(userId);
+            mqSender.SendUserSettingMessage(userSettingDTO);
+        }
+        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 }

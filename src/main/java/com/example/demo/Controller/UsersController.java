@@ -9,10 +9,7 @@ import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
-import com.example.demo.Service.Redis.RedisMessageService;
-import com.example.demo.Service.Redis.RedisService;
-import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
-import com.example.demo.Service.Redis.RedisUsernameService;
+import com.example.demo.Service.Redis.*;
 import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
@@ -41,8 +38,6 @@ import java.io.IOException;
 @RequestMapping("/user")
 public class UsersController {
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
-    private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
-    private static final String USER_SETTING = "USER_SETTING";
     @Autowired
     private UserRegistrationService userRegistrationService;
     @Autowired
@@ -68,9 +63,8 @@ public class UsersController {
     @Autowired
     private UserSettingService userSettingService;
     @Autowired
-    private RedisService redisService;
-    @Autowired
-    private RedisUserFavoriteGameService redisUserFavoriteGameService;
+    private RedisUserInfoService redisUserInfoService;
+
     @PostMapping("/registration")
     public ResponseEntity UserRegistration(@Validated @RequestBody UserRegisterDTO userRegisterDTO, HttpServletRequest request) {
         // Encode email for avoiding email scraping and spam bots
@@ -151,14 +145,11 @@ public class UsersController {
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
 
-
     @PostMapping("/logout")
     public ResponseEntity UserLogout(HttpServletRequest request) throws IOException {
         logger.info("Logging out");
         Long userId = (Long) request.getSession().getAttribute("userId");
-        redisMessageService.DeleteUnreadMessage(userId);
-        redisUserFavoriteGameService.UpdateUserFavoriteGameFromCacheToDB(userId);
-        redisService.DeleteMember(USER_SETTING + ":::" + userId.toString(), userId.toString());
+        redisUserInfoService.DeleteUserInfoFromRedis(userId);
         ApiResponse apiResponse = ApiResponse.success("Logged out successfully");
         request.getSession().invalidate();
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

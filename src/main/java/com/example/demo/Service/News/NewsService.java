@@ -32,18 +32,18 @@ public class NewsService {
             List<Map<String, Object>> newsList = newsRepository.findAllNewsByPublishDate();
             for (Map<String, Object> map : newsList) {
                 NewsVO newsVO = new NewsVO();
-                newsVO.setNewsId((String) map.get("news_id"));
+                newsVO.setNewsId(String.valueOf(map.get("news_id")));
                 newsVO.setGenreId((Byte) map.get("genre_id"));
                 Short gameId = (Short) map.get("game_id");
-                newsVO.setGameName((String) map.get("game_name"));
-                newsVO.setGameIconUrl((String) map.get("icon_url"));
+                newsVO.setGameName(String.valueOf( map.get("game_name")));
+                newsVO.setGameIconUrl(String.valueOf( map.get("icon_url")));
                 newsVO.setGameId(gameId);
-                newsVO.setSource((String) map.get("source"));
-                newsVO.setTitle((String) map.get("title"));
-                newsVO.setDescription((String) map.get("description"));
-                newsVO.setMediaContentUrl((String) map.get("media_content_url"));
-                newsVO.setContent((String) map.get("content"));
-                newsVO.setPubDate((String)map.get("pub_date"));
+                newsVO.setSource(String.valueOf( map.get("source")));
+                newsVO.setTitle(String.valueOf( map.get("title")));
+                newsVO.setDescription(String.valueOf( map.get("description")));
+                newsVO.setMediaContentUrl(String.valueOf( map.get("media_content_url")));
+                newsVO.setContent(String.valueOf( map.get("content")));
+                newsVO.setPubDate(String.valueOf(map.get("pub_date")));
                 newsVOList.add(newsVO);
             }
             logger.info("Set all news from DB: {}", newsVOList.size());
@@ -60,17 +60,17 @@ public class NewsService {
             List<NewsVO> newsVOList = new ArrayList<>();
             for(Map<String, Object> map : newsList) {
                 NewsVO newsVO = new NewsVO();
-                newsVO.setNewsId((String) map.get("news_id"));
+                newsVO.setNewsId(String.valueOf(map.get("news_id")));
                 newsVO.setGenreId(genreId);
                 newsVO.setGameId(gameId);
-                newsVO.setGameName((String) map.get("game_name"));
-                newsVO.setGameIconUrl((String) map.get("icon_url"));
-                newsVO.setSource((String) map.get("source"));
-                newsVO.setTitle((String) map.get("title"));
-                newsVO.setDescription((String) map.get("description"));
-                newsVO.setMediaContentUrl((String) map.get("media_content_url"));
-                newsVO.setContent((String) map.get("content"));
-                newsVO.setPubDate((String)map.get("pub_date"));
+                newsVO.setGameName(String.valueOf( map.get("game_name")));
+                newsVO.setGameIconUrl(String.valueOf( map.get("icon_url")));
+                newsVO.setSource(String.valueOf( map.get("source")));
+                newsVO.setTitle(String.valueOf( map.get("title")));
+                newsVO.setDescription(String.valueOf(map.get("description")));
+                newsVO.setMediaContentUrl(String.valueOf( map.get("media_content_url")));
+                newsVO.setContent(String.valueOf( map.get("content")));
+                newsVO.setPubDate(String.valueOf(map.get("pub_date")));
                 newsVOList.add(newsVO);
             }
             redisNewsService.SetOneGameNewsCache(gameId, newsVOList);
@@ -88,17 +88,17 @@ public class NewsService {
             } else {
                 NewsVO newsVO = new NewsVO();
                 for(Map<String, Object> map : news) {
-                    newsVO.setNewsId((String) map.get("news_id"));
+                    newsVO.setNewsId(String.valueOf( map.get("news_id")));
                     newsVO.setGenreId(newsDTO.getGenreId());
                     newsVO.setGameId(newsDTO.getGameId());
-                    newsVO.setGameName((String) map.get("game_name"));
-                    newsVO.setGameIconUrl((String) map.get("icon_url"));
-                    newsVO.setSource((String) map.get("source"));
-                    newsVO.setTitle((String) map.get("title"));
-                    newsVO.setDescription((String) map.get("description"));
-                    newsVO.setMediaContentUrl((String) map.get("media_content_url"));
-                    newsVO.setContent((String) map.get("content"));
-                    newsVO.setPubDate((String)map.get("pub_date"));
+                    newsVO.setGameName(String.valueOf( map.get("game_name")));
+                    newsVO.setGameIconUrl(String.valueOf( map.get("icon_url")));
+                    newsVO.setSource(String.valueOf( map.get("source")));
+                    newsVO.setTitle(String.valueOf( map.get("title")));
+                    newsVO.setDescription(String.valueOf( map.get("description")));
+                    newsVO.setMediaContentUrl(String.valueOf( map.get("media_content_url")));
+                    newsVO.setContent(String.valueOf( map.get("content")));
+                    newsVO.setPubDate(String.valueOf(map.get("pub_date")));
                 }
                 return newsVO;
             }

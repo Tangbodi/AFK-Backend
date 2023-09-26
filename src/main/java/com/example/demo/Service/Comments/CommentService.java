@@ -172,12 +172,12 @@ public class CommentService {
         logger.info("Creating comment map");
 //        pc.comment_id, p.post_id, pc.from_uid, ui.username, ui.avatar_url, pc.content, ulc.like_status, pc.created_at
         ShowCommentVO showCommentVO = new ShowCommentVO();
-        showCommentVO.setCommentId(comment.get("comment_id").toString());
-        showCommentVO.setPostId(comment.get("post_id").toString());
-        showCommentVO.setFromUid(comment.get("from_uid").toString());
-        showCommentVO.setUsername(comment.get("username").toString());
-        showCommentVO.setFromAvatarURL(comment.get("fm_avatar_url").toString());
-        showCommentVO.setContent(comment.get("content").toString());
+        showCommentVO.setCommentId(String.valueOf(comment.get("comment_id")));
+        showCommentVO.setPostId(String.valueOf(comment.get("post_id")));
+        showCommentVO.setFromUid(String.valueOf(comment.get("from_uid")));
+        showCommentVO.setUsername(String.valueOf(comment.get("username")));
+        showCommentVO.setFromAvatarURL(String.valueOf(comment.get("fm_avatar_url")));
+        showCommentVO.setContent(String.valueOf(comment.get("content")));
         showCommentVO.setLikeStatus((Integer) comment.get("like_status"));
         Timestamp timestamp = (Timestamp) comment.get("created_at");
         showCommentVO.setCreatedAt(timestamp.toInstant());
@@ -189,15 +189,15 @@ public class CommentService {
         logger.info("Creating reply map");
 
         ShowReplyVO showReplyVO = new ShowReplyVO();
-        showReplyVO.setReplyId(reply.get("reply_id").toString());
-        showReplyVO.setCommentId(reply.get("comment_id").toString());
-        showReplyVO.setToReplyId(reply.get("to_reply_id").toString());
-        showReplyVO.setFromUid(reply.get("from_uid").toString());
-        showReplyVO.setFromAvatarURL(reply.get("fm_avatar_url").toString());
-        showReplyVO.setFromUsername(reply.get("fm_username").toString());
-        showReplyVO.setToUid(reply.get("to_uid").toString());
-        showReplyVO.setToUsername(reply.get("to_username").toString());
-        showReplyVO.setContent(reply.get("content").toString());
+        showReplyVO.setReplyId(String.valueOf(reply.get("reply_id")));
+        showReplyVO.setCommentId(String.valueOf(reply.get("comment_id")));
+        showReplyVO.setToReplyId(String.valueOf(reply.get("to_reply_id")));
+        showReplyVO.setFromUid(String.valueOf(reply.get("from_uid")));
+        showReplyVO.setFromAvatarURL(String.valueOf(reply.get("fm_avatar_url")));
+        showReplyVO.setFromUsername(String.valueOf(reply.get("fm_username")));
+        showReplyVO.setToUid(String.valueOf(reply.get("to_uid")));
+        showReplyVO.setToUsername(String.valueOf(reply.get("to_username")));
+        showReplyVO.setContent(String.valueOf(reply.get("content")));
         showReplyVO.setLikeStatus((Integer) reply.get("like_status"));
         Timestamp timestamp = (Timestamp) reply.get("created_at");
         showReplyVO.setCreatedAt(timestamp.toInstant());
@@ -227,11 +227,11 @@ public class CommentService {
         for (Map<String, Object> map : newestCommentsList) {
             try {
                 NewestCommentVO newestCommentVO = new NewestCommentVO();
-                newestCommentVO.setGenreId(Byte.valueOf(map.get("genre_id").toString()));
-                newestCommentVO.setGameId(Short.valueOf(map.get("game_id").toString()));
-                newestCommentVO.setPostId(map.get("post_id").toString());
-                newestCommentVO.setContent((String) map.get("content"));
-                newestCommentVO.setGameName((String) map.get("game_name"));
+                newestCommentVO.setGenreId(Byte.valueOf(String.valueOf(map.get("genre_id"))));
+                newestCommentVO.setGameId(Short.valueOf(String.valueOf(map.get("game_id"))));
+                newestCommentVO.setPostId(String.valueOf(map.get("post_id")));
+                newestCommentVO.setContent(String.valueOf(map.get("content")));
+                newestCommentVO.setGameName(String.valueOf( map.get("game_name")));
                 Timestamp timestamp = (Timestamp) map.get("created_at");
                 newestCommentVO.setCreatedAt(timestamp.toInstant());
                 newestCommentVOList.add(newestCommentVO);

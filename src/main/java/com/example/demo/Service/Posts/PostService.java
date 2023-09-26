@@ -134,9 +134,9 @@ public class PostService {
                 showPostBodyVO.setGameName(post.get("game_name").toString());
                 showPostBodyVO.setUserId(post.get("user_id").toString());
                 logger.info("User ID: {}", post.get("user_id"));
-                showPostBodyVO.setUserName((String) post.get("username"));
-                showPostBodyVO.setTitle((String) post.get("title"));
-                showPostBodyVO.setTextRender((String) post.get("text_render"));
+                showPostBodyVO.setUserName(String.valueOf(post.get("username")));
+                showPostBodyVO.setTitle(String.valueOf(post.get("title")));
+                showPostBodyVO.setTextRender(String.valueOf(post.get("text_render")));
                 showPostBodyVO.setView((Integer) post.get("view"));
                 showPostBodyVO.setCommentReply((Integer) post.get("comment_reply"));
                 showPostBodyVO.setLike((Integer) post.get("like"));

@@ -1,5 +1,6 @@
 package com.example.demo.Service.Redis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import java.util.*;
 @Service
 public class RedisService {
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     private JedisPool jedisPool;
 
@@ -60,7 +63,7 @@ public class RedisService {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.sadd(typeNameInSet, String.valueOf(objectId));
+            jedis.sadd(typeNameInSet, objectId.toString());
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
@@ -76,7 +79,25 @@ public class RedisService {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            jedis.hset(key, hashKey, String.valueOf(value));
+            String json = objectMapper.writeValueAsString(value);
+            jedis.hset(key, hashKey, json);
+        } catch (Exception e) {
+            logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
+    public void AddTimeLimitedHashSet(String key, String hashKey, Object value) {
+        logger.info("Adding hash set to Redis: {}", key, ":::", hashKey, ":::", value);
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String json = objectMapper.writeValueAsString(value);
+            jedis.hset(key, hashKey, json);
+            jedis.expire(key, 15);
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {
