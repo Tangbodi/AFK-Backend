@@ -9,6 +9,7 @@ import com.example.demo.Service.Comments.CommentOnPostMentionService;
 import com.example.demo.Service.Replies.ReplyOnCommentMentionService;
 import com.example.demo.Service.UserLikeSave.LikeOnCommentMentionService;
 import com.example.demo.Service.UserLikeSave.LikeOnPostMentionService;
+import com.example.demo.Service.UserLikeSave.MentionOfUsernameService;
 import com.example.demo.Service.UserLikeSave.SaveOnPostMentionService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
@@ -46,6 +47,8 @@ public class UserRegistrationService {
     private LikeOnPostMentionService likeOnPostMentionService;
     @Autowired
     private SaveOnPostMentionService saveOnPostMentionService;
+    @Autowired
+    private MentionOfUsernameService mentionOfUsernameService;
     public UsersInfo CheckUsernameExists(String username) {
         UsersInfo usersInfo = userInfoService.CheckUsernameExists(username);
         return usersInfo;
@@ -81,6 +84,7 @@ public class UserRegistrationService {
             likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
             likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
             saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
+            mentionOfUsernameService.SetSaveOnPostMention(userRegisterDTO);
             //postOnSavedGame
             return usersLoginRepository.save(user);
         } catch (Exception e) {

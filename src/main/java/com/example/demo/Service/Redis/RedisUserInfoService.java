@@ -29,7 +29,7 @@ public class RedisUserInfoService {
         try {
             redisMessageService.DeleteUnreadMessage(userId);
             redisUserFavoriteGameService.UpdateUserFavoriteGameFromCacheToDB(userId);
-            redisUserSettingService.UpdateUserSettingFromCacheToDB(userId);
+            redisUserSettingService.DeleteUserSettingCache(userId);
             logger.info("Deleted member: {}", userId.toString());
         } catch (Exception e) {
             logger.error("Failed to delete user info from Redis: {}", e.getMessage(), e);

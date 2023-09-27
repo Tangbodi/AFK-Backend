@@ -12,4 +12,5 @@ public class UserSettingVO implements Serializable {
     private Integer postOnSavedGame;
     private Integer replyOnComment;
     private Integer saveOnPost;
+    private Integer mentionOfUsername;
 }

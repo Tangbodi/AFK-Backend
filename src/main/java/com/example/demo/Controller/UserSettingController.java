@@ -38,7 +38,7 @@ public class UserSettingController {
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
-    @PutMapping("/setting")
+    @PutMapping("/update-setting")
     public ResponseEntity UpdateUserSetting(HttpServletRequest request, @RequestBody UserSettingDTO userSettingDTO) throws IOException, JMSException {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;

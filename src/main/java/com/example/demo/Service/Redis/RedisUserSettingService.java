@@ -46,6 +46,7 @@ public class RedisUserSettingService {
             UpdateUserSetting(userSettingVO, userSettingDTO);
             //Set user setting list to Redis
             redisService.AddHashSet(key, userId.toString(), userSettingVO);
+            UpdateUserSettingFromCacheToDB(userId);
         }
     }
 
@@ -70,6 +71,9 @@ public class RedisUserSettingService {
                 break;
             case "saveOnPost":
                 userSettingVO.setSaveOnPost(userSettingDTO.getStatus());
+                break;
+            case "mentionOfUsername":
+                userSettingVO.setMentionOfUsername(userSettingDTO.getStatus());
                 break;
             default:
                 break;
@@ -102,6 +106,13 @@ public class RedisUserSettingService {
     @Async("MultiExecutor")
     public void UpdateUserSettingFromCacheToDB(Long userId) throws IOException {
         logger.info("Updating user setting from cache to DB");
+        String key = USER_SETTING + ":::" + userId;
+        UserSettingVO userSettingVO = GetUserSettingCache(key, userId);
+        userSettingService.SaveUserSetting(userSettingVO, userId);
+    }
+    @Async("MultiExecutor")
+    public void DeleteUserSettingCache(Long userId) throws IOException {
+        logger.info("Deleting user setting cache");
         String key = USER_SETTING + ":::" + userId;
         UserSettingVO userSettingVO = GetUserSettingCache(key, userId);
         userSettingService.SaveUserSetting(userSettingVO, userId);

@@ -35,6 +35,8 @@ public class UserSettingService {
     @Autowired
     private PostOnSavedGameMentionRepository postOnSavedGameMentionRepository;
     @Autowired
+    private MentionOfUsernameRepository mentionOfUsernameRepository;
+    @Autowired
     private RedisService redisService;
     @Lazy
     @Autowired
@@ -51,6 +53,7 @@ public class UserSettingService {
             commentOnPostMentionRepository.UpdateStatus(userSettingVO.getCommentOnPost(), userId);
             replyOnCommentMentionRepository.UpdateStatus(userSettingVO.getReplyOnComment(), userId);
             postOnSavedGameMentionRepository.UpdateStatus(userSettingVO.getPostOnSavedGame(), userId);
+            mentionOfUsernameRepository.UpdateStatus(userSettingVO.getMentionOfUsername(), userId);
         } catch (Exception e) {
             logger.error("Failed to change user setting: {}", e.getMessage(), e);
         }
@@ -93,7 +96,7 @@ public class UserSettingService {
                 userSettingVO.setPostOnSavedGame(map.get("post_on_saved_game") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setReplyOnComment(map.get("reply_on_comment") == Boolean.TRUE ? 1 : 0);
                 userSettingVO.setSaveOnPost(map.get("save_on_post") == Boolean.TRUE ? 1 : 0);
-
+                userSettingVO.setMentionOfUsername(map.get("mention_of_username") == Boolean.TRUE ? 1 : 0);
             }
             return userSettingVO;
         } catch (Exception e) {
@@ -198,7 +201,22 @@ public class UserSettingService {
             return false;
         }
     }
-
+    public boolean CheckMentionOfUsernameMention(Long userId){
+        logger.info("Checking mention of username mention setting for user ID: {}", userId);
+        try {
+            boolean status = mentionOfUsernameRepository.findById(userId).orElse(null).getMentionOn();
+            if (status == false) {
+                logger.info("Mention of username mention setting is off");
+                return false;
+            } else {
+                logger.info("Mention of username mention setting is on");
+                return true;
+            }
+        } catch (Exception e) {
+            logger.error("Error checking mention of username mention setting: {}", e.getMessage(), e);
+            return false;
+        }
+    }
     public boolean CheckPostOnSavedGameMention(Long userId) {
         logger.info("Checking post on saved game mention setting for user ID: {}", userId);
         try {
