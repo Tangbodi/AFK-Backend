@@ -1,9 +1,9 @@
 package com.example.demo.Service.Redis;
 
 import com.example.demo.Model.DTO.UserSettingDTO;
-import com.example.demo.Model.VO.UserSettingVO;
-import com.example.demo.Service.UsersInfo.UserSettingService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.demo.Model.VO.ActivityVO;
+import com.example.demo.Model.VO.RecommendationVO;
+import com.example.demo.Service.UserSettings.UserSettingService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -16,12 +16,17 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
+import java.util.*;
 
 @Service
 public class RedisUserSettingService {
     private static final Logger logger = LoggerFactory.getLogger(RedisUserSettingService.class);
     private static final String USER_SETTING = "USER_SETTING";
+    private static final String ACTIVITY = "activity";
+    private static final String RECOMMENDATION = "recommendation";
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Set<String> ActivitySet = new HashSet<>(Arrays.asList("commentOnPost", "likeOnComment", "likeOnPost", "postOnSavedGame", "replyOnComment", "saveOnPost", "mentionOfUsername"));
+    private static final Set<String> RecommendationSet = new HashSet<>(Arrays.asList("afkAnnouncement", "featuredContent", "trendingPost", "communityRecommendation"));
     @Autowired
     private JedisPool jedisPool;
     @Autowired
@@ -36,60 +41,104 @@ public class RedisUserSettingService {
         logger.info("User id: {}", userId);
         String key = USER_SETTING + ":::" + userId;
         //Get user setting list from Redis to update
-        UserSettingVO userSettingVO = GetUserSettingCache(key, userId);
+        Map<String, Object> userSettingVOMap = GetUserSettingCache(key, userId);
+        logger.info("User setting list: {}", userSettingVOMap);
         //if user setting list is null, create new user setting list
-        if (userSettingVO == null) {
+        if (userSettingVOMap == null) {
             logger.info("No user setting found");
         } else {
             //if user setting is not null, update user setting list
-            logger.info("Updating user setting");
-            UpdateUserSetting(userSettingVO, userSettingDTO);
+            UpdateUserSetting(userSettingVOMap, userSettingDTO);
             //Set user setting list to Redis
-            redisService.AddHashSet(key, userId.toString(), userSettingVO);
+            redisService.AddHashSet(key, userId.toString(), userSettingVOMap);
             UpdateUserSettingFromCacheToDB(userId);
         }
     }
 
-    private void UpdateUserSetting(UserSettingVO userSettingVO, UserSettingDTO userSettingDTO) {
+    private void UpdateUserSetting(Map<String, Object> userSettingVOMap, UserSettingDTO userSettingDTO) {
         logger.info("Updating user setting");
-        String key = USER_SETTING + ":::" + userSettingDTO.getUserId();
+        String type = userSettingDTO.getType();
+        Object VOMap;
+        if (ActivitySet.contains(type)) {;
+            VOMap = userSettingVOMap.get(ACTIVITY);
+            if (VOMap instanceof LinkedHashMap) {
+                LinkedHashMap<String,Integer> activityVOMap = (LinkedHashMap<String, Integer>) VOMap;
+                UpdateActivitySetting(activityVOMap, userSettingDTO);
+                userSettingVOMap.put(ACTIVITY, activityVOMap);
+            } else {
+                logger.info("ActivityVO is null");
+            }
+        } else if (RecommendationSet.contains(type)) {
+            VOMap = userSettingVOMap.get(RECOMMENDATION);
+            if ( VOMap instanceof LinkedHashMap) {
+                LinkedHashMap<String,Integer> recommendationVOMap = (LinkedHashMap<String, Integer>) VOMap;
+                UpdateRecommendationSetting(recommendationVOMap, userSettingDTO);
+                userSettingVOMap.put(RECOMMENDATION, recommendationVOMap);
+            } else {
+                logger.info("RecommendationVO is null");
+            }
+        }
+    }
+
+    private void UpdateActivitySetting(LinkedHashMap<String,Integer> activeVOMap, UserSettingDTO userSettingDTO) {
+        logger.info("Updating activity setting");
         switch (userSettingDTO.getType()) {
             case "commentOnPost":
-                userSettingVO.setCommentOnPost(userSettingDTO.getStatus());
+                activeVOMap.put("commentOnPost", userSettingDTO.getStatus());
                 break;
             case "likeOnComment":
-                userSettingVO.setLikeOnComment(userSettingDTO.getStatus());
+                activeVOMap.put("likeOnComment", userSettingDTO.getStatus());
                 break;
             case "likeOnPost":
-                userSettingVO.setLikeOnPost(userSettingDTO.getStatus());
+                activeVOMap.put("likeOnPost", userSettingDTO.getStatus());
                 break;
             case "postOnSavedGame":
-                userSettingVO.setPostOnSavedGame(userSettingDTO.getStatus());
+                activeVOMap.put("postOnSavedGame", userSettingDTO.getStatus());
                 break;
             case "replyOnComment":
-                userSettingVO.setReplyOnComment(userSettingDTO.getStatus());
+                activeVOMap.put("replyOnComment", userSettingDTO.getStatus());
                 break;
             case "saveOnPost":
-                userSettingVO.setSaveOnPost(userSettingDTO.getStatus());
+                activeVOMap.put("saveOnPost", userSettingDTO.getStatus());
                 break;
             case "mentionOfUsername":
-                userSettingVO.setMentionOfUsername(userSettingDTO.getStatus());
+                activeVOMap.put("mentionOfUsername", userSettingDTO.getStatus());
                 break;
             default:
                 break;
         }
     }
 
-    public UserSettingVO GetUserSettingCache(String key, Long userId) throws IOException {
+    private void UpdateRecommendationSetting( LinkedHashMap<String,Integer> recommendationVOMap, UserSettingDTO userSettingDTO) {
+        logger.info("Updating recommendation setting");
+        switch (userSettingDTO.getType()) {
+            case "afkAnnouncement":
+                recommendationVOMap.put("afkAnnouncement", userSettingDTO.getStatus());
+            break;
+            case "featuredContent":
+                recommendationVOMap.put("featuredContent", userSettingDTO.getStatus());
+                break;
+            case "trendingPost":
+                recommendationVOMap.put("trendingPost", userSettingDTO.getStatus());
+                break;
+            case "communityRecommendation":
+                recommendationVOMap.put("communityRecommendation", userSettingDTO.getStatus());
+                break;
+            default:
+                break;
+        }
+    }
+
+    public Map<String, Object> GetUserSettingCache(String key, Long userId) throws IOException {
         logger.info("Getting user setting cache");
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
             String userSettingVO_json = jedis.hget(key, userId.toString());
             if (userSettingVO_json != null) {
-                UserSettingVO userSettingVO = objectMapper.readValue(userSettingVO_json, new TypeReference<UserSettingVO>() {
+                Map<String, Object> userSettingVOMap = objectMapper.readValue(userSettingVO_json, new TypeReference<Map<String, Object>>() {
                 });
-                return userSettingVO;
+                return userSettingVOMap;
             } else {
                 return null;
             }
@@ -103,19 +152,21 @@ public class RedisUserSettingService {
             }
         }
     }
+
     @Async("MultiExecutor")
     public void UpdateUserSettingFromCacheToDB(Long userId) throws IOException {
         logger.info("Updating user setting from cache to DB");
         String key = USER_SETTING + ":::" + userId;
-        UserSettingVO userSettingVO = GetUserSettingCache(key, userId);
-        userSettingService.SaveUserSetting(userSettingVO, userId);
+        Map<String, Object> userSettingVOMap = GetUserSettingCache(key, userId);
+        userSettingService.SaveUserSetting(userSettingVOMap, userId);
     }
+
     @Async("MultiExecutor")
     public void DeleteUserSettingCache(Long userId) throws IOException {
         logger.info("Deleting user setting cache");
         String key = USER_SETTING + ":::" + userId;
-        UserSettingVO userSettingVO = GetUserSettingCache(key, userId);
-        userSettingService.SaveUserSetting(userSettingVO, userId);
+        Map<String, Object> userSettingVOMap = GetUserSettingCache(key, userId);
+        userSettingService.SaveUserSetting(userSettingVOMap, userId);
         redisService.DeleteMember(USER_SETTING + ":::" + userId.toString(), userId.toString());
     }
 }

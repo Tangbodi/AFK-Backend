@@ -1,4 +1,4 @@
-package com.example.demo.Service.Comments;
+package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.CommentOnPostMentionRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;

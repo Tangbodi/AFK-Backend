@@ -5,12 +5,16 @@ import com.example.demo.Mapper.Repository.UsersLoginRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.Entity.UsersLogin;
-import com.example.demo.Service.Comments.CommentOnPostMentionService;
-import com.example.demo.Service.Replies.ReplyOnCommentMentionService;
-import com.example.demo.Service.UserLikeSave.LikeOnCommentMentionService;
-import com.example.demo.Service.UserLikeSave.LikeOnPostMentionService;
-import com.example.demo.Service.UserLikeSave.MentionOfUsernameService;
-import com.example.demo.Service.UserLikeSave.SaveOnPostMentionService;
+import com.example.demo.Service.UserSettings.CommentOnPostMentionService;
+import com.example.demo.Service.UserSettings.AfkAnnouncementService;
+import com.example.demo.Service.UserSettings.CommunityRecommendationService;
+import com.example.demo.Service.UserSettings.FeaturedContentService;
+import com.example.demo.Service.UserSettings.TrendingPostService;
+import com.example.demo.Service.UserSettings.ReplyOnCommentMentionService;
+import com.example.demo.Service.UserSettings.LikeOnCommentMentionService;
+import com.example.demo.Service.UserSettings.LikeOnPostMentionService;
+import com.example.demo.Service.UserSettings.MentionOfUsernameService;
+import com.example.demo.Service.UserSettings.SaveOnPostMentionService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserMailAddressService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -49,6 +53,15 @@ public class UserRegistrationService {
     private SaveOnPostMentionService saveOnPostMentionService;
     @Autowired
     private MentionOfUsernameService mentionOfUsernameService;
+    @Autowired
+    private AfkAnnouncementService afkAnnouncementService;
+    @Autowired
+    private CommunityRecommendationService communityRecommendationService;
+    @Autowired
+    private FeaturedContentService featuredContentService;
+    @Autowired
+    private TrendingPostService trendingPostService;
+
     public UsersInfo CheckUsernameExists(String username) {
         UsersInfo usersInfo = userInfoService.CheckUsernameExists(username);
         return usersInfo;
@@ -78,13 +91,19 @@ public class UserRegistrationService {
             //user info setting
             userAuthService.SaveUsersAuth(userRegisterDTO);
             userInfoService.SaveUserInfo(userRegisterDTO);
-            //user mention setting
+            //user activity setting
             commentOnPostMentionService.SaveCommentOnPostMention(userRegisterDTO);
             replyOnCommentMentionService.SaveReplyOnCommentMention(userRegisterDTO);
             likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
             likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
             saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
             mentionOfUsernameService.SetSaveOnPostMention(userRegisterDTO);
+            saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
+            //usr recommendation setting
+            afkAnnouncementService.SaveAfkAnnouncement(userRegisterDTO);
+            communityRecommendationService.SaveCommunityRecommendation(userRegisterDTO);
+            featuredContentService.SaveFeaturedContent(userRegisterDTO);
+            trendingPostService.SaveTrendingPost(userRegisterDTO);
             //postOnSavedGame
             return usersLoginRepository.save(user);
         } catch (Exception e) {

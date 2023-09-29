@@ -1,6 +1,5 @@
 package com.example.demo.Service.Comments;
 
-import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.Entity.PostComment;
@@ -11,7 +10,8 @@ import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyService;
-import com.example.demo.Service.UsersInfo.UserSettingService;
+import com.example.demo.Service.UserSettings.CommentOnPostMentionService;
+import com.example.demo.Service.UserSettings.UserSettingService;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

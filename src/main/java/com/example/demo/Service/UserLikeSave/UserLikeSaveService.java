@@ -10,7 +10,7 @@ import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyInfoService;
-import com.example.demo.Service.UsersInfo.UserSettingService;
+import com.example.demo.Service.UserSettings.UserSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

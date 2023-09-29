@@ -1,6 +1,5 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Constant.Enum.ObjectNameEnum;
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserLoginDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
@@ -15,7 +14,7 @@ import com.example.demo.Service.UserLogin.UserLoginService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
-import com.example.demo.Service.UsersInfo.UserSettingService;
+import com.example.demo.Service.UserSettings.UserSettingService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @RestController

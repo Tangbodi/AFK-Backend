@@ -16,14 +16,20 @@ public interface CommentOnPostMentionRepository extends JpaRepository<CommentOnP
     @Query(value = "UPDATE afk.comment_on_post_mentions SET mention_on = :status WHERE user_id = :userId", nativeQuery = true)
     void UpdateStatus(@Param("status") Integer status, @Param("userId") Long userId);
 
-    @Query(value = "SELECT copm.user_id, mou.mention_on AS mention_of_username, copm.mention_on AS comment_on_post, locm.mention_on AS like_on_comment, lopm.mention_on AS like_on_post, posgm.mention_on AS post_on_saved_game, rocm.mention_on AS reply_on_comment, sopm.mention_on AS save_on_post\n" +
-            "FROM afk.comment_on_post_mentions copm \n" +
-            "JOIN afk.like_on_comment_mentions locm ON copm.user_id = locm.user_id\n" +
-            "JOIN afk.like_on_post_mentions lopm ON copm.user_id = lopm.user_id\n" +
-            "JOIN afk.post_on_saved_game_mentions posgm ON copm.user_id = posgm.user_id\n" +
-            "JOIN afk.reply_on_comment_mentions rocm ON copm.user_id = rocm.user_id\n" +
-            "JOIN afk.save_on_post_mentions sopm ON copm.user_id = sopm.user_id\n" +
-            "JOIN afk.mention_of_username mou ON sopm.user_id = mou.user_id\n" +
+    @Query(value = "SELECT copm.user_id, mou.mention_on AS mention_of_username, copm.mention_on AS comment_on_post, locm.mention_on AS like_on_comment, lopm.mention_on AS like_on_post, \n" +
+            "posgm.mention_on AS post_on_saved_game, rocm.mention_on AS reply_on_comment, sopm.mention_on AS save_on_post, aa.mention_on AS afk_announcement, cr.mention_on AS community_recommendation,\n" +
+            "fc.mention_on AS featured_content, tp.mention_on AS trending_post\n" +
+            "FROM afk.comment_on_post_mentions copm\n" +
+            " JOIN afk.like_on_comment_mentions locm ON copm.user_id = locm.user_id\n" +
+            " JOIN afk.like_on_post_mentions lopm ON copm.user_id = lopm.user_id\n" +
+            " JOIN afk.post_on_saved_game_mentions posgm ON copm.user_id = posgm.user_id\n" +
+            " JOIN afk.reply_on_comment_mentions rocm ON copm.user_id = rocm.user_id\n" +
+            " JOIN afk.save_on_post_mentions sopm ON copm.user_id = sopm.user_id\n" +
+            " JOIN afk.mention_of_username mou ON sopm.user_id = mou.user_id\n" +
+            " JOIN afk.afk_announcements aa ON copm.user_id = aa.user_id\n" +
+            " JOIN afk.community_recommendations cr ON copm.user_id = cr.user_id\n" +
+            " JOIN afk.featured_content fc ON copm.user_id = fc.user_id\n" +
+            " JOIN afk.trending_posts tp ON copm.user_id = tp.user_id\n" +
             "WHERE copm.user_id = :userId", nativeQuery = true)
     List<Map<Short, Object>> findSettingByUserId(@Param("userId")Long userId);
 }

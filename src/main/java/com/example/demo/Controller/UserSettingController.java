@@ -16,6 +16,7 @@ import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -33,8 +34,8 @@ public class UserSettingController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            UserSettingVO userSettingVO= redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
-            apiResponse = ApiResponse.success(userSettingVO);
+            Map<String,Object> userSettingVOMap= redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
+            apiResponse = ApiResponse.success(userSettingVOMap);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }

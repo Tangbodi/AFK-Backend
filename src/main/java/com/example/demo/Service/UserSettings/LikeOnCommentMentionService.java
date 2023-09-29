@@ -1,4 +1,4 @@
-package com.example.demo.Service.UserLikeSave;
+package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.LikeOnCommentMentionRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;

@@ -1,10 +1,8 @@
-package com.example.demo.Service.UserLikeSave;
+package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.MentionOfUsernameRepository;
-import com.example.demo.Mapper.Repository.SaveOnPostMentionRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.MentionOfUsername;
-import com.example.demo.Model.Entity.SaveOnPostMention;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,10 @@
-package com.example.demo.Service.UsersInfo;
+package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.Entity.CommentOnPostMention;
 import com.example.demo.Model.Entity.ReplyOnCommentMention;
+import com.example.demo.Model.VO.ActivityVO;
+import com.example.demo.Model.VO.RecommendationVO;
 import com.example.demo.Model.VO.UserSettingVO;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUserSettingService;
@@ -15,12 +17,16 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class UserSettingService {
     private static final Logger logger = LoggerFactory.getLogger(UserSettingService.class);
+    private static final String ACTIVITY = "activity";
+    private static final String RECOMMENDATION = "recommendation";
     private static final String USER_SETTING = "USER_SETTING";
     @Autowired
     private LikeOnPostMentionRepository likeOnPostMentionRepository;
@@ -37,29 +43,65 @@ public class UserSettingService {
     @Autowired
     private MentionOfUsernameRepository mentionOfUsernameRepository;
     @Autowired
+    private AfkAnnouncementRepository afkAnnouncementRepository;
+    @Autowired
+    private FeaturedContentRepository featuredContentRepository;
+    @Autowired
+    private TrendingPostRepository trendingPostRepository;
+    @Autowired
+    private CommunityRecommendationRepository communityRecommendationRepository;
+    @Autowired
     private RedisService redisService;
     @Lazy
     @Autowired
     private RedisUserSettingService redisUserSettingService;
-
-    @Async("MultiExecutor")
     @Transactional
-    public void SaveUserSetting(UserSettingVO userSettingVO, Long userId) {
+    public void SaveUserSetting(Map<String,Object> userSettingVOMap, Long userId) {
         logger.info("Saving User Setting");
         try {
-            likeOnPostMentionRepository.UpdateStatus(userSettingVO.getLikeOnPost(), userId);
-            likeOnCommentMentionRepository.UpdateStatus(userSettingVO.getLikeOnComment(), userId);
-            saveOnPostMentionRepository.UpdateStatus(userSettingVO.getSaveOnPost(), userId);
-            commentOnPostMentionRepository.UpdateStatus(userSettingVO.getCommentOnPost(), userId);
-            replyOnCommentMentionRepository.UpdateStatus(userSettingVO.getReplyOnComment(), userId);
-            postOnSavedGameMentionRepository.UpdateStatus(userSettingVO.getPostOnSavedGame(), userId);
-            mentionOfUsernameRepository.UpdateStatus(userSettingVO.getMentionOfUsername(), userId);
+            //user activity setting
+            Object VOMap = userSettingVOMap.get(ACTIVITY);
+            if (VOMap instanceof LinkedHashMap) {
+                LinkedHashMap<String,Integer> activityVOMap = (LinkedHashMap<String, Integer>) VOMap;
+                SaveActivitySetting(activityVOMap, userId);
+                userSettingVOMap.put(ACTIVITY, activityVOMap);
+            } else {
+                //
+            }
+            //user recommendation setting
+            Object VOMap2 = userSettingVOMap.get(RECOMMENDATION);
+            if(VOMap2 instanceof LinkedHashMap) {
+                LinkedHashMap<String,Integer> recommendationVOMap = (LinkedHashMap<String, Integer>) VOMap2;
+                SaveRecommendationSetting(recommendationVOMap, userId);
+                userSettingVOMap.put(RECOMMENDATION, recommendationVOMap);
+            } else {
+                //
+            }
         } catch (Exception e) {
             logger.error("Failed to change user setting: {}", e.getMessage(), e);
         }
     }
+    @Transactional
+    private void SaveActivitySetting(LinkedHashMap<String,Integer> activityVOMap, Long userId) {
+        logger.info("Saving Activity Setting");
+        likeOnPostMentionRepository.UpdateStatus(activityVOMap.get("likeOnPost"), userId);
+        likeOnCommentMentionRepository.UpdateStatus(activityVOMap.get("likeOnComment"), userId);
+        saveOnPostMentionRepository.UpdateStatus(activityVOMap.get("saveOnPost"), userId);
+        commentOnPostMentionRepository.UpdateStatus(activityVOMap.get("commentOnPost"), userId);
+        replyOnCommentMentionRepository.UpdateStatus(activityVOMap.get("replyOnComment"), userId);
+        postOnSavedGameMentionRepository.UpdateStatus(activityVOMap.get("postOnSavedGame"), userId);
+        mentionOfUsernameRepository.UpdateStatus(activityVOMap.get("mentionOfUsername"), userId);
+    }
+    @Transactional
+    private void SaveRecommendationSetting(LinkedHashMap<String,Integer> recommendationVOMap, Long userId){
+        logger.info("Saving Recommendation Setting");
+        afkAnnouncementRepository.UpdateStatus(recommendationVOMap.get("afkAnnouncement"), userId);
+        featuredContentRepository.UpdateStatus(recommendationVOMap.get("featuredContent"), userId);
+        trendingPostRepository.UpdateStatus(recommendationVOMap.get("trendingPost"), userId);
+        communityRecommendationRepository.UpdateStatus(recommendationVOMap.get("communityRecommendation"), userId);
+    }
 
-    public UserSettingVO GetUserSetting(Long userId) {
+    public Map<String, Object> GetUserSetting(Long userId) {
         logger.info("Getting User Setting: {}", userId);
         try {
             String key = USER_SETTING + ":::" + userId;
@@ -72,9 +114,9 @@ public class UserSettingService {
             List<Map<Short, Object>> userSetting = commentOnPostMentionRepository.findSettingByUserId(userId);
             if (!userSetting.isEmpty()) {
                 logger.info("User Setting found: {}", userId);
-                UserSettingVO userSettingVO = TransferToUserSettingVO(userSetting);
-                redisService.AddHashSet(key, userId.toString(), userSettingVO);
-                return userSettingVO;
+                Map<String, Object> userSettingVOMap = TransferToUserSettingVO(userSetting);
+                redisService.AddHashSet(key, userId.toString(), userSettingVOMap);
+                return userSettingVOMap;
             } else {
                 logger.info("No User Setting found: {}", userId);
                 return null;
@@ -85,20 +127,29 @@ public class UserSettingService {
         }
     }
 
-    private UserSettingVO TransferToUserSettingVO(List<Map<Short, Object>> usersSetting) {
+    private Map<String, Object> TransferToUserSettingVO(List<Map<Short, Object>> usersSetting) {
         logger.info("Transferring User Setting to VO");
         try {
-            UserSettingVO userSettingVO = new UserSettingVO();
+//            UserSettingVO userSettingVO = new UserSettingVO();
+            ActivityVO activityVO = new ActivityVO();
+            RecommendationVO recommendationVO = new RecommendationVO();
+            Map<String, Object> userSettingVOMap = new HashMap<>();
             for (Map<Short, Object> map : usersSetting) {
-                userSettingVO.setCommentOnPost(map.get("comment_on_post") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setLikeOnComment(map.get("like_on_comment") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setLikeOnPost(map.get("like_on_post") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setPostOnSavedGame(map.get("post_on_saved_game") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setReplyOnComment(map.get("reply_on_comment") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setSaveOnPost(map.get("save_on_post") == Boolean.TRUE ? 1 : 0);
-                userSettingVO.setMentionOfUsername(map.get("mention_of_username") == Boolean.TRUE ? 1 : 0);
+                activityVO.setCommentOnPost(map.get("comment_on_post") == Boolean.TRUE ? 1 : 0);
+                activityVO.setLikeOnComment(map.get("like_on_comment") == Boolean.TRUE ? 1 : 0);
+                activityVO.setLikeOnPost(map.get("like_on_post") == Boolean.TRUE ? 1 : 0);
+                activityVO.setPostOnSavedGame(map.get("post_on_saved_game") == Boolean.TRUE ? 1 : 0);
+                activityVO.setReplyOnComment(map.get("reply_on_comment") == Boolean.TRUE ? 1 : 0);
+                activityVO.setSaveOnPost(map.get("save_on_post") == Boolean.TRUE ? 1 : 0);
+                activityVO.setMentionOfUsername(map.get("mention_of_username") == Boolean.TRUE ? 1 : 0);
+                userSettingVOMap.put(ACTIVITY, activityVO);
+                recommendationVO.setAfkAnnouncement(map.get("afk_announcement") == Boolean.TRUE ? 1 : 0);
+                recommendationVO.setCommunityRecommendation(map.get("community_recommendation") == Boolean.TRUE ? 1 : 0);
+                recommendationVO.setFeaturedContent(map.get("featured_content") == Boolean.TRUE ? 1 : 0);
+                recommendationVO.setTrendingPost(map.get("trending_post") == Boolean.TRUE ? 1 : 0);
+                userSettingVOMap.put(RECOMMENDATION, recommendationVO);
             }
-            return userSettingVO;
+            return userSettingVOMap;
         } catch (Exception e) {
             logger.error("Failed to transfer User Setting to VO: {}", e.getMessage(), e);
             return null;

@@ -13,7 +13,7 @@ import com.example.demo.Model.Entity.PostReply;
 import com.example.demo.Model.Entity.PostsUsersMap;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
-import com.example.demo.Service.UsersInfo.UserSettingService;
+import com.example.demo.Service.UserSettings.UserSettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

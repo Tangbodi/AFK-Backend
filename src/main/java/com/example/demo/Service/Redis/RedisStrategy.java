@@ -1,35 +1,19 @@
 package com.example.demo.Service.Redis;
 
-import com.example.demo.Constant.Enum.CountNameEnum;
 import com.example.demo.Constant.Enum.ObjectNameEnum;
-import com.example.demo.Constant.Enum.StatusEnum;
 import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.*;
-import com.example.demo.Model.Entity.Post;
-import com.example.demo.Model.Entity.PostComment;
-import com.example.demo.Model.Entity.PostReply;
-import com.example.demo.Model.VO.GameIconVO;
-import com.example.demo.Model.VO.UserFavoriteGameVO;
-import com.example.demo.Service.Comments.CommentOnPostMentionService;
-import com.example.demo.Service.Comments.CommentService;
+import com.example.demo.Service.UserSettings.CommentOnPostMentionService;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
-import com.example.demo.Service.Replies.ReplyService;
-import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
-import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
-import com.example.demo.Service.UsersInfo.UserInfoService;
-import com.example.demo.Service.UsersInfo.UserSettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
 
 @Service
 public class RedisStrategy {

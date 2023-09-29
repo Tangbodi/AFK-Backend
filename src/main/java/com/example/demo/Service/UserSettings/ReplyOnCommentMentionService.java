@@ -1,20 +1,14 @@
-package com.example.demo.Service.Replies;
+package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.ReplyOnCommentMentionRepository;
-import com.example.demo.Model.DTO.CommentReplyDTO;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.ReplyOnCommentMention;
-import com.example.demo.Model.VO.MessageVO;
-import com.example.demo.Service.MQ.MQSender;
-import com.example.demo.Service.Message.MessageService;
-import com.example.demo.Service.Redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.jms.JMSException;
 import javax.transaction.Transactional;
 
 @Service
