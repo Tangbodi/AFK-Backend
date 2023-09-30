@@ -81,6 +81,7 @@ public class RedisService {
             jedis = jedisPool.getResource();
             String json = objectMapper.writeValueAsString(value);
             jedis.hset(key, hashKey, json);
+            jedis.expire(key, 1800);
         } catch (Exception e) {
             logger.error("Failed to set username exists cache: {}", e.getMessage(), e);
         } finally {

@@ -75,6 +75,7 @@ public class RedisUserFavoriteGameService {
             userFavoriteGameVOList.removeIf(userFavoriteGameVO -> userFavoriteGameVO.getGameId().equals(gameId));
             redisService.AddHashSet(key, userId.toString(), userFavoriteGameVOList);
             logger.info("Removed game from user favorite game list");
+            UpdateUserFavoriteGameFromCacheToDB(userId);
         }
     }
 

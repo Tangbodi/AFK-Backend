@@ -55,6 +55,7 @@ public class RedisUserSettingService {
         }
     }
 
+    @Async("MultiExecutor")
     private void UpdateUserSetting(Map<String, Object> userSettingVOMap, UserSettingDTO userSettingDTO) {
         logger.info("Updating user setting");
         String type = userSettingDTO.getType();
