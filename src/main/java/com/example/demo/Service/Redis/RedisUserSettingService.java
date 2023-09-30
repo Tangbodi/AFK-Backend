@@ -51,7 +51,7 @@ public class RedisUserSettingService {
             UpdateUserSetting(userSettingVOMap, userSettingDTO);
             //Set user setting list to Redis
             redisService.AddHashSet(key, userId.toString(), userSettingVOMap);
-            UpdateUserSettingFromCacheToDB(userId);
+            UpdateUserSettingFromCacheToDB(userId, userSettingDTO);
         }
     }
 
@@ -77,6 +77,8 @@ public class RedisUserSettingService {
             } else {
                 logger.info("RecommendationVO is null");
             }
+        } else{
+            //
         }
     }
 
@@ -154,11 +156,9 @@ public class RedisUserSettingService {
     }
 
     @Async("MultiExecutor")
-    public void UpdateUserSettingFromCacheToDB(Long userId) throws IOException {
+    public void UpdateUserSettingFromCacheToDB(Long userId, UserSettingDTO userSettingDTO) throws IOException {
         logger.info("Updating user setting from cache to DB");
-        String key = USER_SETTING + ":::" + userId;
-        Map<String, Object> userSettingVOMap = GetUserSettingCache(key, userId);
-        userSettingService.SaveUserSetting(userSettingVOMap, userId);
+        userSettingService.UpdateUserSettingFromCacheToDB(userId, userSettingDTO);
     }
 
     @Async("MultiExecutor")
@@ -166,7 +166,7 @@ public class RedisUserSettingService {
         logger.info("Deleting user setting cache");
         String key = USER_SETTING + ":::" + userId;
         Map<String, Object> userSettingVOMap = GetUserSettingCache(key, userId);
-        userSettingService.SaveUserSetting(userSettingVOMap, userId);
+        userSettingService.SaveUserSetting(userId, userSettingVOMap);
         redisService.DeleteMember(USER_SETTING + ":::" + userId.toString(), userId.toString());
     }
 }

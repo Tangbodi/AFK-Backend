@@ -1,6 +1,7 @@
 package com.example.demo.Service.UserSettings;
 
 import com.example.demo.Mapper.Repository.*;
+import com.example.demo.Model.DTO.UserSettingDTO;
 import com.example.demo.Model.Entity.CommentOnPostMention;
 import com.example.demo.Model.Entity.ReplyOnCommentMention;
 import com.example.demo.Model.VO.ActivityVO;
@@ -55,8 +56,54 @@ public class UserSettingService {
     @Lazy
     @Autowired
     private RedisUserSettingService redisUserSettingService;
+
     @Transactional
-    public void SaveUserSetting(Map<String,Object> userSettingVOMap, Long userId) {
+    public void UpdateUserSettingFromCacheToDB(Long userId, UserSettingDTO userSettingDTO) {
+        logger.info("Updating User Setting");
+        try {
+            switch(userSettingDTO.getType()){
+                case  "commentOnPost":
+                    commentOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "likeOnComment":
+                    likeOnCommentMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case "likeOnPost":
+                    likeOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "postOnSavedGame":
+                    postOnSavedGameMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "replyOnComment":
+                    replyOnCommentMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "saveOnPost":
+                    saveOnPostMentionRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "mentionOfUsername":
+                    mentionOfUsernameRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "afkAnnouncement":
+                    afkAnnouncementRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "featuredContent":
+                    featuredContentRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "trendingPost":
+                    trendingPostRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                case  "communityRecommendation":
+                    communityRecommendationRepository.UpdateStatus(userSettingDTO.getStatus(), userId);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update user setting: {}", e.getMessage(), e);
+        }
+    }
+    @Transactional
+    public void SaveUserSetting(Long userId, Map<String, Object>userSettingVOMap) {
         logger.info("Saving User Setting");
         try {
             //user activity setting
@@ -75,10 +122,10 @@ public class UserSettingService {
                 SaveRecommendationSetting(recommendationVOMap, userId);
                 userSettingVOMap.put(RECOMMENDATION, recommendationVOMap);
             } else {
-                //
+
             }
         } catch (Exception e) {
-            logger.error("Failed to change user setting: {}", e.getMessage(), e);
+            logger.error("Failed to save user setting: {}", e.getMessage(), e);
         }
     }
     @Transactional
