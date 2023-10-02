@@ -11,9 +11,6 @@ import com.example.demo.Model.Entity.UsersInfo;
 import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.Redis.RedisEmailService;
-import com.example.demo.Service.Redis.RedisMessageService;
-import com.example.demo.Service.Redis.RedisService;
-import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
 import com.example.demo.Util.Snowflake;
 import org.mindrot.jbcrypt.BCrypt;
@@ -35,7 +32,8 @@ import java.time.Instant;
 @Service
 public class UserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
-    private static final String AVATAR_URL = "http://31.220.21.110:8180/IMAGE/AVATAR/";
+    //    private static final String AVATAR_URL = "http://31.220.21.110:8180/IMAGE/AVATAR/";
+    private static final String AVATAR_URL = "https://www.away-from-keyboard.com/IMAGE/AVATAR/";
     private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat2/webapps/IMAGE/AVATAR/";
     private static final String USER_SETTING = "USER_SETTING";
 
