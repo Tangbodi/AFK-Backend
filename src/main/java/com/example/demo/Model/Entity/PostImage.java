@@ -33,9 +33,9 @@ public class PostImage {
     @Column(name = "image_path", nullable = false, length = 127)
     private String imagePath;
 
-    @Size(max = 63)
+    @Size(max = 127)
     @NotNull
-    @Column(name = "image_url", nullable = false, length = 63)
+    @Column(name = "image_url", nullable = false, length = 127)
     private String imageUrl;
 
     @NotNull
