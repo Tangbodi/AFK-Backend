@@ -61,6 +61,7 @@ public class MessageService {
             message.setToUid(toUid);
             message.setCreatedAt(commentReplyDTO.getCreatedAt());
             message.setModifiedAt(commentReplyDTO.getCreatedAt());
+            message.setTypeId(commentReplyDTO.getTypeId().byteValue());
             Message savedMessage = messageRepository.save(message);
             logger.info("Saved message");
             //set message user map
