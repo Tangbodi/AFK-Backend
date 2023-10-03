@@ -92,7 +92,7 @@ public class ReplyInfoService {
                     //
                 }
             } else {
-                logger.info("FromUid mention setting is off");
+                logger.info("PostAuthorId mention setting is off");
             }
         } else {
             logger.info("FromUid is equal to postAuthorId");
@@ -110,7 +110,7 @@ public class ReplyInfoService {
                     //
                 }
             } else {
-                logger.info("FromUid mention setting is off");
+                logger.info("CommentAuthorId mention setting is off");
             }
         } else {
             logger.info("FromUid is equal to commentAuthorId or commentAuthorId is equal to postAuthorId");

@@ -143,7 +143,7 @@ public class RedisUserLikeSaveService {
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(postTitle);
-                    messageDTO.setCommentReplyId(objectId);
+                    messageDTO.setCommentReplyId(post.getId());
                     messageDTO.setTypeId(userLikeSaveDTO.getTypeId());
                     messageDTO.setCreatedAt(Instant.now());
                     messageService.SaveMessage(messageDTO);
@@ -155,13 +155,14 @@ public class RedisUserLikeSaveService {
             case 1:
                 PostComment postComment = commentRepository.findById(objectId).orElse(null);
                 Long commentAuthorId = postComment.getFromUid();
+                Long postId = postComment.getPostId();
                 if (!commentAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(commentAuthorId)) {
                     String commentContent = postComment.getContent();
                     //set mention message
                     messageDTO.setToUid(commentAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(commentContent);
-                    messageDTO.setCommentReplyId(objectId);
+                    messageDTO.setCommentReplyId(postId);
                     messageDTO.setTypeId(userLikeSaveDTO.getTypeId());
                     messageDTO.setCreatedAt(Instant.now());
                     messageService.SaveMessage(messageDTO);
@@ -173,12 +174,15 @@ public class RedisUserLikeSaveService {
             case 2:
                 PostReply postReply = replyRepository.findById(objectId).orElse(null);
                 Long replyAuthorId = postReply.getFromUid();
+                Long commentId = postReply.getCommentId();
+                postComment = commentRepository.findById(commentId).orElse(null);
+                postId = postComment.getPostId();
                 if (!replyAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(replyAuthorId)) {
                     String replyContent = postReply.getContent();
                     messageDTO.setToUid(replyAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(replyContent);
-                    messageDTO.setCommentReplyId(objectId);
+                    messageDTO.setCommentReplyId(postId);
                     messageDTO.setTypeId(userLikeSaveDTO.getTypeId());
                     messageDTO.setCreatedAt(Instant.now());
                     messageService.SaveMessage(messageDTO);
@@ -196,7 +200,7 @@ public class RedisUserLikeSaveService {
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(postTitle);
-                    messageDTO.setCommentReplyId(objectId);
+                    messageDTO.setCommentReplyId(post.getId());
                     messageDTO.setTypeId(userLikeSaveDTO.getTypeId());
                     messageDTO.setCreatedAt(Instant.now());
                     messageService.SaveMessage(messageDTO);

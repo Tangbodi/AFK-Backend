@@ -59,6 +59,7 @@ public class CommentService {
             long commentId = Snowflake.generateUniqueId();
             commentReplyDTO.setCommentId(commentId);
             commentReplyDTO.setCreatedAt(Instant.now());
+            commentReplyDTO.setTypeId(5);
             PostComment postComment = new PostComment();
             postComment.setId(commentId);
             postComment.setContent(commentReplyDTO.getContent());

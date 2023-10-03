@@ -47,6 +47,7 @@ public class ReplyService {
             long replyId = Snowflake.generateUniqueId();
             commentReplyDTO.setReplyId(replyId);
             commentReplyDTO.setCreatedAt(Instant.now());
+            commentReplyDTO.setTypeId(6);
             PostReply postReply = new PostReply();
             postReply.setId(replyId);
             postReply.setCommentId(commentReplyDTO.getCommentId());

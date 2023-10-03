@@ -43,11 +43,11 @@ public class MessageService {
         logger.info("Saving message");
         Message message = new Message();
         try {
-            if (commentReplyDTO.getReplyId() != null) {
-                message.setCommentReplyId(commentReplyDTO.getReplyId());
-            } else {
-                message.setCommentReplyId(commentReplyDTO.getCommentId());
-            }
+//            if (commentReplyDTO.getReplyId() != null) {
+//                message.setCommentReplyId(commentReplyDTO.getReplyId());
+//            } else {
+//                message.setCommentReplyId(commentReplyDTO.getCommentId());
+//            }
             int maxLength = commentReplyDTO.getContent().length();
             String content;
             if (maxLength > MENTIONED_MESSAGE_LENGTH) {
@@ -55,9 +55,11 @@ public class MessageService {
             } else {
                 content = commentReplyDTO.getContent();
             }
+            message.setCommentReplyId(commentReplyDTO.getPostId());
             message.setContent(content);
             message.setFromUid(commentReplyDTO.getFromUid());
             message.setToUid(toUid);
+            message.setTypeId(commentReplyDTO.getTypeId().byteValue());
             message.setCreatedAt(commentReplyDTO.getCreatedAt());
             message.setModifiedAt(commentReplyDTO.getCreatedAt());
             Message savedMessage = messageRepository.save(message);
@@ -76,8 +78,7 @@ public class MessageService {
         logger.info("Saving message");
         Message message = new Message();
         try {
-
-            message.setCommentReplyId(Long.valueOf(messageDTO.getCommentReplyId()));
+            message.setCommentReplyId(messageDTO.getCommentReplyId());
             //set message
             int maxLength = messageDTO.getContent().length();
             String content;

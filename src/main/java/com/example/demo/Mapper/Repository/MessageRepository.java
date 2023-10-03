@@ -17,11 +17,11 @@ public interface MessageRepository extends JpaRepository<Message,Long> {
             "WHERE m.to_uid = :userId ORDER BY m.created_at DESC", nativeQuery = true)
     List<Map<Short, Object>> getMessageHistoryByUserId(@Param("userId") Long userId);
 
-    @Query(value = "SELECT m.message_id, m.comment_reply_id, m.from_uid, ui.username AS from_username, IFNULL(ui.avatar_url, '') AS from_avatar_url, m.to_uid, m.content, IFNULL(m.type_id, '') AS type_id, ui.created_at\n" +
+    @Query(value = "SELECT m.message_id, m.comment_reply_id, m.from_uid, ui.username AS from_username, IFNULL(ui.avatar_url, '') AS from_avatar_url, m.to_uid, m.content, IFNULL(m.type_id, '') AS type_id, m.created_at\n" +
             "FROM afk.messages_users_map mum\n" +
             "JOIN afk.messages m ON mum.message_id = m.message_id\n" +
             "JOIN afk.users_info ui ON m.from_uid = ui.user_id\n" +
             "WHERE mum.mentioned_uid = :userId AND mum.read_status = 0\n" +
-            "GROUP BY m.comment_reply_id, m.from_uid, m.type_id", nativeQuery = true)
+            "GROUP BY m.comment_reply_id, m.from_uid, m.type_id ORDER BY message_id DESC", nativeQuery = true)
     List<Map<Short, Object>> getUnreadMessagesByUserId(@Param("userId") Long userId);
 }

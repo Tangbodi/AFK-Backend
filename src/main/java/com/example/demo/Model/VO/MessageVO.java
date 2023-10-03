@@ -8,6 +8,7 @@ import java.time.Instant;
 @Data
 public class MessageVO implements Serializable {
     private String messageId;
+    private String postId;
     private String commentReplyId;
     private String content;
     private String fromUid;

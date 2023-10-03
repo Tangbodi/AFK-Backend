@@ -89,24 +89,15 @@ private static final String POST_IMAGE_URL = "https://www.away-from-keyboard.com
                     logger.info("ImageName: {}", imageName);
                     logger.info("Saving PostImage to Tomcat and Nginx");
                     // Define paths for Tomcat and Nginx
-//                    Path tomcatImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                    Path nginxImagePath  = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
-                    Thumbnails.of(new ByteArrayInputStream(imageData))
-                            .scale(1f)
-                            .outputQuality(0.5) // Adjust quality (0.0 to 1.0)
-                            .outputFormat(IMAGE_TYPE)
-                            .toFile(nginxImagePath.toFile());
-//                            .size(800, 600) // Set your desired resolution here
-                    postImageNameList.add(imageName);
-                    logger.info("PostImageNameList: {}", postImageNameList);
-                    // Save image to Tomcat and Nginx
-//                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
-//                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
-//                    fos_tomcat.write(imageData);
+                    Path Tomcat_imagePath = Paths.get(TOMCAT_POST_IMAGE_PATH, imageName);
+//                    Path Nginx_imagePath = Paths.get(NGINX_POST_IMAGE_PATH, imageName);
+                    FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
+//                    FileOutputStream fos_nginx = new FileOutputStream(Nginx_imagePath.toFile());
+                    fos_tomcat.write(imageData);
 //                    fos_nginx.write(imageData);
-//                    fos_tomcat.close();
+                    fos_tomcat.close();
 //                    fos_nginx.close();
-                    logger.info("Saved PostImage to Tomcat and Nginx");
+                    logger.info("Saved PostImage to Tomcat");
                     //add image url
                 } else {
                     logger.info("Image is not an image or size is too large");
