@@ -7,6 +7,7 @@ import java.time.Instant;
 
 @Data
 public class MessageDTO implements Serializable {
+    private Long postId;
     private Long commentReplyId;
     private String content;
     private Long fromUid;

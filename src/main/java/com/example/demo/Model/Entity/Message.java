@@ -17,7 +17,10 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id", nullable = false)
     private Long id;
-
+    @NotNull
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
+    
     @NotNull
     @Column(name = "comment_reply_id", nullable = false)
     private Long commentReplyId;
