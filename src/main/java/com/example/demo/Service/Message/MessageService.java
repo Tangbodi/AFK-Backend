@@ -87,9 +87,10 @@ public class MessageService {
                 content = messageDTO.getContent();
             }
             message.setPostId(messageDTO.getPostId());
+            message.setCommentReplyId(messageDTO.getCommentReplyId());
             message.setContent(content);
-            message.setFromUid(Long.valueOf(messageDTO.getFromUid()));
-            message.setToUid(Long.valueOf(messageDTO.getToUid()));
+            message.setFromUid(messageDTO.getFromUid());
+            message.setToUid(messageDTO.getToUid());
             message.setCreatedAt(messageDTO.getCreatedAt());
             message.setModifiedAt(messageDTO.getCreatedAt());
             message.setTypeId(messageDTO.getTypeId().byteValue());

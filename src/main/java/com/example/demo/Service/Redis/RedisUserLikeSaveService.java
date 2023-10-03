@@ -140,6 +140,9 @@ public class RedisUserLikeSaveService {
                 Long postAuthorId = postsUsersMap.getId().getUserId();
                 if (!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnPostMention(postAuthorId)) {
                     String postTitle = post.getTitle();
+                    messageDTO.setPostId(objectId);
+                    //if user likes post then commentReplyId = 0
+                    messageDTO.setCommentReplyId(0L);
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(postTitle);
@@ -159,6 +162,8 @@ public class RedisUserLikeSaveService {
                 if (!commentAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(commentAuthorId)) {
                     String commentContent = postComment.getContent();
                     //set mention message
+                    messageDTO.setPostId(objectId);
+                    messageDTO.setCommentReplyId(userLikeSaveDTO.getCommentReplyId());
                     messageDTO.setToUid(commentAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(commentContent);
@@ -179,6 +184,8 @@ public class RedisUserLikeSaveService {
                 postId = postComment.getPostId();
                 if (!replyAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(replyAuthorId)) {
                     String replyContent = postReply.getContent();
+                    messageDTO.setPostId(objectId);
+                    messageDTO.setCommentReplyId(userLikeSaveDTO.getCommentReplyId());
                     messageDTO.setToUid(replyAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(replyContent);
@@ -197,6 +204,9 @@ public class RedisUserLikeSaveService {
                 postAuthorId = postsUsersMap.getId().getUserId();
                 if (!postAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckSaveOnPostMention(postAuthorId)) {
                     String postTitle = post.getTitle();
+                    messageDTO.setPostId(objectId);
+                    //if user saves post then commentReplyId = 0
+                    messageDTO.setCommentReplyId(0L);
                     messageDTO.setToUid(postAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(postTitle);
