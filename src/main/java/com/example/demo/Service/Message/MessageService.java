@@ -77,7 +77,6 @@ public class MessageService {
         logger.info("Saving message");
         Message message = new Message();
         try {
-            message.setCommentReplyId(messageDTO.getCommentReplyId());
             //set message
             int maxLength = messageDTO.getContent().length();
             String content;
@@ -86,6 +85,8 @@ public class MessageService {
             } else {
                 content = messageDTO.getContent();
             }
+            logger.info("post id: {}", messageDTO.getPostId());
+            logger.info("comment reply id: {}", messageDTO.getCommentReplyId());
             message.setPostId(messageDTO.getPostId());
             message.setCommentReplyId(messageDTO.getCommentReplyId());
             message.setContent(content);
