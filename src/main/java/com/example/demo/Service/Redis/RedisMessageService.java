@@ -38,6 +38,8 @@ public class RedisMessageService {
                 for (Map<Short, Object> map : messagesList) {
                     MessageVO messageVO = new MessageVO();
                     messageVO.setMessageId(map.get("message_id").toString());
+                    messageVO.setGenreId(map.get("genre_id").toString());
+                    messageVO.setGameId(map.get("game_id").toString());
                     messageVO.setPostId(map.get("post_id").toString());
                     messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
                     messageVO.setFromUid(map.get("from_uid").toString());

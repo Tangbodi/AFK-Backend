@@ -1,16 +1,10 @@
 package com.example.demo.Service.Redis;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
-import com.example.demo.Mapper.Repository.CommentRepository;
-import com.example.demo.Mapper.Repository.PostRepository;
-import com.example.demo.Mapper.Repository.PostUserMapRepository;
-import com.example.demo.Mapper.Repository.ReplyRepository;
+import com.example.demo.Mapper.Repository.*;
 import com.example.demo.Model.DTO.MessageDTO;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Model.Entity.Post;
-import com.example.demo.Model.Entity.PostComment;
-import com.example.demo.Model.Entity.PostReply;
-import com.example.demo.Model.Entity.PostsUsersMap;
+import com.example.demo.Model.Entity.*;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UserSettings.UserSettingService;
@@ -36,6 +30,8 @@ public class RedisUserLikeSaveService {
     private RedisService redisService;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private PostGameMapRepository postGameMapRepository;
     @Autowired
     private UserSettingService userSettingService;
     @Autowired
