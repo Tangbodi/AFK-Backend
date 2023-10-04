@@ -153,13 +153,14 @@ public class RedisUserLikeSaveService {
             //COMMENT_LIKE
             case 1:
                 logger.info("case 1");
-                PostComment postComment = commentRepository.findById(userLikeSaveDTO.getCommentReplyId()).orElse(null);
+                PostComment postComment = commentRepository.findById(userLikeSaveDTO.getObjectId()).orElse(null);
                 Long commentAuthorId = postComment.getFromUid();
+                Long postId = postComment.getPostId();
                 if (!commentAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(commentAuthorId)) {
                     String commentContent = postComment.getContent();
                     //set mention message
-                    messageDTO.setPostId(objectId);
-                    messageDTO.setCommentReplyId(userLikeSaveDTO.getCommentReplyId());
+                    messageDTO.setPostId(postId);
+                    messageDTO.setCommentReplyId(userLikeSaveDTO.getObjectId());
                     messageDTO.setToUid(commentAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(commentContent);
@@ -173,12 +174,15 @@ public class RedisUserLikeSaveService {
             //REPLY_LIKE
             case 2:
                 logger.info("case 2");
-                PostReply postReply = replyRepository.findById(userLikeSaveDTO.getCommentReplyId()).orElse(null);
+                PostReply postReply = replyRepository.findById(userLikeSaveDTO.getObjectId()).orElse(null);
                 Long replyAuthorId = postReply.getFromUid();
+                Long commentId = postReply.getCommentId();
+                postComment = commentRepository.findById(commentId).orElse(null);
+                postId = postComment.getPostId();
                 if (!replyAuthorId.equals(userLikeSaveDTO.getUserId()) && userSettingService.CheckLikeOnCommentMention(replyAuthorId)) {
                     String replyContent = postReply.getContent();
-                    messageDTO.setPostId(objectId);
-                    messageDTO.setCommentReplyId(userLikeSaveDTO.getCommentReplyId());
+                    messageDTO.setPostId(postId);
+                    messageDTO.setCommentReplyId(userLikeSaveDTO.getObjectId());
                     messageDTO.setToUid(replyAuthorId);
                     messageDTO.setFromUid(userLikeSaveDTO.getUserId());
                     messageDTO.setContent(replyContent);

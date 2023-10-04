@@ -34,7 +34,7 @@ public class CommentReplyDTO implements Serializable {
     @NotNull(message = "ToUid is required")
     @ValidUserId
     private Long toUid;
-    Integer typeId;
+    private Integer typeId;
     private Long ipvFour;
     private String ipvSix;
     private Instant createdAt;
