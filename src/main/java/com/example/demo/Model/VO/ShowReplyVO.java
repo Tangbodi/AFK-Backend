@@ -16,7 +16,7 @@ public class ShowReplyVO {
     private String fromUsername;
     private String toUsername;
     private String content;
-    private Object likeStatus;
-    private Instant createdAt;
+    private String likeStatus;
+    private String createdAt;
 
 }

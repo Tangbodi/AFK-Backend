@@ -17,12 +17,12 @@ public class ShowPostBodyVO {
     private String userName;
     private String title;
     private String textRender;
-    private Integer view;
-    private Integer commentReply;
-    private Integer like;
-    private Integer save;
-    private Object likeStatus;
-    private Object saveStatus;
+    private String view;
+    private String commentReply;
+    private String like;
+    private String save;
+    private String likeStatus;
+    private String saveStatus;
     private List<String> imageURL;
-    private Instant createdAt;
+    private String createdAt;
 }

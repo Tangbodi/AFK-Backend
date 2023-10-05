@@ -13,6 +13,6 @@ public class ShowCommentVO{
     private String username;
     private String fromAvatarURL;
     private String content;
-    private Object likeStatus;
-    private Instant createdAt;
+    private String likeStatus;
+    private String createdAt;
 }

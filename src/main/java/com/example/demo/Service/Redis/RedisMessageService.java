@@ -56,6 +56,7 @@ public class RedisMessageService {
             }
             String new_unread_json = objectMapper.writeValueAsString(unreadMessageVOList);
             jedis.set(MESSAGE_MENTION_KEY + userId, new_unread_json);
+            jedis.expire(MESSAGE_MENTION_KEY + userId, 1800);
 
         } catch (Exception e) {
             logger.error("Failed to set unread message cache: {}", e.getMessage(), e);

@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -155,7 +156,7 @@ public class PostsController {
                                                     @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                                     @RequestParam(value = "post") @ValidPostId Long postId,
                                                     @RequestParam(value = "page") int page,
-                                                    @RequestParam(value = "size") int size, HttpServletRequest request) {
+                                                    @RequestParam(value = "size") int size, HttpServletRequest request) throws ParseException {
         ApiResponse apiResponse;
         GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
         gameGenreMapIdDTO.setGameId(gameId);

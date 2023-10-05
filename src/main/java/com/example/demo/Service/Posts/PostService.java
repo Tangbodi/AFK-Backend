@@ -9,6 +9,7 @@ import com.example.demo.Model.VO.ShowPostBodyVO;
 import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -137,14 +138,14 @@ public class PostService {
                 showPostBodyVO.setUserName(String.valueOf(post.get("username")));
                 showPostBodyVO.setTitle(String.valueOf(post.get("title")));
                 showPostBodyVO.setTextRender(String.valueOf(post.get("text_render")));
-                showPostBodyVO.setView((Integer) post.get("view"));
-                showPostBodyVO.setCommentReply((Integer) post.get("comment_reply"));
-                showPostBodyVO.setLike((Integer) post.get("like"));
-                showPostBodyVO.setSave((Integer) post.get("save"));
-                showPostBodyVO.setLikeStatus(post.get("like_status"));
-                showPostBodyVO.setSaveStatus(post.get("save_status"));
-                Timestamp timestamp = (Timestamp) post.get("created_at");
-                showPostBodyVO.setCreatedAt(timestamp.toInstant());
+                showPostBodyVO.setView(String.valueOf( post.get("view")));
+                showPostBodyVO.setCommentReply(String.valueOf( post.get("comment_reply")));
+                showPostBodyVO.setLike(String.valueOf(post.get("like")));
+                showPostBodyVO.setSave(String.valueOf( post.get("save")));
+                showPostBodyVO.setLikeStatus(String.valueOf(post.get("like_status")));
+                showPostBodyVO.setSaveStatus(String.valueOf(post.get("save_status")));
+                String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(post.get("created_at")));
+                showPostBodyVO.setCreatedAt(formattedDateTime);
             }
             List<String> ImageURLList = new ArrayList<>();
             for (Map<String, Object> map : postImageList) {

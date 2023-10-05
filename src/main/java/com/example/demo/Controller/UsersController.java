@@ -72,11 +72,14 @@ public class UsersController {
         userRegisterDTO.setEmail(encodedEmail);
         if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Password and confirm password must be the same");
+            return ResponseEntity.status(ReturnCode.RC400.getCode()).body(apiResponse);
         } else if (redisUsernameService.CheckUsernameExistsCache(userRegisterDTO.getUsername()) || userRegistrationService.CheckUsernameExists(userRegisterDTO.getUsername()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Username already exists");
             redisUsernameService.SetUsernameExistsCache(userRegisterDTO.getUsername());
+            return ResponseEntity.status(ReturnCode.RC409.getCode()).body(apiResponse);
         } else if (userRegistrationService.CheckEmailExists(userRegisterDTO.getEmail()) != null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Email already exists");
+            return ResponseEntity.status(ReturnCode.RC409.getCode()).body(apiResponse);
         } else {
             // If all checks are passed, register user
             logger.info("User doesn't exist");
@@ -111,18 +114,22 @@ public class UsersController {
         //2 --- User found but blocked
         int res = userAuthService.CheckUserExistsAndAuth(userLoginDTO);
         if (res == -2) {
-            apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), "Internal Server Error");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Internal Server Error");
+            return ResponseEntity.status(ReturnCode.RC500.getCode()).body(apiResponse);
         } else if (res == -1) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User not found");
+            return ResponseEntity.status(ReturnCode.RC404.getCode()).body(apiResponse);
         } else if (res == 0) {
             if (!redisUsernameService.CheckEmailValidationCacheByUsername(userLoginDTO.getUsername())) {
                 userVerificationService.SetUserLoginVerificationToken(userLoginDTO.getUsername(), request);
             } else {
                 //
             }
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but not verified, verification email has been sent out, please check your email");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User is not verified, verification email has been sent out, please check your email");
+            return ResponseEntity.status(ReturnCode.RC401.getCode()).body(apiResponse);
         } else if (res == 2) {
-            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but blocked");
+            apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User has been blocked");
+            return ResponseEntity.status(ReturnCode.RC403.getCode()).body(apiResponse);
         } else {
             if (userLoginService.CheckPassword(userLoginDTO)) {
                 UserInfoVO userInfoVO = userInfoService.GetUserInfo(userLoginDTO.getUsername());
@@ -137,7 +144,8 @@ public class UsersController {
                 logger.info("User logged in successfully : {}");
                 apiResponse = ApiResponse.success(userInfoVO);
             } else {
-                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "User found but password is incorrect");
+                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Username or password is incorrect");
+                return ResponseEntity.status(ReturnCode.RC400.getCode()).body(apiResponse);
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

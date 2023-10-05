@@ -12,6 +12,7 @@ import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Replies.ReplyService;
 import com.example.demo.Service.UserSettings.CommentOnPostMentionService;
 import com.example.demo.Service.UserSettings.UserSettingService;
+import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 
@@ -112,7 +114,7 @@ public class CommentService {
         return commentRepository.findCommentsByPostId(postId, userId);
     }
 
-    public List<Map<String, Object>> GetAllCommentsAndReplies(Long postId, Long userId) {
+    public List<Map<String, Object>> GetAllCommentsAndReplies(Long postId, Long userId) throws ParseException {
         logger.info("Getting all comments and replies");
         //get all comments by post id
         List<Map<String, Object>> commentsList = GetAllCommentsByPostId(postId, userId);
@@ -169,7 +171,7 @@ public class CommentService {
         }
     }
 
-    private static ShowCommentVO CreateCommentMap(Map<String, Object> comment) {
+    private static ShowCommentVO CreateCommentMap(Map<String, Object> comment) throws ParseException {
         logger.info("Creating comment map");
 //        pc.comment_id, p.post_id, pc.from_uid, ui.username, ui.avatar_url, pc.content, ulc.like_status, pc.created_at
         ShowCommentVO showCommentVO = new ShowCommentVO();
@@ -179,14 +181,14 @@ public class CommentService {
         showCommentVO.setUsername(String.valueOf(comment.get("username")));
         showCommentVO.setFromAvatarURL(String.valueOf(comment.get("fm_avatar_url")));
         showCommentVO.setContent(String.valueOf(comment.get("content")));
-        showCommentVO.setLikeStatus((Integer) comment.get("like_status"));
-        Timestamp timestamp = (Timestamp) comment.get("created_at");
-        showCommentVO.setCreatedAt(timestamp.toInstant());
+        showCommentVO.setLikeStatus(String.valueOf(comment.get("like_status")));
+        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(comment.get("created_at")));
+        showCommentVO.setCreatedAt(formattedDateTime);
 
         return showCommentVO;
     }
 
-    private static ShowReplyVO CreateReplyMap(Map<String, Object> reply) {
+    private static ShowReplyVO CreateReplyMap(Map<String, Object> reply) throws ParseException {
         logger.info("Creating reply map");
 
         ShowReplyVO showReplyVO = new ShowReplyVO();
@@ -199,9 +201,9 @@ public class CommentService {
         showReplyVO.setToUid(String.valueOf(reply.get("to_uid")));
         showReplyVO.setToUsername(String.valueOf(reply.get("to_username")));
         showReplyVO.setContent(String.valueOf(reply.get("content")));
-        showReplyVO.setLikeStatus((Integer) reply.get("like_status"));
-        Timestamp timestamp = (Timestamp) reply.get("created_at");
-        showReplyVO.setCreatedAt(timestamp.toInstant());
+        showReplyVO.setLikeStatus(String.valueOf(reply.get("like_status")));
+        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(reply.get("created_at")));
+        showReplyVO.setCreatedAt(formattedDateTime);
 
         return showReplyVO;
     }
