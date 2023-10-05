@@ -10,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class SteamNewsService {
                 link = RemoveCDATA(link);
                 logger.info("Link: {}" + link);
                 String newsId = "";
-                String mediaContentUrl = "";
+
                 String content = item.getElementsByTagName("description").item(0).getTextContent();
                 content = RemoveCDATA(content);
                 logger.info("Parsed Description: {}" + content);
@@ -122,11 +123,12 @@ public class SteamNewsService {
                         newsId = matcher.group(1);
                     }
                 }
+                String mediaContentUrl = "";
                 NodeList enclosures = item.getElementsByTagName("enclosure");
                 if(enclosures.getLength() > 0){
                     mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 } else {
-                    mediaContentUrl = parseImg.ParseImage(content);
+                    mediaContentUrl = ParseImage(content);
                 }
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
                 news.setMediaContentUrl(mediaContentUrl);
@@ -182,5 +184,15 @@ public class SteamNewsService {
         String cleanedDescription= description.replaceAll("<.*?>", "");
         // Remove HTML tags
         return cleanedDescription;
+    }
+    private static String ParseImage(String str) {
+        logger.info("ParseImage:::");
+        String imageSrc = "";
+        org.jsoup.nodes.Document document = Jsoup.parse(str);
+        for (org.jsoup.nodes.Element imageElement : document.select("img")) {
+            imageSrc = imageElement.attr("src");
+            break;
+        }
+        return imageSrc;
     }
 }
