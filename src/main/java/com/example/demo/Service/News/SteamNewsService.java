@@ -105,6 +105,8 @@ public class SteamNewsService {
                 String content = item.getElementsByTagName("description").item(0).getTextContent();
                 NodeList enclosures = item.getElementsByTagName("enclosure");
 
+                content = RemoveCDATA(content);
+
                 if(enclosures.getLength() > 0){
                     mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 } else {
@@ -113,7 +115,6 @@ public class SteamNewsService {
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
                 news.setMediaContentUrl(mediaContentUrl);
 
-                content = RemoveCDATA(content);
                 logger.info("Parsed Description: {}" + content);
 //                news.setDescription(description);
                 news.setContent(content);
