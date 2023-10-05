@@ -30,8 +30,8 @@ public class UsersInfo {
     @Column(name = "email", nullable = false, length = 63)
     private String email;
 
-    @Size(max = 63)
-    @Column(name = "avatar_url", length = 63)
+    @Size(max = 127)
+    @Column(name = "avatar_url", length = 127)
     private String avatarUrl;
 
     @NotNull

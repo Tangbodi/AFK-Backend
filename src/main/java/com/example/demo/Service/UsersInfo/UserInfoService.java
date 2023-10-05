@@ -118,6 +118,7 @@ public class UserInfoService {
             usersInfo.setId(userRegisterDTO.getUserId());
             usersInfo.setUsername(userRegisterDTO.getUsername());
             usersInfo.setEmail(userRegisterDTO.getEmail());
+            usersInfo.setAvatarUrl("");
             usersInfo.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersInfo.setModifiedAt(userRegisterDTO.getCreatedAt());
             userInfoRepository.save(usersInfo);
