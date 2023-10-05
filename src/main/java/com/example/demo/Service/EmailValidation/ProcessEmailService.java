@@ -33,10 +33,11 @@ public class ProcessEmailService {
         logger.info("Processing registration email validation: {}");
         try {
             String token = UUIDCreator.CreateUUID();
-//            siteURL = siteURL.replace("http://", "https://");
             if (userVerificationService.SetUserRegistrationVerificationToken(token, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();
-                String emailValidationLink = userRegisterDTO.getSiteURL() + "/email-validation?token=" + token;
+                String siteURL = userRegisterDTO.getSiteURL();
+                siteURL = siteURL.replace("http://", "https://");
+                String emailValidationLink = siteURL + "/email-validation?token=" + token;
                 logger.info("emailValidationLink:::" + emailValidationLink);
                 redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
@@ -53,6 +54,7 @@ public class ProcessEmailService {
         logger.info("Processing login email validation: {}");
         try {
             String recipientEmail = email;
+            siteURL = siteURL.replace("http://", "https://");
             String emailValidationLink = siteURL + "/email-validation?token=" + token + "&username=" + username;
             logger.info("emailValidationLink:::" + emailValidationLink);
             redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
