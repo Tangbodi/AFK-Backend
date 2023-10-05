@@ -182,6 +182,10 @@ public class SteamNewsService {
         logger.info("Removing HTML Tags");
         // Remove CDATA section
         String cleanedDescription= description.replaceAll("<.*?>", "");
+        if(cleanedDescription.contains("<")){
+            int index = cleanedDescription.indexOf("<");
+            cleanedDescription = cleanedDescription.substring(0, index);
+        }
         // Remove HTML tags
         return cleanedDescription;
     }
