@@ -101,24 +101,13 @@ public class SteamNewsService {
                 logger.info("Link: {}" + link);
                 String newsId = "";
                 String mediaContentUrl = "";
-
                 String content = item.getElementsByTagName("description").item(0).getTextContent();
-                NodeList enclosures = item.getElementsByTagName("enclosure");
-
                 content = RemoveCDATA(content);
-
-                if(enclosures.getLength() > 0){
-                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
-                } else {
-                    mediaContentUrl = parseImg.ParseImage(content);
-                }
-                logger.info("MediaContentUrl: {}" + mediaContentUrl);
-                news.setMediaContentUrl(mediaContentUrl);
-
                 logger.info("Parsed Description: {}" + content);
 //                news.setDescription(description);
                 news.setContent(content);
                 String description = content.length() >=MaxLength ? content.substring(0, MaxLength) : content;
+                RemoveHTMLTags(description);
                 news.setDescription(description);
                 if (res == 1) {
                     Pattern pattern = Pattern.compile("/detail/(\\d+)$");
@@ -133,6 +122,14 @@ public class SteamNewsService {
                         newsId = matcher.group(1);
                     }
                 }
+                NodeList enclosures = item.getElementsByTagName("enclosure");
+                if(enclosures.getLength() > 0){
+                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
+                } else {
+                    mediaContentUrl = parseImg.ParseImage(content);
+                }
+                logger.info("MediaContentUrl: {}" + mediaContentUrl);
+                news.setMediaContentUrl(mediaContentUrl);
                 news.setId(newsId);
                 news.setLink(link);
 
@@ -178,5 +175,11 @@ public class SteamNewsService {
         // Remove HTML tags
 //        cleanedDescription = Jsoup.parse(cleanedDescription).text();
         return cleanedString;
+    }
+    private static void RemoveHTMLTags(String description) {
+        logger.info("Removing HTML Tags");
+        // Remove CDATA section
+        String cleanedString = description.replaceAll("<.*?>", "");
+        // Remove HTML tags
     }
 }
