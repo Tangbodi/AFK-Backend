@@ -106,9 +106,9 @@ public class SteamNewsService {
                 logger.info("Parsed Description: {}" + content);
 //                news.setDescription(description);
                 news.setContent(content);
-                String description = content.length() >=MaxLength ? content.substring(0, MaxLength) : content;
-                RemoveHTMLTags(description);
-                news.setDescription(description);
+                String descriptionHTML = content.length() >=MaxLength ? content.substring(0, MaxLength) : content;
+                String cleanedDescription = RemoveHTMLTags(descriptionHTML);
+                news.setDescription(cleanedDescription);
                 if (res == 1) {
                     Pattern pattern = Pattern.compile("/detail/(\\d+)$");
                     Matcher matcher = pattern.matcher(link);
@@ -176,10 +176,11 @@ public class SteamNewsService {
 //        cleanedDescription = Jsoup.parse(cleanedDescription).text();
         return cleanedString;
     }
-    private static void RemoveHTMLTags(String description) {
+    private static String RemoveHTMLTags(String description) {
         logger.info("Removing HTML Tags");
         // Remove CDATA section
-        String cleanedString = description.replaceAll("<.*?>", "");
+        String cleanedDescription= description.replaceAll("<.*?>", "");
         // Remove HTML tags
+        return cleanedDescription;
     }
 }
