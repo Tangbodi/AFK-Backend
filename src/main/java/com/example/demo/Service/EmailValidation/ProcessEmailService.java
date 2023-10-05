@@ -36,7 +36,7 @@ public class ProcessEmailService {
 //            siteURL = siteURL.replace("http://", "https://");
             if (userVerificationService.SetUserRegistrationVerificationToken(token, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();
-                String emailValidationLink = userRegisterDTO.getSiteURL() + "/email-validation?token=" + token;
+                String emailValidationLink = userRegisterDTO.getSiteURL() + "/email-validation?token=" + token + "&username=" + userRegisterDTO.getUsername();
                 logger.info("emailValidationLink:::" + emailValidationLink);
                 redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);

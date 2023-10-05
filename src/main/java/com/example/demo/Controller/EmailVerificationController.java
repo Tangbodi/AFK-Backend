@@ -39,6 +39,8 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
+        String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
+        logger.info("siteURL:::" + siteURL);
         logger.info("token:::" + token);
         if(redisService.CacheExists(EMAIL_VALIDATION + token)){
             logger.info("EMAIL_VALIDATION cache exists: {}" + token);
