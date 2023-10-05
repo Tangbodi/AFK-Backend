@@ -3,6 +3,7 @@ package com.example.demo.Service.UserSettings;
 import com.example.demo.Mapper.Repository.MentionOfUsernameRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.MentionOfUsername;
+import com.example.demo.Model.Entity.UsersVerificationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,14 @@ public class MentionOfUsernameService {
     private MentionOfUsernameRepository mentionOfUsernameRepository;
     @Async("MultiExecutor")
     @Transactional
-    public void SetMentionOfUsername(UserRegisterDTO userRegisterDTO) {
+    public void SetMentionOfUsername(UsersVerificationToken usersVerificationToken) {
         logger.info("Setting MentionOfUsername");
         try{
             MentionOfUsername mentionOfUsername = new MentionOfUsername();
-            mentionOfUsername.setId(userRegisterDTO.getUserId());
+            mentionOfUsername.setId(usersVerificationToken.getId());
             mentionOfUsername.setMentionOn(true);
-            mentionOfUsername.setCreatedAt(userRegisterDTO.getCreatedAt());
-            mentionOfUsername.setModifiedAt(userRegisterDTO.getCreatedAt());
+            mentionOfUsername.setCreatedAt(usersVerificationToken.getModifiedAt());
+            mentionOfUsername.setModifiedAt(usersVerificationToken.getModifiedAt());
             mentionOfUsernameRepository.save(mentionOfUsername);
         } catch (Exception e) {
             logger.error("Failed to save mention of username setting: {}", e.getMessage(), e);

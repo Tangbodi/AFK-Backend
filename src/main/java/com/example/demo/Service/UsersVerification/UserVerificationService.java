@@ -4,6 +4,7 @@ import com.example.demo.Mapper.Repository.UserVerificationRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersVerificationToken;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.UserSettings.*;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Util.UUIDCreator;
@@ -31,6 +32,28 @@ public class UserVerificationService {
     @Lazy
     @Autowired
     private UserAuthService userAuthService;
+    @Autowired
+    private CommentOnPostMentionService commentOnPostMentionService;
+    @Autowired
+    private ReplyOnCommentMentionService replyOnCommentMentionService;
+    @Autowired
+    private LikeOnCommentMentionService likeOnCommentMentionService;
+    @Autowired
+    private LikeOnPostMentionService likeOnPostMentionService;
+    @Autowired
+    private SaveOnPostMentionService saveOnPostMentionService;
+    @Autowired
+    private PostOnSavedGameService postOnSavedGameService;
+    @Autowired
+    private MentionOfUsernameService mentionOfUsernameService;
+    @Autowired
+    private AfkAnnouncementService afkAnnouncementService;
+    @Autowired
+    private CommunityRecommendationService communityRecommendationService;
+    @Autowired
+    private FeaturedContentService featuredContentService;
+    @Autowired
+    private TrendingPostService trendingPostService;
 
     @Transactional
     public boolean SetUserRegistrationVerificationToken(String token, UserRegisterDTO userRegisterDTO) {
@@ -43,7 +66,6 @@ public class UserVerificationService {
             usersVerificationToken.setEmail(userRegisterDTO.getEmail());
             usersVerificationToken.setCreatedAt(userRegisterDTO.getCreatedAt());
             usersVerificationToken.setModifiedAt(userRegisterDTO.getCreatedAt());
-
             userVerificationRepository.save(usersVerificationToken);
 
             logger.info("Saved UserRegistrationVerificationToken successfully");
@@ -66,8 +88,6 @@ public class UserVerificationService {
                 usersVerificationToken.setToken(token);
                 usersVerificationToken.setModifiedAt(Instant.now());
                 userVerificationRepository.save(usersVerificationToken);
-//                String siteURL = request.getRequestURL().toString();
-//                siteURL.replace(request.getServletPath(), "");
                 logger.info("Saved UserVerificationToken successfully");
                 String siteURL = request.getRequestURL().toString();
                 siteURL.replace(request.getServletPath(), "");
@@ -88,6 +108,19 @@ public class UserVerificationService {
                 logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getId());
                 userAuthService.UpdateUserAuth(usersVerificationToken.getId());
                 RemoveToken(usersVerificationToken);
+                //user activity setting
+                commentOnPostMentionService.SaveCommentOnPostMention(usersVerificationToken);
+                replyOnCommentMentionService.SaveReplyOnCommentMention(usersVerificationToken);
+                likeOnPostMentionService.SetLikeOnPostMention(usersVerificationToken);
+                likeOnCommentMentionService.SetLikeOnCommentMention(usersVerificationToken);
+                saveOnPostMentionService.SetSaveOnPostMention(usersVerificationToken);
+                mentionOfUsernameService.SetMentionOfUsername(usersVerificationToken);
+                postOnSavedGameService.SetPostOnSavedGame(usersVerificationToken);
+                //usr recommendation setting
+                afkAnnouncementService.SaveAfkAnnouncement(usersVerificationToken);
+                communityRecommendationService.SaveCommunityRecommendation(usersVerificationToken);
+                featuredContentService.SaveFeaturedContent(usersVerificationToken);
+                trendingPostService.SaveTrendingPost(usersVerificationToken);
             } else {
                 //
             }

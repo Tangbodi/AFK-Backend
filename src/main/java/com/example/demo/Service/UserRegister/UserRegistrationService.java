@@ -32,28 +32,6 @@ public class UserRegistrationService {
     private UserAuthService userAuthService;
     @Autowired
     private UserMailAddressService userMailAddressService;
-    @Autowired
-    private CommentOnPostMentionService commentOnPostMentionService;
-    @Autowired
-    private ReplyOnCommentMentionService replyOnCommentMentionService;
-    @Autowired
-    private LikeOnCommentMentionService likeOnCommentMentionService;
-    @Autowired
-    private LikeOnPostMentionService likeOnPostMentionService;
-    @Autowired
-    private SaveOnPostMentionService saveOnPostMentionService;
-    @Autowired
-    private PostOnSavedGameService postOnSavedGameService;
-    @Autowired
-    private MentionOfUsernameService mentionOfUsernameService;
-    @Autowired
-    private AfkAnnouncementService afkAnnouncementService;
-    @Autowired
-    private CommunityRecommendationService communityRecommendationService;
-    @Autowired
-    private FeaturedContentService featuredContentService;
-    @Autowired
-    private TrendingPostService trendingPostService;
 
     public UsersInfo CheckUsernameExists(String username) {
         String usernameCapitalized = CapitalizeFirstLetter(username);
@@ -90,19 +68,6 @@ public class UserRegistrationService {
                 //user info setting
                 userAuthService.SaveUsersAuth(userRegisterDTO);
                 userInfoService.SaveUserInfo(userRegisterDTO);
-                //user activity setting
-                commentOnPostMentionService.SaveCommentOnPostMention(userRegisterDTO);
-                replyOnCommentMentionService.SaveReplyOnCommentMention(userRegisterDTO);
-                likeOnPostMentionService.SetLikeOnPostMention(userRegisterDTO);
-                likeOnCommentMentionService.SetLikeOnCommentMention(userRegisterDTO);
-                saveOnPostMentionService.SetSaveOnPostMention(userRegisterDTO);
-                mentionOfUsernameService.SetMentionOfUsername(userRegisterDTO);
-                postOnSavedGameService.SetPostOnSavedGame(userRegisterDTO);
-                //usr recommendation setting
-                afkAnnouncementService.SaveAfkAnnouncement(userRegisterDTO);
-                communityRecommendationService.SaveCommunityRecommendation(userRegisterDTO);
-                featuredContentService.SaveFeaturedContent(userRegisterDTO);
-                trendingPostService.SaveTrendingPost(userRegisterDTO);
             } else {
                 //
             }

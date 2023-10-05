@@ -3,6 +3,7 @@ package com.example.demo.Service.UserSettings;
 import com.example.demo.Mapper.Repository.SaveOnPostMentionRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.SaveOnPostMention;
+import com.example.demo.Model.Entity.UsersVerificationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,14 @@ public class SaveOnPostMentionService {
     private SaveOnPostMentionRepository saveOnPostMentionRepository;
     @Async("MultiExecutor")
     @Transactional
-    public void SetSaveOnPostMention(UserRegisterDTO userRegisterDTO) {
+    public void SetSaveOnPostMention(UsersVerificationToken usersVerificationToken) {
         logger.info("Setting SaveOnPostMention");
         try{
             SaveOnPostMention saveOnPostMention = new SaveOnPostMention();
-            saveOnPostMention.setId(userRegisterDTO.getUserId());
+            saveOnPostMention.setId(usersVerificationToken.getId());
             saveOnPostMention.setMentionOn(true);
-            saveOnPostMention.setCreatedAt(userRegisterDTO.getCreatedAt());
-            saveOnPostMention.setModifiedAt(userRegisterDTO.getCreatedAt());
+            saveOnPostMention.setCreatedAt(usersVerificationToken.getModifiedAt());
+            saveOnPostMention.setModifiedAt(usersVerificationToken.getModifiedAt());
             saveOnPostMentionRepository.save(saveOnPostMention);
         } catch (Exception e) {
             logger.error("Failed to save save on post mention setting: {}", e.getMessage(), e);

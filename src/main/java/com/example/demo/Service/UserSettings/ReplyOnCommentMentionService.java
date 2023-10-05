@@ -3,6 +3,7 @@ package com.example.demo.Service.UserSettings;
 import com.example.demo.Mapper.Repository.ReplyOnCommentMentionRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.ReplyOnCommentMention;
+import com.example.demo.Model.Entity.UsersVerificationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,14 @@ public class ReplyOnCommentMentionService {
 
     @Async("MultiExecutor")
     @Transactional
-    public void SaveReplyOnCommentMention(UserRegisterDTO userRegisterDTO) {
+    public void SaveReplyOnCommentMention(UsersVerificationToken usersVerificationToken) {
         logger.info("Saving ReplyOnCommentMention:{}");
         try {
             ReplyOnCommentMention replyOnCommentMention = new ReplyOnCommentMention();
-            replyOnCommentMention.setId(userRegisterDTO.getUserId());
+            replyOnCommentMention.setId(usersVerificationToken.getId());
             replyOnCommentMention.setMentionOn(true);
-            replyOnCommentMention.setCreatedAt(userRegisterDTO.getCreatedAt());
-            replyOnCommentMention.setModifiedAt(userRegisterDTO.getCreatedAt());
+            replyOnCommentMention.setCreatedAt(usersVerificationToken.getModifiedAt());
+            replyOnCommentMention.setModifiedAt(usersVerificationToken.getModifiedAt());
             replyOnCommentMentionRepository.save(replyOnCommentMention);
             logger.info("Saved reply on comment mention setting");
         } catch (Exception e) {
