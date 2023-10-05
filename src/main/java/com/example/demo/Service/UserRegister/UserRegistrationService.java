@@ -75,6 +75,7 @@ public class UserRegistrationService {
             userRegisterDTO.setUserId(snowflakeId);
             userRegisterDTO.setCreatedAt(Instant.now());
             String username = CapitalizeFirstLetter(userRegisterDTO.getUsername());
+            userRegisterDTO.setUsername(username);
             logger.info("Saving User :{}", username);
             UsersLogin user = new UsersLogin();
             user.setId(snowflakeId);
