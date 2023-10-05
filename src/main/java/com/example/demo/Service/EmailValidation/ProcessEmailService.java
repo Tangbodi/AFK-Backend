@@ -37,6 +37,7 @@ public class ProcessEmailService {
             if (userVerificationService.SetUserRegistrationVerificationToken(token, userRegisterDTO)) {
                 String recipientEmail = userRegisterDTO.getEmail();
                 String emailValidationLink = userRegisterDTO.getSiteURL() + "/email-validation?token=" + token;
+                logger.info("emailValidationLink:::" + emailValidationLink);
                 redisEmailService.SetEmailValidationCacheByToken(token, recipientEmail);
                 sendEmailService.sendEmailValidationLink(recipientEmail, emailValidationLink);
             } else {
