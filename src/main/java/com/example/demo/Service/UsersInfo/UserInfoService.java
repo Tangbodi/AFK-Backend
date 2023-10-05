@@ -53,7 +53,8 @@ public class UserInfoService {
     public UsersInfo CheckUsernameExists(String username) {
         logger.info("Checking if username exists: {}", username);
         try {
-            UsersInfo usersInfo = userInfoRepository.findByUsername(username).orElse(null);
+            String capitalizedUsername = CapitalizeFirstLetter(username);
+            UsersInfo usersInfo = userInfoRepository.findByUsername(capitalizedUsername).orElse(null);
             if (usersInfo != null) {
                 logger.info("Username: {}" + usersInfo.getUsername());
                 return usersInfo;
@@ -312,5 +313,8 @@ public class UserInfoService {
             logger.error("Failed to reset password: {}", e.getMessage(), e);
         }
         return false;
+    }
+    private String CapitalizeFirstLetter(String username){
+        return username.substring(0, 1).toUpperCase() + username.substring(1).toLowerCase();
     }
 }

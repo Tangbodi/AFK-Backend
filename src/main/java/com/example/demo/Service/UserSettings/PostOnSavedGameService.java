@@ -19,7 +19,7 @@ public class PostOnSavedGameService {
     private PostOnSavedGameMentionRepository postOnSavedGameMentionRepository;
     @Async("MultiExecutor")
     @Transactional
-    public void SavePostOnSavedGame(UserRegisterDTO userRegisterDTO) {
+    public void SetPostOnSavedGame(UserRegisterDTO userRegisterDTO) {
         logger.info("Saving post on saved game");
         try {
             PostOnSavedGameMention postOnSavedGameMention = new PostOnSavedGameMention();

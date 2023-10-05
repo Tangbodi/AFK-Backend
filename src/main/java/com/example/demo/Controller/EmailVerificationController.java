@@ -43,9 +43,9 @@ public class EmailVerificationController {
             logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
-            redirectURL = "https://www.nybing.com/email-verified";
+            redirectURL = "https://away-from-keyboard.com/verifysuccess";
         } else {
-            redirectURL = "https://www.nybing.com/link-expired";
+            redirectURL = "https://away-from-keyboard.com/verifyfailed";
         }
 
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
@@ -69,9 +69,9 @@ public class EmailVerificationController {
             userVerificationService.FindUserVerificationByToken(token);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
             redisUsernameService.DeleteEmailValidationCacheByUsername(username);
-            redirectURL = "https://www.nybing.com/email-verified";
+            redirectURL = "https://away-from-keyboard.com/verifysuccess";
         } else {
-            redirectURL = "https://www.nybing.com/link-expired";
+            redirectURL = "https://away-from-keyboard.com/verifyfailed";
         }
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
         if (isRedirected) {
@@ -94,10 +94,10 @@ public class EmailVerificationController {
             userVerificationService.UpdateUserEmail(token,newEmail);
             userInfoService.UpdateUserEmail(token,newEmail);
             redisEmailService.DeleteEmailValidationCacheByToken(token);
-//            redisUsernameService.DeleteEmailValidationCacheByUsername(token);
-            redirectURL = "https://www.nybing.com/email-verified";
+            redisUsernameService.DeleteEmailValidationCacheByUsername(token);
+            redirectURL = "https://away-from-keyboard.com/verifysuccess";
         }else{
-            redirectURL = "https://www.nybing.com/link-expired";
+            redirectURL = "https://away-from-keyboard.com/verifyfailed";
         }
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
         if(isRedirected){
@@ -122,7 +122,7 @@ public class EmailVerificationController {
             redisEmailService.DeleteEmailValidationCacheByEmail(email);
             redirectURL = "https://www.nybing.com/reset-password?token=" + usersInfo.getId();
         } else{
-            redirectURL = "https://www.nybing.com/link-expired";
+            redirectURL = "https://away-from-keyboard.com/verifyfailed";
         }
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
         if(isRedirected) {

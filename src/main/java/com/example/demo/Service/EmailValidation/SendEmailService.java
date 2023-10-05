@@ -22,16 +22,16 @@ public class SendEmailService {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-            mimeMessageHelper.setFrom("contactus@nybing.com", "NYBing");
+            mimeMessageHelper.setFrom("contactus@nybing.com", "DummyNode");
             mimeMessageHelper.setTo(recipientEmail);
-            String subject = " Verify your email to start using NYBing";
+            String subject = " Verify your email to start using AFK";
             String content = "<p>Hello,</p>"
-                    + "<p>Verify your email address so we know it’s really you—and so we can send you important information about your NYBing account.</p>"
+                    + "<p>Verify your email address so we know it’s really you—and so we can send you important information about your AFK account.</p>"
                     + "<br>"
                     + "<p >"
                     + "<a href=\"" + emailValidationLink + "\" style=\"background-color: #c67c4b;padding: 10px 15px;color: white; border-radius: 0.8rem; display: inline-block;text-decoration: none;\">Verify email address</a></p>"
                     + "<br>"
-                    + "<p>NYBing</p>";
+                    + "<p>DummyNode</p>";
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(content, true);
             javaMailSender.send(message);

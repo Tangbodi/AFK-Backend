@@ -18,7 +18,7 @@ public class MentionOfUsernameService {
     private MentionOfUsernameRepository mentionOfUsernameRepository;
     @Async("MultiExecutor")
     @Transactional
-    public void SetSaveOnPostMention(UserRegisterDTO userRegisterDTO) {
+    public void SetMentionOfUsername(UserRegisterDTO userRegisterDTO) {
         logger.info("Setting MentionOfUsername");
         try{
             MentionOfUsername mentionOfUsername = new MentionOfUsername();
