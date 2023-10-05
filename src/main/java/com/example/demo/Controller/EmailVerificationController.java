@@ -39,6 +39,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
         String redirectURL;
+        logger.info("token:::" + token);
         if(redisService.CacheExists(EMAIL_VALIDATION + token)){
             logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             userVerificationService.FindUserVerificationByToken(token);
@@ -115,6 +116,7 @@ public class EmailVerificationController {
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected",isRedirected);
         String redirectURL;
+        logger.info("token:::" + token);
         if(redisService.CacheExists(EMAIL_VALIDATION + token)) {
             logger.info("EMAIL_VALIDATION cache exists: {}" + token);
             String email = redisEmailService.GetEmailByToken(token);
