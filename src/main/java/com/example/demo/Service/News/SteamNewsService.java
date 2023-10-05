@@ -39,6 +39,7 @@ public class SteamNewsService {
     private static final String Source = "Steam";
     private static final String SteamCommunity = "steamcommunity";
     private static final String SteamPowered = "steampowered";
+    private static final int MaxLength = 255;
     @Autowired
     private NewsRepository newsRepository;
     @Autowired
@@ -100,11 +101,24 @@ public class SteamNewsService {
                 logger.info("Link: {}" + link);
                 String newsId = "";
                 String mediaContentUrl = "";
+
                 String content = item.getElementsByTagName("description").item(0).getTextContent();
+                NodeList enclosures = item.getElementsByTagName("enclosure");
+
+                if(enclosures.getLength() > 0){
+                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
+                } else {
+                    mediaContentUrl = parseImg.ParseImage(content);
+                }
+                logger.info("MediaContentUrl: {}" + mediaContentUrl);
+                news.setMediaContentUrl(mediaContentUrl);
+
                 content = RemoveCDATA(content);
                 logger.info("Parsed Description: {}" + content);
 //                news.setDescription(description);
                 news.setContent(content);
+                String description = content.length() >=MaxLength ? content.substring(0, MaxLength) : content;
+                news.setDescription(description);
                 if (res == 1) {
                     Pattern pattern = Pattern.compile("/detail/(\\d+)$");
                     Matcher matcher = pattern.matcher(link);
@@ -118,14 +132,6 @@ public class SteamNewsService {
                         newsId = matcher.group(1);
                     }
                 }
-                NodeList enclosures = item.getElementsByTagName("enclosure");
-                if(enclosures.getLength() > 0){
-                    mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
-                } else {
-                    mediaContentUrl = parseImg.ParseImage(content);
-                }
-                logger.info("MediaContentUrl: {}" + mediaContentUrl);
-                news.setMediaContentUrl(mediaContentUrl);
                 news.setId(newsId);
                 news.setLink(link);
 
