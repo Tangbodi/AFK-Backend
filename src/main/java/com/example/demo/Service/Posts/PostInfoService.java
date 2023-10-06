@@ -10,6 +10,7 @@ import com.example.demo.Model.VO.PostInfoVO;
 import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Mapper.Repository.PostInfoRepository;
 import com.example.demo.Mapper.Repository.UserFavoritePostRepository;
+import com.example.demo.Util.DateTimeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,15 +118,15 @@ public class PostInfoService {
             List<PostInfoVO> postInfoVOList = new ArrayList<>();
             for (Map<String, Object> map : allPostInfoWithOneGame) {
                 PostInfoVO postInfoVO = new PostInfoVO();
-                postInfoVO.setPostId(map.get("post_id").toString());
+                postInfoVO.setPostId(String.valueOf(map.get("post_id")));
                 postInfoVO.setTitle(String.valueOf( map.get("title")));
-                postInfoVO.setView((Integer) map.get("view"));
-                postInfoVO.setComment((Integer) map.get("comment"));
-                postInfoVO.setLike((Integer) map.get("like"));
-                postInfoVO.setSave((Integer) map.get("save"));
+                postInfoVO.setView(String.valueOf( map.get("view")));
+                postInfoVO.setReply(String.valueOf( map.get("comment_reply")));
+                postInfoVO.setLike(String.valueOf( map.get("like")));
+                postInfoVO.setSave(String.valueOf( map.get("save")));
                 postInfoVO.setUsername(String.valueOf( map.get("username")));
-                Timestamp timestamp = (Timestamp) map.get("created_at");
-                postInfoVO.setCreatedAt(timestamp.toInstant());
+                String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(map.get("created_at")));
+                postInfoVO.setCreatedAt(formattedDateTime);
                 postInfoVOList.add(postInfoVO);
             }
             return postInfoVOList;

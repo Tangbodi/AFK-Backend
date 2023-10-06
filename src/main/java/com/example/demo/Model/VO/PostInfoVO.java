@@ -9,9 +9,9 @@ public class PostInfoVO {
     private String postId;
     private String title;
     private String username;
-    private Integer view;
-    private Integer comment;
-    private Integer like;
-    private Integer save;
-    private Instant CreatedAt;
+    private String view;
+    private String reply;
+    private String like;
+    private String save;
+    private String CreatedAt;
 }
