@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -174,27 +173,24 @@ public class PostsController {
             getPostDTO.setGenreId(genreId);
             getPostDTO.setUserId(userId);
             ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
-            if (showPostBodyVO == null) {
-                apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
-            } else {
-                //need pagination
-                List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId, userId);
-                if (!res.isEmpty()) {
-                    Pageable pageable = PageRequest.of(page, size);
-                    int startIdx = (int) pageable.getOffset();
-                    int endIdx = Math.min((startIdx + pageable.getPageSize()), res.size());
-                    logger.info("startIdx:{}" + startIdx);
-                    logger.info("endIdx:{}" + endIdx);
-                    if (endIdx < startIdx) {
-                        apiResponse = ApiResponse.success(Collections.emptyList());
-                        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-                    }
-                    List<Map<String, Object>> currentResItems = res.subList(startIdx, endIdx);
-                    Page<Map<String, Object>> currentResPage = new PageImpl<>(currentResItems, pageable, res.size());
-                    apiResponse = ApiResponse.success(currentResPage);
-                } else {
+
+            //need pagination
+            List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId, userId);
+            if (!res.isEmpty()) {
+                Pageable pageable = PageRequest.of(page, size);
+                int startIdx = (int) pageable.getOffset();
+                int endIdx = Math.min((startIdx + pageable.getPageSize()), res.size());
+                logger.info("startIdx:{}" + startIdx);
+                logger.info("endIdx:{}" + endIdx);
+                if (endIdx < startIdx) {
                     apiResponse = ApiResponse.success(Collections.emptyList());
+                    return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
                 }
+                List<Map<String, Object>> currentResItems = res.subList(startIdx, endIdx);
+                Page<Map<String, Object>> currentResPage = new PageImpl<>(currentResItems, pageable, res.size());
+                apiResponse = ApiResponse.success(currentResPage);
+            } else {
+                apiResponse = ApiResponse.success(Collections.emptyList());
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);

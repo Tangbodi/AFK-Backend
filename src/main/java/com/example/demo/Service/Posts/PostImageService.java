@@ -32,6 +32,7 @@ public class PostImageService {
 //    private static final String POST_IMAGE_URL = "http://31.220.21.110:8180/IMAGE/POST/";
 private static final String POST_IMAGE_URL = "https://www.away-from-keyboard.com/IMAGE/POST/";
 //    private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
+    private static final int IMAGE_SIZE = 5 * 1024 * 1024;
     private static final String IMAGE_TYPE = "jpg";
     @Autowired
     private PostImageRepository postImageRepository;
@@ -77,7 +78,7 @@ private static final String POST_IMAGE_URL = "https://www.away-from-keyboard.com
             List<String> postImageNameList = new ArrayList<>();
             for (MultipartFile image : images) {
                 // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
-                if (image.getContentType().startsWith("image/")&&image.getSize() <= 5 * 1024 * 1024) {
+                if (image.getContentType().startsWith("image/")&&image.getSize() <= IMAGE_SIZE) {
                     // Generate a unique image ID
                     long imageId = Snowflake.generateUniqueId();
                     // Get image data and type
