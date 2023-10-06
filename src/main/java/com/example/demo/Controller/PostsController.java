@@ -172,8 +172,6 @@ public class PostsController {
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
             getPostDTO.setUserId(userId);
-            ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
-
             //need pagination
             List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId, userId);
             if (!res.isEmpty()) {
