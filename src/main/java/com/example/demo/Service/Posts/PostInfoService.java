@@ -125,7 +125,7 @@ public class PostInfoService {
                 postInfoVO.setLike(String.valueOf( map.get("like")));
                 postInfoVO.setSave(String.valueOf( map.get("save")));
                 postInfoVO.setUsername(String.valueOf( map.get("username")));
-                String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(map.get("created_at")));
+                String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(map.get("created_at")));
                 postInfoVO.setCreatedAt(formattedDateTime);
                 postInfoVOList.add(postInfoVO);
             }

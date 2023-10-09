@@ -78,7 +78,7 @@ public class PostUserMapService {
                 postHistoryVO.setReply(String.valueOf( map.get("comment_reply")));
                 postHistoryVO.setLike(String.valueOf( map.get("like")));
                 postHistoryVO.setSave(String.valueOf( map.get("save")));
-                String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(map.get("created_at")));
+                String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(map.get("created_at")));
                 postHistoryVO.setCreatedAt(formattedDateTime);
                 postHistoryVOList.add(postHistoryVO);
             }

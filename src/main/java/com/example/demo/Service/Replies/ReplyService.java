@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,7 @@ public class ReplyService {
         return replyList;
     }
 
-    private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) throws ParseException {
+    private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
         logger.info("Transferring reply to VO");
         ReplySavedVO replySavedVO = new ReplySavedVO();
         replySavedVO.setReplyId(commentReplyDTO.getReplyId().toString());
@@ -94,7 +93,7 @@ public class ReplyService {
             replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
         }
         replySavedVO.setToUid(commentReplyDTO.getToUid().toString());
-        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(commentReplyDTO.getCreatedAt()));
+        String formattedDateTime = DateTimeConverter.DateTimeConvertFromInstant(commentReplyDTO.getCreatedAt());
         replySavedVO.setCreatedAt(formattedDateTime);
         return replySavedVO;
     }

@@ -49,7 +49,7 @@ public class RedisMessageService {
                     messageVO.setFromAvatarUrl(String.valueOf(map.get("from_avatar_url")));
                     messageVO.setContent(String.valueOf(map.get("content")));
                     messageVO.setTypeId(String.valueOf(map.get("type_id")));
-                    String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(map.get("created_at")));
+                    String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(map.get("created_at")));
                     messageVO.setCreatedAt(formattedDateTime);
                     unreadMessageVOList.add(messageVO);
                 }

@@ -144,7 +144,7 @@ public class PostService {
                 showPostBodyVO.setSave(String.valueOf( post.get("save")));
                 showPostBodyVO.setLikeStatus(String.valueOf(post.get("like_status")));
                 showPostBodyVO.setSaveStatus(String.valueOf(post.get("save_status")));
-                String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(post.get("created_at")));
+                String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(post.get("created_at")));
                 showPostBodyVO.setCreatedAt(formattedDateTime);
             }
             List<String> ImageURLList = new ArrayList<>();

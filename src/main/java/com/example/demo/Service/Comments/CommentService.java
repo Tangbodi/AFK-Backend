@@ -105,7 +105,7 @@ public class CommentService {
         CommentSavedVO commentSavedVO = new CommentSavedVO();
         commentSavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
         commentSavedVO.setPostId(commentReplyDTO.getPostId().toString());
-        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(Instant.now()));
+        String formattedDateTime = DateTimeConverter.DateTimeConvertFromInstant(Instant.now());
         commentSavedVO.setCreatedAt(formattedDateTime);
         return commentSavedVO;
     }
@@ -183,7 +183,7 @@ public class CommentService {
         showCommentVO.setFromAvatarURL(String.valueOf(comment.get("fm_avatar_url")));
         showCommentVO.setContent(String.valueOf(comment.get("content")));
         showCommentVO.setLikeStatus(String.valueOf(comment.get("like_status")));
-        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(comment.get("created_at")));
+        String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(comment.get("created_at")));
         showCommentVO.setCreatedAt(formattedDateTime);
 
         return showCommentVO;
@@ -203,7 +203,7 @@ public class CommentService {
         showReplyVO.setToUsername(String.valueOf(reply.get("to_username")));
         showReplyVO.setContent(String.valueOf(reply.get("content")));
         showReplyVO.setLikeStatus(String.valueOf(reply.get("like_status")));
-        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(reply.get("created_at")));
+        String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(reply.get("created_at")));
         showReplyVO.setCreatedAt(formattedDateTime);
 
         return showReplyVO;
