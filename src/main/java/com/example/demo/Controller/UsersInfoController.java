@@ -88,15 +88,11 @@ public class UsersInfoController {
     }
 
     @PutMapping(value = "/update-avatar",consumes = "multipart/form-data")
-    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile[] images, HttpServletRequest request) {
+    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
-        } else if (images[0].isEmpty()) {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Please select an image to upload");
-        } else if (!images[0].isEmpty() && images.length > 1) {
-            apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Please select only one image to upload");
         } else {
             try {
                 if (userInfoService.UpdateUserAvatar(images, userId)) {

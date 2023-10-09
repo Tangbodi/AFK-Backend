@@ -190,11 +190,10 @@ public class UserInfoService {
     }
 
     @Transactional
-    public boolean UpdateUserAvatar(MultipartFile[] images, Long userId) {
+    public boolean UpdateUserAvatar(MultipartFile avatar, Long userId) {
         logger.info("Updating avatar: {}");
         try {
             String avatarURL = "";
-            MultipartFile avatar = images[0];
             // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
             if (avatar.getContentType().startsWith("image/") && avatar.getSize() <= 5 * 1024 * 1024) {
                 //create avatar id for avatar
@@ -210,7 +209,7 @@ public class UserInfoService {
                 logger.info("AvatarName: {}", avatarName);
                 avatarURL = AVATAR_URL + avatarName;
                 logger.info("AvatarURL: {}", avatarURL);
-                logger.info("Saving PostImage to Tomcat and Nginx");
+                logger.info("Saving PostImage to Tomcat");
                 Path Tomcat_imagePath = Paths.get(TOMCAT_AVATAR_PATH, avatarName);
 //                Path Nginx_imagePath = Paths.get(NGINX_AVATAR_PATH, avatarName);
                 FileOutputStream fos_tomcat = new FileOutputStream(Tomcat_imagePath.toFile());
