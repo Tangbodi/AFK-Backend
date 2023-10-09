@@ -3,6 +3,7 @@ package com.example.demo.Service.Redis;
 import com.example.demo.Mapper.Repository.MessageRepository;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.NewsVO;
+import com.example.demo.Util.DateTimeConverter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -37,18 +38,19 @@ public class RedisMessageService {
             if(!messagesList.isEmpty()){
                 for (Map<Short, Object> map : messagesList) {
                     MessageVO messageVO = new MessageVO();
-                    messageVO.setMessageId(map.get("message_id").toString());
-                    messageVO.setGenreId(map.get("genre_id").toString());
-                    messageVO.setGameId(map.get("game_id").toString());
-                    messageVO.setPostId(map.get("post_id").toString());
-                    messageVO.setCommentReplyId(map.get("comment_reply_id").toString());
-                    messageVO.setFromUid(map.get("from_uid").toString());
-                    messageVO.setToUid(map.get("to_uid").toString());
-                    messageVO.setFromUsername(map.get("from_username").toString());
-                    messageVO.setFromAvatarUrl(map.get("from_avatar_url").toString());
-                    messageVO.setContent(map.get("content").toString());
-                    messageVO.setTypeId(map.get("type_id").toString());
-                    messageVO.setCreatedAt(map.get("created_at").toString());
+                    messageVO.setMessageId(String.valueOf(map.get("message_id")));
+                    messageVO.setGenreId(String.valueOf(map.get("genre_id")));
+                    messageVO.setGameId(String.valueOf(map.get("game_id")));
+                    messageVO.setPostId(String.valueOf(map.get("post_id")));
+                    messageVO.setCommentReplyId(String.valueOf(map.get("comment_reply_id")));
+                    messageVO.setFromUid(String.valueOf(map.get("from_uid")));
+                    messageVO.setToUid(String.valueOf(map.get("to_uid")));
+                    messageVO.setFromUsername(String.valueOf(map.get("from_username")));
+                    messageVO.setFromAvatarUrl(String.valueOf(map.get("from_avatar_url")));
+                    messageVO.setContent(String.valueOf(map.get("content")));
+                    messageVO.setTypeId(String.valueOf(map.get("type_id")));
+                    String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(map.get("created_at")));
+                    messageVO.setCreatedAt(formattedDateTime);
                     unreadMessageVOList.add(messageVO);
                 }
             } else {
