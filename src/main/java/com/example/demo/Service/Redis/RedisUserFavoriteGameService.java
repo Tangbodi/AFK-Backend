@@ -95,8 +95,7 @@ public class RedisUserFavoriteGameService {
             jedis = jedisPool.getResource();
             String gameIconVOListJson = jedis.hget(key, userId.toString());
             if (gameIconVOListJson != null) {
-                return objectMapper.readValue(gameIconVOListJson, new TypeReference<List<UserFavoriteGameVO>>() {
-                });
+                return objectMapper.readValue(gameIconVOListJson, new TypeReference<List<UserFavoriteGameVO>>() {});
             }
         } catch (Exception e) {
             logger.error("Failed to get user favorite game cache: {}", e.getMessage(), e);
