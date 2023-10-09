@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
@@ -18,8 +20,12 @@ public class DateTimeConverter {
         return formattedDateTime;
     }
     public static String DateTimeConvertFromInstant(Instant instant) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedDateTime = formatter.format(instant);
+        //Convert the Instant to a ZonedDateTime with a specific time zone
+        //ZoneId zoneId = ZoneId.of("UTC");
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String formattedDateTime = formatter.format(zonedDateTime);
         return formattedDateTime;
     }
 }
