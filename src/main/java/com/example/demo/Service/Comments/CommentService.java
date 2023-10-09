@@ -101,11 +101,12 @@ public class CommentService {
         return null;
     }
 
-    private static CommentSavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
+    private static CommentSavedVO TransferToVO(CommentReplyDTO commentReplyDTO) throws ParseException {
         CommentSavedVO commentSavedVO = new CommentSavedVO();
         commentSavedVO.setCommentId(commentReplyDTO.getCommentId().toString());
         commentSavedVO.setPostId(commentReplyDTO.getPostId().toString());
-        commentSavedVO.setCreatedAt(Instant.now());
+        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(Instant.now()));
+        commentSavedVO.setCreatedAt(formattedDateTime);
         return commentSavedVO;
     }
 

@@ -12,6 +12,7 @@ import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Message.MessageService;
 import com.example.demo.Service.Posts.PostInfoService;
 import com.example.demo.Service.Redis.RedisService;
+import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +83,7 @@ public class ReplyService {
         return replyList;
     }
 
-    private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) {
+    private static ReplySavedVO TransferToVO(CommentReplyDTO commentReplyDTO) throws ParseException {
         logger.info("Transferring reply to VO");
         ReplySavedVO replySavedVO = new ReplySavedVO();
         replySavedVO.setReplyId(commentReplyDTO.getReplyId().toString());
@@ -92,7 +94,8 @@ public class ReplyService {
             replySavedVO.setToReplyId(commentReplyDTO.getToReplyId().toString());
         }
         replySavedVO.setToUid(commentReplyDTO.getToUid().toString());
-        replySavedVO.setCreatedAt(commentReplyDTO.getCreatedAt());
+        String formattedDateTime = DateTimeConverter.DateTimeConvert(String.valueOf(commentReplyDTO.getCreatedAt()));
+        replySavedVO.setCreatedAt(formattedDateTime);
         return replySavedVO;
     }
 }

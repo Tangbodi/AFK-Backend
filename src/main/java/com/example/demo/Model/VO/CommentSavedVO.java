@@ -8,5 +8,5 @@ import java.time.Instant;
 public class CommentSavedVO {
     private String commentId;
     private String postId;
-    private Instant createdAt;
+    private String createdAt;
 }

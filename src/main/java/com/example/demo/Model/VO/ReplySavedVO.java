@@ -10,5 +10,5 @@ public class ReplySavedVO {
     private String commentId;
     private String toReplyId;
     private String toUid;
-    private Instant createdAt;
+    private String createdAt;
 }
