@@ -11,7 +11,6 @@ import com.example.demo.Service.Posts.PostUserMapService;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
-import com.example.demo.Service.Redis.RedisUserSettingService;
 import com.example.demo.Service.UserLikeSave.UserLikeSaveService;
 import com.example.demo.Service.UserRegister.UserRegistrationService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -26,18 +25,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -89,28 +84,22 @@ public class UsersInfoController {
 
     }
 
-    @PostMapping(value = "/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity UpdateUserAvatar(@RequestParam("images") MultipartFile[] images, HttpServletRequest request) {
+    @PostMapping(value = "/update-avatar")
+    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile[] images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            if (request instanceof MultipartHttpServletRequest) {
-                logger.info("MultipartHttpServletRequest");
-                try {
-                    if (userInfoService.UpdateUserAvatar(images, userId)) {
-                        apiResponse = ApiResponse.success("Avatar has been updated");
-                    } else {
-                        apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Avatar is not an image or size is too large");
-                    }
-                } catch (Exception e) {
-                    logger.error("Failed to update avatar", e.getMessage(), e);
-                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
+            try {
+                if (userInfoService.UpdateUserAvatar(images, userId)) {
+                    apiResponse = ApiResponse.success("Avatar has been updated");
+                } else {
+                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Avatar is not an image or size is too large");
                 }
-            }
-            else {
-                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Request is not a multipart request");
+            } catch (Exception e) {
+                logger.error("Failed to update avatar", e.getMessage(), e);
+                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
