@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -88,7 +89,7 @@ public class UsersInfoController {
 
     }
 
-    @PostMapping(value = "/update-avatar")
+    @PostMapping(value = "/update-avatar",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
