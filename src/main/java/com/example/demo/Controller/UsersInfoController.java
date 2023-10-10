@@ -89,8 +89,8 @@ public class UsersInfoController {
 
     }
 
-    @PostMapping(value = "/update-avatar")
-    public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile images, HttpServletRequest request) {
+    @PostMapping(value = "/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity UpdateUserAvatar(@RequestPart("image") MultipartFile images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
