@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.jms.JMSException;
@@ -87,22 +88,28 @@ public class UsersInfoController {
 
     }
 
-    @PutMapping(value = "/update-avatar",consumes = {"multipart/form-data"},produces = {"application/json;charset=UTF-8"})
+    @PutMapping(value = "/update-avatar",consumes = "multipart/form-data")
     public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            try {
-                if (userInfoService.UpdateUserAvatar(images, userId)) {
-                    apiResponse = ApiResponse.success("Avatar has been updated");
-                } else {
-                    apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Avatar is not an image or size is too large");
+            if (request instanceof MultipartHttpServletRequest) {
+                logger.info("MultipartHttpServletRequest");
+                try {
+                    if (userInfoService.UpdateUserAvatar(images, userId)) {
+                        apiResponse = ApiResponse.success("Avatar has been updated");
+                    } else {
+                        apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Avatar is not an image or size is too large");
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to update avatar", e.getMessage(), e);
+                    apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
                 }
-            } catch (Exception e) {
-                logger.error("Failed to update avatar", e.getMessage(), e);
-                apiResponse = ApiResponse.error(ReturnCode.RC500.getCode(), e.getMessage());
+            }
+            else {
+                apiResponse = ApiResponse.error(ReturnCode.RC400.getCode(), "Request is not a multipart request");
             }
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
