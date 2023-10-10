@@ -190,10 +190,11 @@ public class UserInfoService {
     }
 
     @Transactional
-    public boolean UpdateUserAvatar(MultipartFile avatar, Long userId) {
+    public boolean UpdateUserAvatar(MultipartFile[] image, Long userId) {
         logger.info("Updating avatar: {}");
         try {
             String avatarURL = "";
+            MultipartFile avatar = image[0];
             // Check if the uploaded file is an image and its size is within limit (e.g., 5MB)
             if (avatar.getContentType().startsWith("image/") && avatar.getSize() <= 5 * 1024 * 1024) {
                 //create avatar id for avatar
