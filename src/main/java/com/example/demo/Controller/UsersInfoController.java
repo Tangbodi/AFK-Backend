@@ -88,7 +88,7 @@ public class UsersInfoController {
 
     }
 
-    @PutMapping(value = "/update-avatar",consumes = "multipart/form-data")
+    @PutMapping(value = "/update-avatar")
     public ResponseEntity UpdateUserAvatar(@RequestParam("image") MultipartFile images, HttpServletRequest request) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         ApiResponse apiResponse;
