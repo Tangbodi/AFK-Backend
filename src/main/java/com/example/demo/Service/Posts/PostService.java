@@ -113,7 +113,7 @@ public class PostService {
         logger.info("Getting post for post ID: {}", getPostDTO.getPostId());
 
         try {
-            List<Map<String, Object>> posts = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId());
+            List<Map<String, Object>> posts = postGameMapRepository.findByGenreGamePostId(getPostDTO.getGenreId(), getPostDTO.getGameId(), getPostDTO.getPostId(), getPostDTO.getUserId());
             if (posts.isEmpty()) {
                 logger.info("Post not found: " + getPostDTO.getPostId());
                 return null;
@@ -122,7 +122,7 @@ public class PostService {
                 List<Map<String, Object>> postImageList = postImageService.findAllImageURLsByPostId(getPostDTO);
                 // Update post viewed count
                 postInfoService.UpdatePostViewCount(getPostDTO.getPostId());
-                return TransferToShowPostVO(posts, postImageList, getPostDTO);
+                return TransferToShowPostVO(posts, postImageList);
             }
         } catch (Exception e) {
             logger.error("Failed to get post: {}", e.getMessage(), e);
@@ -130,13 +130,9 @@ public class PostService {
         }
     }
 
-    private ShowPostBodyVO TransferToShowPostVO(List<Map<String, Object>> posts, List<Map<String, Object>> postImageList, GetPostDTO getPostDTO) {
+    private ShowPostBodyVO TransferToShowPostVO(List<Map<String, Object>> posts, List<Map<String, Object>> postImageList) {
         logger.info("Transferring post to VO for post ID: {}");
         try {
-            UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-            usersFavoritePostId.setPostId(getPostDTO.getPostId());
-            usersFavoritePostId.setUserId(getPostDTO.getUserId());
-            UsersFavoritePost usersFavoritePost = userFavoritePostRepository.findById(usersFavoritePostId).orElse(null);
             ShowPostBodyVO showPostBodyVO = new ShowPostBodyVO();
             for (Map<String, Object> post : posts) {
                 showPostBodyVO.setPostId(post.get("post_id").toString());
@@ -150,9 +146,9 @@ public class PostService {
                 showPostBodyVO.setView(String.valueOf( post.get("view")));
                 showPostBodyVO.setCommentReply(String.valueOf( post.get("comment_reply")));
                 showPostBodyVO.setLike(String.valueOf(post.get("like")));
-                showPostBodyVO.setSave(String.valueOf( post.get("save")));
-                showPostBodyVO.setLikeStatus(usersFavoritePost == null ? "0" : String.valueOf(usersFavoritePost.getLikeStatus()));
-                showPostBodyVO.setSaveStatus(usersFavoritePost == null ? "0" : String.valueOf(usersFavoritePost.getSaveStatus()));
+                showPostBodyVO.setSave(String.valueOf(post.get("save")));
+                showPostBodyVO.setLikeStatus(String.valueOf(post.get("like_status")));
+                showPostBodyVO.setSaveStatus(String.valueOf(post.get("save_status")));
                 String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(post.get("created_at")));
                 showPostBodyVO.setCreatedAt(formattedDateTime);
             }

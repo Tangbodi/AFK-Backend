@@ -128,9 +128,6 @@ public class PostsController {
                                        @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                        @RequestParam(value = "post") @ValidPostId Long postId) {
         ApiResponse apiResponse;
-        GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
-        gameGenreMapIdDTO.setGameId(gameId);
-        gameGenreMapIdDTO.setGenreId(genreId);
         Long userId = (Long) request.getSession().getAttribute("userId");
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Game not found");
@@ -139,7 +136,7 @@ public class PostsController {
             getPostDTO.setPostId(postId);
             getPostDTO.setGameId(gameId);
             getPostDTO.setGenreId(genreId);
-            getPostDTO.setUserId(userId);
+            getPostDTO.setUserId(userId == null ? 0 : userId);
             ShowPostBodyVO showPostBodyVO = postService.GetPost(getPostDTO);
             if (showPostBodyVO == null) {
                 apiResponse = ApiResponse.error(ReturnCode.RC200.getCode(), "Post not found");
@@ -157,9 +154,6 @@ public class PostsController {
                                                     @RequestParam(value = "page") int page,
                                                     @RequestParam(value = "size") int size, HttpServletRequest request) throws ParseException {
         ApiResponse apiResponse;
-        GameGenreMapIdDTO gameGenreMapIdDTO = new GameGenreMapIdDTO();
-        gameGenreMapIdDTO.setGameId(gameId);
-        gameGenreMapIdDTO.setGenreId(genreId);
         page = page - 1;
         Long userId = (Long) request.getSession().getAttribute("userId");
         if (gameGenreMapService.FindGamesGenresMapById(genreId, gameId) == null) {
@@ -167,11 +161,6 @@ public class PostsController {
         } else if (page < 0 || size <= 0) {
             apiResponse = ApiResponse.success(Collections.emptyList());
         } else {
-            GetPostDTO getPostDTO = new GetPostDTO();
-            getPostDTO.setPostId(postId);
-            getPostDTO.setGameId(gameId);
-            getPostDTO.setGenreId(genreId);
-            getPostDTO.setUserId(userId);
             //need pagination
             List<Map<String, Object>> res = commentService.GetAllCommentsAndReplies(postId, userId);
             if (!res.isEmpty()) {
@@ -267,7 +256,6 @@ public class PostsController {
     @PostMapping("/genre/latest-popular-newest")
     public ResponseEntity LatestPopularNewest(@Validated @RequestBody TypeDTO typeDTO) {
         ApiResponse apiResponse;
-
         switch (typeDTO.getType()) {
             case "latest":
                 List<LatestPostVO> latestPosts = postGameMapService.ShowLatestPosts();
