@@ -52,6 +52,7 @@ public class NewsController {
     public ResponseEntity SetAllGameNewsCache() {
         ApiResponse apiResponse;
         redisNewsService.DeleteAllGameNewsCache();
+        redisNewsService.DeleteOneGameNewsListCache();
         for (Integer gameId : STEAM_SET) {
             steamNewsService.ProxyXML(gameId);
         }
@@ -106,7 +107,7 @@ public class NewsController {
     }
 
     @GetMapping("/game-news-list")
-    public ResponseEntity GetOneGameNewsCache(@RequestParam(value = "game") @ValidGameId Short gameId,
+    public ResponseEntity GetOneGameNewsListCache(@RequestParam(value = "game") @ValidGameId Short gameId,
                                               @RequestParam(value = "genre") @ValidGenreId Byte genreId,
                                               @RequestParam(value = "page") int page,
                                               @RequestParam(value = "size") int size) throws IOException {

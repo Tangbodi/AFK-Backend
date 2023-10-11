@@ -113,4 +113,19 @@ public class RedisNewsService {
             }
         }
     }
+    public void DeleteOneGameNewsListCache(){
+        logger.info("Updating one game news list cache");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.del(AFK_GAME_NEWS);
+        } catch (Exception e) {
+            logger.error("Failed to update one game news list cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis) {
+                logger.info("Closing the jedis connection:::");
+                jedis.close();
+            }
+        }
+    }
 }
