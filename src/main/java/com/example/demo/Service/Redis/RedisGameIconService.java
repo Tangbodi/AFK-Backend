@@ -1,7 +1,9 @@
 package com.example.demo.Service.Redis;
 
+import com.example.demo.Model.Entity.GameIcon;
 import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
+import com.example.demo.Service.Games.GameIconService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

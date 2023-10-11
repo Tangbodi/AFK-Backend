@@ -1,6 +1,7 @@
 package com.example.demo.Service.Games;
 
 import com.example.demo.Mapper.Repository.GameIconRepository;
+import com.example.demo.Mapper.Repository.GameRepository;
 import com.example.demo.Mapper.Repository.HomeGameImageRepository;
 import com.example.demo.Model.DTO.GameGenreMapIdDTO;
 import com.example.demo.Model.Entity.GameIcon;
@@ -23,6 +24,8 @@ public class GameIconService {
     private GameIconRepository gameIconRepository;
     @Autowired
     private HomeGameImageRepository homeGameImageRepository;
+    @Autowired
+    private GameRepository gameRepository;
 
     public List<GameIconVO> GetAllGameIcons() {
         logger.info("Getting all game icons");
@@ -100,6 +103,15 @@ public class GameIconService {
             logger.error("Failed to get game by id: {}", e.getMessage(), e);
             return null;
         }
+    }
+    public List<Map<Short,Object>> FindAllGameIds(){
+        logger.info("Finding all game ids");
+        try{
+            return gameRepository.findAllGameIds();
+        } catch (Exception e) {
+            logger.error("Failed to find all games: {}", e.getMessage(), e);
+        }
+        return null;
     }
 }
 

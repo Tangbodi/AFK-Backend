@@ -2,6 +2,7 @@ package com.example.demo.Service.Redis;
 
 
 import com.example.demo.Model.VO.NewsVO;
+import com.example.demo.Service.Games.GameIconService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RedisNewsService {
@@ -20,7 +22,8 @@ public class RedisNewsService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AFK_GAME_NEWS = "AFK_GAME_NEWS:";
     private static final String ALL_AFK_GAME_NEWS = "ALL_AFK_GAME_NEWS";
-
+    @Autowired
+    private GameIconService gameIconService;
 
     @Autowired
     private JedisPool jedisPool;
@@ -117,8 +120,17 @@ public class RedisNewsService {
         logger.info("Updating one game news list cache");
         Jedis jedis = null;
         try {
+            List<Map<Short,Object>> gameIdsMap = gameIconService.FindAllGameIds();
             jedis = jedisPool.getResource();
-            jedis.del(AFK_GAME_NEWS);
+            if(gameIdsMap.isEmpty()){
+                logger.info("No game ids found");
+            } else {
+                logger.info("Found {} game ids", gameIdsMap.size());
+                for(Map<Short, Object> map : gameIdsMap){
+                    String gameId = String.valueOf(map.get("game_id"));
+                    jedis.del(AFK_GAME_NEWS+gameId);
+                }
+            }
         } catch (Exception e) {
             logger.error("Failed to update one game news list cache: {}", e.getMessage(), e);
         } finally {

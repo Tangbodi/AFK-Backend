@@ -1,12 +1,17 @@
 package com.example.demo.Service.Games;
 
 import com.example.demo.Mapper.Repository.GameGenreMapRepository;
+import com.example.demo.Mapper.Repository.GameRepository;
+import com.example.demo.Model.Entity.Game;
 import com.example.demo.Model.Entity.GamesGenresMap;
 import com.example.demo.Model.Entity.GamesGenresMapId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class GameGenreMapService {
@@ -31,15 +36,6 @@ public class GameGenreMapService {
             }
         } catch (Exception e) {
             logger.error("Failed to find game genre map by id: {}", e.getMessage(), e);
-        }
-        return null;
-    }
-    public GamesGenresMap FindGamesGenresMapByGameId(Short gameId) {
-        logger.info("Finding genre id by game id: {}", gameId);
-        try {
-            return gameGenreMapRepository.findByGameId(gameId);
-        } catch (Exception e) {
-            logger.error("Failed to save game genre map: {}", e.getMessage(), e);
         }
         return null;
     }

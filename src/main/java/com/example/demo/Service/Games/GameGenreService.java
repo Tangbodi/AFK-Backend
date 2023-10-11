@@ -19,17 +19,6 @@ public class GameGenreService {
     @Autowired
     private GameGenreRepository gameGenreRepository;
 
-    public List<GameGenreVO> GetAllGameGenres() {
-        logger.info("Getting all game genres");
-        try {
-            List<GameGenre> gameGenreList = gameGenreRepository.findAll();
-            return MapGameGenresToVOList(gameGenreList);
-        } catch (Exception e) {
-            logger.error("Failed to get all game genres: {}", e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
     private static List<GameGenreVO> MapGameGenresToVOList(List<GameGenre> gameGenreList) {
         List<GameGenreVO> gameGenreVOList = new ArrayList<>();
         for (GameGenre gameGenre : gameGenreList) {
