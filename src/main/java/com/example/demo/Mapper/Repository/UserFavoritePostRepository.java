@@ -31,4 +31,5 @@ public interface UserFavoritePostRepository extends JpaRepository<UsersFavoriteP
             "LEFT JOIN afk.posts_info pi ON p.post_id = pi.post_id \n" +
             "WHERE user_id = :user_id AND save_status = 1", nativeQuery = true)
     List<Map<String, Object>> findAllSavedPostsByUserId(@Param("user_id") Long user_id);
+
 }
