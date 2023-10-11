@@ -30,10 +30,10 @@ public interface PostGameMapRepository extends JpaRepository<PostsGamesMap, Long
     @Query(value = "SELECT p.post_id, g.game_name, ui.user_id, ui.username, p.title,p.text_render, pi.view, pi.comment_reply, pi.like, pi.save, p.created_at\n" +
             "FROM afk.posts_games_map pgm\n" +
             "JOIN afk.posts p ON pgm.post_id = p.post_id\n" +
-            "JOIN afk.posts_users_map pum ON pgm.post_id = pum.post_id\n" +
+            "JOIN afk.posts_users_map pum ON pgm.post_id = pum.post_id \n" +
             "JOIN afk.users_info ui ON pum.user_id = ui.user_id\n" +
-            "JOIN afk.posts_info pi ON pi.post_id = pgm.post_id\n" +
-            "LEFT JOIN afk.games g ON g.game_id = pgm.game_id" +
+            "JOIN afk.posts_info pi ON pgm.post_id =pi.post_id\n" +
+            "LEFT JOIN afk.games g ON pgm.game_id = g.game_id\n" +
             "WHERE pgm.genre_id = :genreId\n" +
             "AND pgm.game_id = :gameId\n" +
             "AND pgm.post_id = :postId", nativeQuery = true)
