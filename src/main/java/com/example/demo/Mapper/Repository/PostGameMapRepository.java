@@ -34,10 +34,8 @@ public interface PostGameMapRepository extends JpaRepository<PostsGamesMap, Long
             "JOIN afk.users_info ui ON pum.user_id = ui.user_id\n" +
             "JOIN afk.posts_info pi ON pi.post_id = pgm.post_id\n" +
             "LEFT JOIN afk.games g ON g.game_id = pgm.game_id" +
-            "AND ufp.user_id = pum.user_id\n" +
             "WHERE pgm.genre_id = :genreId\n" +
             "AND pgm.game_id = :gameId\n" +
             "AND pgm.post_id = :postId", nativeQuery = true)
     List<Map<String, Object>> findByGenreGamePostId(@Param("genreId") Byte genreId, @Param("gameId") Short gameId, @Param("postId") Long postId);
-
 }
