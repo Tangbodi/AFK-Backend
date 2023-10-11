@@ -53,6 +53,8 @@ public class CommentService {
     private RedisService redisService;
     @Autowired
     private UserSettingService userSettingService;
+    @Autowired
+    private CommentInfoService commentInfoService;
 
     @Transactional
     public CommentSavedVO SaveComment(CommentReplyDTO commentReplyDTO) {
@@ -69,11 +71,12 @@ public class CommentService {
             postComment.setPostId(commentReplyDTO.getPostId());
             postComment.setCreatedAt(commentReplyDTO.getCreatedAt());
             postComment.setModifiedAt(commentReplyDTO.getCreatedAt());
-            PostComment savedComment = commentRepository.save(postComment);
-            if (savedComment != null) {
+            if (commentRepository.save(postComment) != null) {
                 logger.info("Comment saved successfully: {}");
                 //set comment reply ip address
                 ipAddressService.SetCommentIpAddress(commentReplyDTO);
+                //set comment like count
+                commentInfoService.UpdateCommentLikeCount(commentReplyDTO.getCommentId(), 0);
                 //send comment count message to ActiveMQ
                 mqSender.SendCommentCountMessage(commentReplyDTO);
                 //Set mention message after saved comment if the user is not the author of the post
@@ -183,6 +186,7 @@ public class CommentService {
         showCommentVO.setFromAvatarURL(String.valueOf(comment.get("fm_avatar_url")));
         showCommentVO.setContent(String.valueOf(comment.get("content")));
         showCommentVO.setLikeStatus(String.valueOf(comment.get("like_status")));
+        showCommentVO.setLikeNum(String.valueOf(comment.get("like_num")));
         String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(comment.get("created_at")));
         showCommentVO.setCreatedAt(formattedDateTime);
 
@@ -203,6 +207,7 @@ public class CommentService {
         showReplyVO.setToUsername(String.valueOf(reply.get("to_username")));
         showReplyVO.setContent(String.valueOf(reply.get("content")));
         showReplyVO.setLikeStatus(String.valueOf(reply.get("like_status")));
+        showReplyVO.setLikeNum(String.valueOf(reply.get("like_num")));
         String formattedDateTime = DateTimeConverter.DateTimeConvertFromString(String.valueOf(reply.get("created_at")));
         showReplyVO.setCreatedAt(formattedDateTime);
 

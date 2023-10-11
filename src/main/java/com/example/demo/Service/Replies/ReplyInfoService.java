@@ -57,7 +57,8 @@ public class ReplyInfoService {
         }
     }
 
-    private void UpdateReplyLikeCount(Long replyId, Integer totalLike) {
+    @Async("MultiExecutor")
+    public void UpdateReplyLikeCount(Long replyId, Integer totalLike) {
         logger.info("Updating reply like count");
         RepliesInfo repliesInfo = replyInfoRepository.findById(replyId)
                 .orElseGet(() -> CreateReplyInfo(replyId));

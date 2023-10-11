@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 
 @Service
 public class IpAddressService {
@@ -64,6 +65,38 @@ public class IpAddressService {
             ipAddress.setIpvSix(commentReplyDTO.getIpvSix());
             ipAddress.setCreatedAt(commentReplyDTO.getCreatedAt());
             ipAddress.setModifiedAt(commentReplyDTO.getCreatedAt());
+            ipAddressRepository.save(ipAddress);
+            logger.info("SetIpAddress:::Success:::");
+        } catch (Exception e) {
+            logger.error("SetIpAddress:::Exception:::" + e.getMessage(), e);
+        }
+    }
+    @Async("MultiExecutor")
+    @Transactional
+    public void SetUserRegIpAddress(Long userId, String ip){
+        logger.info("Setting IP Address:::");
+        try{
+            IpAddress ipAddress = new IpAddress();
+            ipAddress.setId(userId);
+            ipAddress.setIpvSix(ip);
+            ipAddress.setCreatedAt(Instant.now());
+            ipAddress.setModifiedAt(Instant.now());
+            ipAddressRepository.save(ipAddress);
+            logger.info("SetIpAddress:::Success:::");
+        } catch (Exception e) {
+            logger.error("SetIpAddress:::Exception:::" + e.getMessage(), e);
+        }
+    }
+    @Async("MultiExecutor")
+    @Transactional
+    public void SetUserRegIpAddress(Long userId, Long ip){
+        logger.info("Setting IP Address:::");
+        try{
+            IpAddress ipAddress = new IpAddress();
+            ipAddress.setId(userId);
+            ipAddress.setIpvFour(ip);
+            ipAddress.setCreatedAt(Instant.now());
+            ipAddress.setModifiedAt(Instant.now());
             ipAddressRepository.save(ipAddress);
             logger.info("SetIpAddress:::Success:::");
         } catch (Exception e) {

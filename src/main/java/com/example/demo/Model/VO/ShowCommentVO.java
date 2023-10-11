@@ -14,5 +14,6 @@ public class ShowCommentVO{
     private String fromAvatarURL;
     private String content;
     private String likeStatus;
+    private String likeNum;
     private String createdAt;
 }

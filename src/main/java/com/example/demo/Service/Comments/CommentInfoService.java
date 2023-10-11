@@ -8,6 +8,7 @@ import com.example.demo.Mapper.Repository.UserLikeCommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -30,6 +31,7 @@ public class CommentInfoService {
             UpdateCommentLikeCount(commentId, totalLike);
         }
     }
+    @Async("MultiExecutor")
     public void UpdateCommentLikeCount(Long commentId, Integer totalLike){
         logger.info("Updating comment like count");
         CommentsInfo commentsInfo = commentInfoRepository.findById(commentId)

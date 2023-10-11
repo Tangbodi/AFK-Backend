@@ -50,7 +50,6 @@ public class CommentsController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your opinion");
         } else {
-
             String ipAddress = HttpUtils.getRequestIP(request);
             logger.info("ipAddress:{}" + ipAddress);
             if (ipService.isValidInet4Address(ipAddress)) {

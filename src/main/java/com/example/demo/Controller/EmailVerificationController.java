@@ -1,14 +1,19 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.Entity.UsersInfo;
+import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUsernameService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import com.example.demo.Util.ApiResponse;
+import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Controller
 public class EmailVerificationController {
@@ -32,25 +38,50 @@ public class EmailVerificationController {
     private RedisUsernameService redisUsernameService;
     @Autowired
     private RedisService redisService;
-
+    @Autowired
+    private IpService ipService;
     @GetMapping("/user/registration/email-validation")
     public void ShowEmailValidationPageViaRegisterLink(HttpServletRequest request, @RequestParam(value = "token") String token, HttpServletResponse response) throws IOException {
         boolean isRedirected = true;
         HttpSession session = request.getSession();
         session.setAttribute("isRedirected", isRedirected);
-        String redirectURL;
+        String redirectURL = "";
         String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
         logger.info("siteURL:::" + siteURL);
         logger.info("token:::" + token);
-        if(redisService.CacheExists(EMAIL_VALIDATION + token)){
-            logger.info("EMAIL_VALIDATION cache exists: {}" + token);
-            userVerificationService.FindUserVerificationByToken(token);
-            redisEmailService.DeleteEmailValidationCacheByToken(token);
-            redirectURL = "https://away-from-keyboard.com/verifysuccess";
+        String ipAddress = HttpUtils.getRequestIP(request);
+        logger.info("ipAddress:{}" + ipAddress);
+        if (ipService.isValidInet4Address(ipAddress)) {
+            logger.info("ipAddress is valid");
+            String[] ipString = ipAddress.split("\\.");
+            logger.info("ipAddress split:{}" + ipString);
+            Long ipvF = (Long.valueOf(ipString[0]) << 24) + (Long.valueOf(ipString[1]) << 16) + (Long.valueOf(ipString[2]) << 8) + Long.valueOf(ipString[3]);
+            logger.info("ipvF:{}" + ipvF);
+            Long ip = ipvF;
+            if(redisService.CacheExists(EMAIL_VALIDATION + token)){
+                logger.info("EMAIL_VALIDATION cache exists: {}" + token);
+                userVerificationService.FindUserVerificationByToken(token,ip);
+                redisEmailService.DeleteEmailValidationCacheByToken(token);
+                redirectURL = "https://away-from-keyboard.com/verifysuccess";
+            } else {
+                redirectURL = "https://away-from-keyboard.com/verifyfailed";
+            }
+        } else if (ipService.isValidInet6Address(ipAddress)) {
+            logger.info("ipAddress is valid");
+            String[] ipString = ipAddress.split(":");
+            logger.info("ipvS:{}" + Arrays.toString(ipString));
+            String ip = ipString.toString();
+            if(redisService.CacheExists(EMAIL_VALIDATION + token)){
+                logger.info("EMAIL_VALIDATION cache exists: {}" + token);
+                userVerificationService.FindUserVerificationByToken(token,ip);
+                redisEmailService.DeleteEmailValidationCacheByToken(token);
+                redirectURL = "https://away-from-keyboard.com/verifysuccess";
+            } else {
+                redirectURL = "https://away-from-keyboard.com/verifyfailed";
+            }
         } else {
-            redirectURL = "https://away-from-keyboard.com/verifyfailed";
-        }
 
+        }
         isRedirected = (boolean) session.getAttribute("isRedirected");//true
         if (isRedirected) {
             isRedirected = false;

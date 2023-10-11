@@ -17,7 +17,7 @@ import java.time.Instant;
 @Table(name = "ip_address")
 public class IpAddress {
     @Id
-    @Column(name = "pcr_id", nullable = false)
+    @Column(name = "upcr_id", nullable = false)
     private Long id;
 
     @Column(name = "ipv_four", columnDefinition = "INT UNSIGNED")

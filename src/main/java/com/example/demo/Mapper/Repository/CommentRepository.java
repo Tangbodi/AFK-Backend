@@ -11,10 +11,11 @@ import java.util.Map;
 
 @Repository
 public interface CommentRepository extends JpaRepository<PostComment, Long> {
-    @Query(value = "SELECT pc.comment_id, p.post_id, pc.from_uid, ui.username, ifnull(ui.avatar_url,'') AS fm_avatar_url, pc.content, ifnull(ulc.like_status,false) AS like_status, pc.created_at " +
+    @Query(value = "SELECT pc.comment_id, p.post_id, pc.from_uid, ui.username, ifnull(ui.avatar_url,'') AS fm_avatar_url, pc.content, ifnull(ulc.like_status,false) AS like_status, ifnull(ci.like, 0) AS like_num, pc.created_at " +
             "FROM afk.posts p\n" +
             "JOIN afk.post_comments pc ON p.post_id = pc.post_id\n" +
             "JOIN afk.users_info ui ON pc.from_uid = ui.user_id\n" +
+            "JOIN afk.comments_info ci ON pc.comment_id = ci.comment_id\n" +
             "LEFT JOIN afk.users_like_comments ulc ON pc.comment_id = ulc.comment_id\n" +
             "AND ulc.user_id = :userId\n" +
             "WHERE p.post_id = :postId ORDER BY pc.created_at ASC", nativeQuery = true)

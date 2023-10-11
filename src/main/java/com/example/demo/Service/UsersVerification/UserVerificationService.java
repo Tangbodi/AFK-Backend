@@ -4,6 +4,7 @@ import com.example.demo.Mapper.Repository.UserVerificationRepository;
 import com.example.demo.Model.DTO.UserRegisterDTO;
 import com.example.demo.Model.Entity.UsersVerificationToken;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
+import com.example.demo.Service.IP.IpAddressService;
 import com.example.demo.Service.UserSettings.*;
 import com.example.demo.Service.UsersAuth.UserAuthService;
 import com.example.demo.Service.UsersInfo.UserInfoService;
@@ -54,6 +55,8 @@ public class UserVerificationService {
     private FeaturedContentService featuredContentService;
     @Autowired
     private TrendingPostService trendingPostService;
+    @Autowired
+    private IpAddressService ipAddressService;
 
     @Transactional
     public boolean SetUserRegistrationVerificationToken(String token, UserRegisterDTO userRegisterDTO) {
@@ -100,7 +103,7 @@ public class UserVerificationService {
         }
     }
 
-    public void FindUserVerificationByToken(String token) {
+    public void FindUserVerificationByToken(String token, String ip) {
         logger.info("Getting UsersVerificationToken: {}", token);
         try {
            UsersVerificationToken usersVerificationToken = userVerificationRepository.findByToken(token);
@@ -108,6 +111,8 @@ public class UserVerificationService {
                 logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getId());
                 userAuthService.UpdateUserAuth(usersVerificationToken.getId());
                 RemoveToken(usersVerificationToken);
+                //user register ip
+                ipAddressService.SetUserRegIpAddress(usersVerificationToken.getId(), ip);
                 //user activity setting
                 commentOnPostMentionService.SaveCommentOnPostMention(usersVerificationToken);
                 replyOnCommentMentionService.SaveReplyOnCommentMention(usersVerificationToken);
@@ -128,7 +133,66 @@ public class UserVerificationService {
             logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(), e);
         }
     }
+    public void FindUserVerificationByToken(String token, Long ip) {
+        logger.info("Getting UsersVerificationToken: {}", token);
+        try {
+            UsersVerificationToken usersVerificationToken = userVerificationRepository.findByToken(token);
+            if (usersVerificationToken != null) {
+                logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getId());
+                userAuthService.UpdateUserAuth(usersVerificationToken.getId());
+                RemoveToken(usersVerificationToken);
+                //user register ip
+                ipAddressService.SetUserRegIpAddress(usersVerificationToken.getId(), ip);
+                //user activity setting
+                commentOnPostMentionService.SaveCommentOnPostMention(usersVerificationToken);
+                replyOnCommentMentionService.SaveReplyOnCommentMention(usersVerificationToken);
+                likeOnPostMentionService.SetLikeOnPostMention(usersVerificationToken);
+                likeOnCommentMentionService.SetLikeOnCommentMention(usersVerificationToken);
+                saveOnPostMentionService.SetSaveOnPostMention(usersVerificationToken);
+                mentionOfUsernameService.SetMentionOfUsername(usersVerificationToken);
+                postOnSavedGameService.SetPostOnSavedGame(usersVerificationToken);
+                //usr recommendation setting
+                afkAnnouncementService.SaveAfkAnnouncement(usersVerificationToken);
+                communityRecommendationService.SaveCommunityRecommendation(usersVerificationToken);
+                featuredContentService.SaveFeaturedContent(usersVerificationToken);
+                trendingPostService.SaveTrendingPost(usersVerificationToken);
+            } else {
+                //
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(), e);
+        }
+    }
+    public void FindUserVerificationByToken(String token) {
+        logger.info("Getting UsersVerificationToken: {}", token);
+        try {
+            UsersVerificationToken usersVerificationToken = userVerificationRepository.findByToken(token);
+            if (usersVerificationToken != null) {
+                logger.info("Found UsersVerificationToken: token={}, userId={}", usersVerificationToken.getToken(), usersVerificationToken.getId());
+                userAuthService.UpdateUserAuth(usersVerificationToken.getId());
+                RemoveToken(usersVerificationToken);
+                //user register ip
 
+                //user activity setting
+                commentOnPostMentionService.SaveCommentOnPostMention(usersVerificationToken);
+                replyOnCommentMentionService.SaveReplyOnCommentMention(usersVerificationToken);
+                likeOnPostMentionService.SetLikeOnPostMention(usersVerificationToken);
+                likeOnCommentMentionService.SetLikeOnCommentMention(usersVerificationToken);
+                saveOnPostMentionService.SetSaveOnPostMention(usersVerificationToken);
+                mentionOfUsernameService.SetMentionOfUsername(usersVerificationToken);
+                postOnSavedGameService.SetPostOnSavedGame(usersVerificationToken);
+                //usr recommendation setting
+                afkAnnouncementService.SaveAfkAnnouncement(usersVerificationToken);
+                communityRecommendationService.SaveCommunityRecommendation(usersVerificationToken);
+                featuredContentService.SaveFeaturedContent(usersVerificationToken);
+                trendingPostService.SaveTrendingPost(usersVerificationToken);
+            } else {
+                //
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get UsersVerificationToken: {}", e.getMessage(), e);
+        }
+    }
     @Transactional
     public void RemoveToken(UsersVerificationToken usersVerificationToken) {
         logger.info("Removing token via UsersVerificationToken: {}", usersVerificationToken.getToken());

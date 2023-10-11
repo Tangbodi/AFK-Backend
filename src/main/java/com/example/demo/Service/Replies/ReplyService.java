@@ -62,6 +62,8 @@ public class ReplyService {
                 logger.info("Reply saved successfully");
                 //set comment reply ip address
                 ipAddressService.SetReplyIpAddress(commentReplyDTO);
+                //set  reply like count
+                replyInfoService.UpdateReplyLikeCount(commentReplyDTO.getReplyId(), 0);
                 //send message to ActiveMQ
                 mqSender.SendReplyCountMessage(commentReplyDTO);
                 //set reply mention
