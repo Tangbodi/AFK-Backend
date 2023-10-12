@@ -3,6 +3,7 @@ package com.example.demo.Service.MQ;
 import com.example.demo.Mapper.Repository.GameRepository;
 import com.example.demo.Mapper.Repository.MessageRepository;
 import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
+import com.example.demo.Model.DTO.NewPostNotificationDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.Message.MessageService;
@@ -37,11 +38,11 @@ public class GameSubConsumer {
     public void NewPostNotification(Message message) throws JMSException {
         // Implement logic to send notifications to subscribed users.
         ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
-        PostDTO postDTO = (PostDTO) activeMqObjectMessage.getObject();
+        NewPostNotificationDTO newPostNotificationDTO = (NewPostNotificationDTO) activeMqObjectMessage.getObject();
         try {
-            List<Map<Short, Object>> userSavedGameAndMentionOn = userFavoriteGameRepository.findUserSavedGameAndMentionOn(postDTO.getGameId());
+            List<Map<Short, Object>> userSavedGameAndMentionOn = userFavoriteGameRepository.findUserSavedGameAndMentionOn(newPostNotificationDTO.getGameId());
             if (!userSavedGameAndMentionOn.isEmpty()) {
-                String gameName = gameRepository.findById(postDTO.getGameId()).get().getGameName();
+                String gameName = gameRepository.findById(newPostNotificationDTO.getGameId()).get().getGameName();
                 for(Map<Short, Object> map : userSavedGameAndMentionOn){
                     Long userId = Long.valueOf(map.get("user_id").toString());
                     if (redisService.MemberExists(USER_SETTING, userId)) {
@@ -49,9 +50,9 @@ public class GameSubConsumer {
                         List<MessageVO> unreadMessage = redisMessageService.GetUnreadMessageFromRedis(userId);
                         MessageVO messageVO = new MessageVO();
                         messageVO.setContent("New post in " + gameName+"!");
-                        messageVO.setGenreId(postDTO.getGenreId().toString());
-                        messageVO.setGameId(postDTO.getGameId().toString());
-                        messageVO.setPostId(postDTO.getPostId().toString());
+                        messageVO.setGenreId(newPostNotificationDTO.getGenreId().toString());
+                        messageVO.setGameId(newPostNotificationDTO.getGameId().toString());
+                        messageVO.setPostId(newPostNotificationDTO.getPostId().toString());
                         messageVO.setToUid(userId.toString());
                         messageVO.setTypeId(TypeId);
                         unreadMessage.add(messageVO);

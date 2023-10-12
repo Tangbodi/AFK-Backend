@@ -2,6 +2,7 @@ package com.example.demo.Service.Posts;
 
 import com.example.demo.Mapper.Repository.UserFavoritePostRepository;
 import com.example.demo.Model.DTO.GetPostDTO;
+import com.example.demo.Model.DTO.NewPostNotificationDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import com.example.demo.Model.Entity.Post;
 import com.example.demo.Model.Entity.UsersFavoritePost;
@@ -87,7 +88,11 @@ public class PostService {
                 postInfoService.SetPostInfo(postDTO);
                 postUserMapService.SetPostUserMap(postDTO);
                 postGameMapService.SetPostGameMap(postDTO);
-                gameSubProducer.SendGameSubNotification(postDTO);
+                NewPostNotificationDTO newPostNotificationDTO = new NewPostNotificationDTO();
+                newPostNotificationDTO.setPostId(postId);
+                newPostNotificationDTO.setGenreId(postDTO.getGenreId());
+                newPostNotificationDTO.setGameId(postDTO.getGameId());
+                gameSubProducer.SendGameSubNotification(newPostNotificationDTO);
             } else {
                 return null;
             }

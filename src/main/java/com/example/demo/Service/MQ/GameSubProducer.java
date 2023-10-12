@@ -1,5 +1,6 @@
 package com.example.demo.Service.MQ;
 
+import com.example.demo.Model.DTO.NewPostNotificationDTO;
 import com.example.demo.Model.DTO.PostDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,9 @@ public class GameSubProducer {
     private Topic NewPost;
 
     @Async("MultiExecutor")
-    public void SendGameSubNotification(PostDTO postDTO) throws JMSException {
+    public void SendGameSubNotification(NewPostNotificationDTO newPostNotificationDTO) throws JMSException {
         String topicName = NewPost.getTopicName();
-        jmsTemplate.convertAndSend(topicName, postDTO);
+        jmsTemplate.convertAndSend(topicName, newPostNotificationDTO);
         logger.info("Topic sent:" + topicName);
     }
 }
