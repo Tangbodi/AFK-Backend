@@ -75,7 +75,7 @@ public class RedisUserLikeSaveService {
             //
         }
         //postId/commentId/replyId -> userId -> 1/0
-//        redisService.AddTimeLimitedHashSet(key, hashKey, value);
+        redisService.AddTimeLimitedHashSet(key, hashKey, value);
         redisService.AddHashSet(updateKey, hashKey, value);
         //update status from Redis to DB
         UpdateUserLikeSaveStatusFromRedisToDB(key, userLikeSaveDTO);
