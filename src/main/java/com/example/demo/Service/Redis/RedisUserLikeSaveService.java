@@ -75,7 +75,7 @@ public class RedisUserLikeSaveService {
             //
         }
         //postId/commentId/replyId -> userId -> 1/0
-        redisService.AddTimeLimitedHashSet(key, hashKey, value);
+//        redisService.AddTimeLimitedHashSet(key, hashKey, value);
         redisService.AddHashSet(updateKey, hashKey, value);
         //update status from Redis to DB
         UpdateUserLikeSaveStatusFromRedisToDB(key, userLikeSaveDTO);
@@ -84,7 +84,6 @@ public class RedisUserLikeSaveService {
     @Async("MultiExecutor")
     public void UpdateUserLikeSaveStatusFromRedisToDB(String key, UserLikeSaveDTO userLikeSaveDTO) throws InterruptedException {
         logger.info("Updating user like save status from Redis to DB");
-        Thread.sleep(1000);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
