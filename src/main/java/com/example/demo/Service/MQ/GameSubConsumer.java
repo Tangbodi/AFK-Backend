@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class GameSubConsumer {
     private static final Logger logger = LoggerFactory.getLogger(GameSubConsumer.class);
-    private static final String USER_SETTING = "USER_SETTING";
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
     private static final String TypeId = "7";
     @Autowired
     private UserFavoriteGameRepository userFavoriteGameRepository;
@@ -45,7 +45,7 @@ public class GameSubConsumer {
                 String gameName = gameRepository.findById(newPostNotificationDTO.getGameId()).get().getGameName();
                 for(Map<Short, Object> map : userSavedGameAndMentionOn){
                     Long userId = Long.valueOf(map.get("user_id").toString());
-                    if (redisService.MemberExists(USER_SETTING, userId)) {
+                    if (redisService.CacheExists(MESSAGE_MENTION_KEY + userId)) {
                         logger.info("User is online: {}");
                         List<MessageVO> unreadMessage = redisMessageService.GetUnreadMessageFromRedis(userId);
                         MessageVO messageVO = new MessageVO();
