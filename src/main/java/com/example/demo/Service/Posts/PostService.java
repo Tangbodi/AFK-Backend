@@ -13,7 +13,7 @@ import com.example.demo.Model.VO.ShowPostBodyVO;
 import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Service.IP.IpAddressService;
-import com.example.demo.Service.MQ.GameSubProducer;
+import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.jsoup.Jsoup;
@@ -24,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +51,7 @@ public class PostService {
     @Autowired
     private UserFavoritePostRepository userFavoritePostRepository;
     @Autowired
-    private GameSubProducer gameSubProducer;
+    private MQSender mqSender;
 
     @Transactional(rollbackOn = Exception.class)
     public PostSavedVO SavePost(PostDTO postDTO) throws Exception {
@@ -92,7 +90,8 @@ public class PostService {
                 newPostNotificationDTO.setPostId(postId);
                 newPostNotificationDTO.setGenreId(postDTO.getGenreId());
                 newPostNotificationDTO.setGameId(postDTO.getGameId());
-                gameSubProducer.SendGameSubNotification(newPostNotificationDTO);
+                newPostNotificationDTO.setUserId(postDTO.getUserId());
+                mqSender.SendNewPostNotification(newPostNotificationDTO);
             } else {
                 return null;
             }

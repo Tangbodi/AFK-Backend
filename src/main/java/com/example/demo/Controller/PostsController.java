@@ -46,6 +46,7 @@ import java.util.Map;
 @RequestMapping("/all-games-genres")
 public class PostsController {
     private static final Logger logger = LoggerFactory.getLogger(PostsController.class);
+    private static final int MAX_IMAGE_LENGTH = 9;
     @Autowired
     private PostService postService;
     @Autowired
@@ -230,7 +231,7 @@ public class PostsController {
         Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to share your images");
-        } else if (!images[0].isEmpty() && images.length <= 9) {
+        } else if (!images[0].isEmpty() && images.length <= MAX_IMAGE_LENGTH) {
             try {
                 List<String> postImageNameList = postImageService.SavePostImageToServer(images);
                 if (!postImageNameList.isEmpty()) {

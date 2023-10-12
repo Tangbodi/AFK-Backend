@@ -5,6 +5,7 @@ import com.example.demo.Mapper.Repository.CommentRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Mapper.Repository.ReplyRepository;
 import com.example.demo.Model.DTO.*;
+import com.example.demo.Service.UserFavoriteGame.UserFavoriteGameService;
 import com.example.demo.Service.UserSettings.CommentOnPostMentionService;
 import com.example.demo.Service.EmailValidation.ProcessEmailService;
 import com.example.demo.Service.Message.MessageService;
@@ -37,6 +38,8 @@ public class RedisStrategy {
     private MessageService messageService;
     @Autowired
     private CommentOnPostMentionService commentOnPostMentionService;
+    @Autowired
+    private UserFavoriteGameService userFavoriteGameService;
     @Autowired
     private RedisUserSettingService redisUserSettingService;
     @Autowired
@@ -93,5 +96,9 @@ public class RedisStrategy {
     public void UserSettingStrategy(UserSettingDTO userSettingDTO) throws IOException {
         logger.info("Start UserSettingStrategy");
         redisUserSettingService.HandleUserSettingStrategy(userSettingDTO);
+    }
+    public void NewPostNotificationStrategy(NewPostNotificationDTO newPostNotificationDTO) throws IOException {
+        logger.info("Start NewPostNotificationStrategy");
+        userFavoriteGameService.HandleNewPostNotificationStrategy(newPostNotificationDTO);
     }
 }

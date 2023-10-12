@@ -1,6 +1,9 @@
 package com.example.demo.Service.MQ;
 
+import com.example.demo.Mapper.Repository.GameRepository;
+import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
 import com.example.demo.Model.DTO.*;
+import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Service.Redis.RedisStrategy;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import org.slf4j.Logger;
@@ -11,10 +14,15 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class MQReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MQReceiver.class);
+    private static final String TypeId = "7";
+
     @Autowired
     private RedisStrategy redisStrategy;
 
@@ -199,6 +207,23 @@ public class MQReceiver {
         } catch (Exception e) {
             logger.error("Unhandled Exception while processing message: " + e.getMessage(), e);
             // Optionally, throw a custom exception or take other appropriate action
+        }
+    }
+    @JmsListener(destination = "new-post-redis",containerFactory = "activeMQFactory")
+    public void NewPostNotificationHandle(Message message) {
+        // Implement logic to send notifications to subscribed users.
+        try {
+            ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
+            NewPostNotificationDTO newPostNotificationDTO = (NewPostNotificationDTO) activeMqObjectMessage.getObject();
+            try {
+                redisStrategy.NewPostNotificationStrategy(newPostNotificationDTO);
+            } catch (Exception e) {
+                logger.error("Error processing message for User: " + newPostNotificationDTO.getGameId(), e);
+            }
+        } catch (JMSException e) {
+            logger.error("JMS Exception while processing message: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unhandled Exception while processing message: " + e.getMessage(), e);
         }
     }
 }

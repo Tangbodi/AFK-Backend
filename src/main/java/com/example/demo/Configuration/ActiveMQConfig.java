@@ -38,7 +38,7 @@ public class ActiveMQConfig {
     @Bean
     public Queue UserSettingQueue() {return new ActiveMQQueue("user-setting-redis");}
     @Bean
-    public Topic NewPost() {return new ActiveMQTopic("new-post-redis");}
+    public Queue NewPost() {return new ActiveMQQueue("new-post-redis");}
     @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();

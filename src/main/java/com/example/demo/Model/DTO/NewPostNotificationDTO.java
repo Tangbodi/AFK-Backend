@@ -9,5 +9,6 @@ public class NewPostNotificationDTO implements Serializable {
     private Byte genreId;
     private Short gameId;
     private Long postId;
+    private Long userId;
 
 }

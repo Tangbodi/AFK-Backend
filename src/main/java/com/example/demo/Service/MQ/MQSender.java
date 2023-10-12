@@ -34,6 +34,8 @@ public class MQSender {
     private Queue ForgotPasswordQueue;
     @Autowired
     private Queue UserSettingQueue;
+    @Autowired
+    private Queue NewPost;
 
     @Async("MultiExecutor")
     public void SendUserRegistrationMessage(UserRegisterDTO userRegisterDTO) throws JMSException, InterruptedException {
@@ -96,5 +98,11 @@ public class MQSender {
         String queueName = UserSettingQueue.getQueueName();
         jmsMessagingTemplate.convertAndSend(queueName, userSettingDTO);
         logger.info("Message sent, User: " + userSettingDTO.getUserId());
+    }
+    @Async("MultiExecutor")
+    public void SendNewPostNotification(NewPostNotificationDTO newPostNotificationDTO) throws JMSException {
+        String topicName = NewPost.getQueueName();
+        jmsMessagingTemplate.convertAndSend(topicName, newPostNotificationDTO);
+        logger.info("Topic sent:" + topicName);
     }
 }

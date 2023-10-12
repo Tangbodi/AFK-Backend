@@ -1,11 +1,15 @@
 package com.example.demo.Service.UserFavoriteGame;
 
 import com.example.demo.Constant.Enum.ObjectNameEnum;
+import com.example.demo.Mapper.Repository.GameRepository;
 import com.example.demo.Mapper.Repository.UserFavoriteGameRepository;
+import com.example.demo.Model.DTO.NewPostNotificationDTO;
 import com.example.demo.Model.Entity.UsersFavoriteGame;
 import com.example.demo.Model.Entity.UsersFavoriteGameId;
+import com.example.demo.Model.VO.MessageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Redis.RedisGameIconService;
+import com.example.demo.Service.Redis.RedisMessageService;
 import com.example.demo.Service.Redis.RedisService;
 import com.example.demo.Service.Redis.RedisUserFavoriteGameService;
 import org.slf4j.Logger;
@@ -26,6 +30,9 @@ import java.util.Map;
 public class UserFavoriteGameService {
     private static final Logger logger = LoggerFactory.getLogger(UserFavoriteGameService.class);
     private static final String SAVED_GAME = ObjectNameEnum.SAVED_GAME_SET.getTypeName();
+    private static final String MESSAGE_MENTION_KEY = "UNREAD:";
+    private static final String TypeId = "7";
+    private static final String NEW_POST_NOTIFICATION = "New post in ";
     @Autowired
     private UserFavoriteGameRepository userFavoriteGameRepository;
     @Lazy
@@ -33,6 +40,10 @@ public class UserFavoriteGameService {
     private RedisUserFavoriteGameService redisUserFavoriteGameService;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private RedisMessageService redisMessageService;
+    @Autowired
+    private GameRepository gameRepository;
 
 
     @Transactional
@@ -112,5 +123,39 @@ public class UserFavoriteGameService {
         }
         return Collections.emptyList();
     }
-
+    public void HandleNewPostNotificationStrategy(NewPostNotificationDTO newPostNotificationDTO){
+        logger.info("Finding user saved game and mention on");
+        try {
+            logger.info("Sending new post notification");
+            List<Map<Short, Object>> userSavedGameAndMentionOn = userFavoriteGameRepository.findUserSavedGameAndMentionOn(newPostNotificationDTO.getGameId());
+            if (!userSavedGameAndMentionOn.isEmpty()) {
+                String gameName = gameRepository.findById(newPostNotificationDTO.getGameId()).get().getGameName();
+                for(Map<Short, Object> map : userSavedGameAndMentionOn){
+                    Long userId = Long.valueOf(map.get("user_id").toString());
+                    if(userId.equals(newPostNotificationDTO.getUserId())){
+                        continue;
+                    } else {
+                        if (redisService.CacheExists(MESSAGE_MENTION_KEY + userId)) {
+                            logger.info("User is online: {}");
+                            List<MessageVO> unreadMessage = redisMessageService.GetUnreadMessageFromRedis(userId);
+                            MessageVO messageVO = new MessageVO();
+                            messageVO.setContent(NEW_POST_NOTIFICATION + gameName);
+                            messageVO.setGenreId(newPostNotificationDTO.getGenreId().toString());
+                            messageVO.setGameId(newPostNotificationDTO.getGameId().toString());
+                            messageVO.setPostId(newPostNotificationDTO.getPostId().toString());
+                            messageVO.setTypeId(TypeId);
+                            unreadMessage.add(messageVO);
+                            redisMessageService.UpdateUnreadMessageFromRedis(unreadMessage);
+                        } else {
+                            logger.info("User is offline: {}");
+                        }
+                    }
+                }
+            } else {
+                logger.info("No user subscribed to this game or mention on");
+            }
+        } catch (Exception e) {
+            logger.error("Error occurred when sending new post notification: " + e.getMessage(), e);
+        }
+    }
 }

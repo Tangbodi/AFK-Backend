@@ -157,7 +157,7 @@ public class PostInfoService {
     public void CalculatePostTotalSave(List<Long> postIds){
         logger.info("Finding all users favorite post list with save status = 1");
         for(Long postId: postIds){
-            Map<String,Object> map = userFavoritePostRepository.findPostTotalLikeBySaveStatus(postId);
+            Map<String,Object> map = userFavoritePostRepository.findPostTotalSaveBySaveStatus(postId);
             Integer totalSave = ((BigInteger) map.get("total_save")).intValue();
             logger.info("Total save: {}",totalSave);
             //Update post save count

@@ -84,7 +84,7 @@ public class RedisUserLikeSaveService {
     @Async("MultiExecutor")
     public void UpdateUserLikeSaveStatusFromRedisToDB(String key, UserLikeSaveDTO userLikeSaveDTO) throws InterruptedException {
         logger.info("Updating user like save status from Redis to DB");
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
