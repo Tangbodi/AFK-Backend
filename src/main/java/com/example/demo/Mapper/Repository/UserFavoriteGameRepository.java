@@ -23,4 +23,10 @@ public interface UserFavoriteGameRepository extends JpaRepository<UsersFavoriteG
     @Query(value = "DELETE FROM afk.users_favorite_games WHERE user_id = :userId", nativeQuery = true)
     void deleteAllFavoriteGamesByUserId(@Param("userId") Long userId);
 
+    @Query(value = "SELECT posgm.user_id FROM afk.users_favorite_games ufg \n" +
+            "JOIN post_on_saved_game_mentions posgm ON ufg.user_id = posgm.user_id\n" +
+            "WHERE ufg.favorite_status = 1 \n" +
+            "AND ufg.game_id = :gameId \n" +
+            "AND posgm.mention_on = 1", nativeQuery = true)
+    List<Map<Short, Object>> findUserSavedGameAndMentionOn(@Param("gameId") Short gameId);
 }

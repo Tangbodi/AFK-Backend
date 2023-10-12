@@ -5,7 +5,6 @@ import com.example.demo.Model.VO.GameIconVO;
 import com.example.demo.Model.VO.HomeGameImageVO;
 import com.example.demo.Model.VO.UserFavoriteGameVO;
 import com.example.demo.Service.Games.GameGenreMapService;
-import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisGameIconService;
@@ -40,8 +39,6 @@ public class GamesController {
     private GameIconService gameIconService;
     @Autowired
     private RedisService redisService;
-    @Autowired
-    private GameGenreService gameGenreService;
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired

@@ -11,7 +11,9 @@ public enum ObjectNameEnum {
     REPLY_LIKE_SET(2, "REPLY_LIKE"),
     POST_SAVE_SET(3, "POST_SAVE"),
     SAVED_GAME_SET(4, "SAVED_GAME");
-
+    //5 comment
+    //6 reply
+    //7 newPost
     private int typeCode;
 
     private String typeName;

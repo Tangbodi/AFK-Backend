@@ -12,6 +12,7 @@ import com.example.demo.Model.VO.ShowPostBodyVO;
 import com.example.demo.Mapper.Repository.PostGameMapRepository;
 import com.example.demo.Mapper.Repository.PostRepository;
 import com.example.demo.Service.IP.IpAddressService;
+import com.example.demo.Service.MQ.GameSubProducer;
 import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.jsoup.Jsoup;
@@ -50,6 +51,8 @@ public class PostService {
     private PostUserMapService postUserMapService;
     @Autowired
     private UserFavoritePostRepository userFavoritePostRepository;
+    @Autowired
+    private GameSubProducer gameSubProducer;
 
     @Transactional(rollbackOn = Exception.class)
     public PostSavedVO SavePost(PostDTO postDTO) throws Exception {
@@ -84,6 +87,7 @@ public class PostService {
                 postInfoService.SetPostInfo(postDTO);
                 postUserMapService.SetPostUserMap(postDTO);
                 postGameMapService.SetPostGameMap(postDTO);
+                gameSubProducer.SendGameSubNotification(postDTO);
             } else {
                 return null;
             }

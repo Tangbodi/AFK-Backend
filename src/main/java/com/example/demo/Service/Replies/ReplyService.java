@@ -27,6 +27,7 @@ import java.util.Map;
 @Service
 public class ReplyService {
     private static final Logger logger = LoggerFactory.getLogger(ReplyService.class);
+    private static final Integer TypeId = 6;
     @Autowired
     private ReplyRepository replyRepository;
     @Autowired
@@ -48,7 +49,7 @@ public class ReplyService {
             long replyId = Snowflake.generateUniqueId();
             commentReplyDTO.setReplyId(replyId);
             commentReplyDTO.setCreatedAt(Instant.now());
-            commentReplyDTO.setTypeId(6);
+            commentReplyDTO.setTypeId(TypeId);
             PostReply postReply = new PostReply();
             postReply.setId(replyId);
             postReply.setCommentId(commentReplyDTO.getCommentId());

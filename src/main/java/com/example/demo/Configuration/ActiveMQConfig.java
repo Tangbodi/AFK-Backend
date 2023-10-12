@@ -1,6 +1,8 @@
 package com.example.demo.Configuration;
 
+
 import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +10,7 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
+import javax.jms.Topic;
 
 @Configuration
 public class ActiveMQConfig {
@@ -34,6 +37,8 @@ public class ActiveMQConfig {
     public Queue ForgotPasswordQueue() {return new ActiveMQQueue("forgot-password-redis");}
     @Bean
     public Queue UserSettingQueue() {return new ActiveMQQueue("user-setting-redis");}
+    @Bean
+    public Topic NewPost() {return new ActiveMQTopic("new-post-redis");}
     @Bean
     public DefaultJmsListenerContainerFactory activeMQFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configure) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();

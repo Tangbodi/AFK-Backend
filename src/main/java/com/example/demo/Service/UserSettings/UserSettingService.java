@@ -151,7 +151,6 @@ public class UserSettingService {
     public Map<String, Object> GetUserSetting(Long userId) {
         logger.info("Getting User Setting: {}", userId);
         try {
-            String key = USER_SETTING + ":::" + userId;
             if (redisService.MemberExists(USER_SETTING, userId)) {
                 logger.info("USER_SETTING exists in Redis cache: {}");
             } else {
@@ -161,6 +160,7 @@ public class UserSettingService {
             List<Map<Short, Object>> userSetting = commentOnPostMentionRepository.findSettingByUserId(userId);
             if (!userSetting.isEmpty()) {
                 logger.info("User Setting found: {}", userId);
+                String key = USER_SETTING + ":::" + userId;
                 Map<String, Object> userSettingVOMap = TransferToUserSettingVO(userSetting);
                 redisService.AddHashSet(key, userId.toString(), userSettingVOMap);
                 return userSettingVOMap;

@@ -11,7 +11,6 @@ import com.example.demo.Model.DTO.TypeDTO;
 import com.example.demo.Model.VO.*;
 import com.example.demo.Service.Comments.CommentService;
 import com.example.demo.Service.Games.GameGenreMapService;
-import com.example.demo.Service.Games.GameGenreService;
 import com.example.demo.Service.Games.GameIconService;
 import com.example.demo.Service.IP.IpService;
 import com.example.demo.Service.Posts.PostGameMapService;
@@ -53,8 +52,6 @@ public class PostsController {
     private IpService ipService;
     @Autowired
     private UserInfoService userInfoService;
-    @Autowired
-    private GameGenreService gameGenreService;
     @Autowired
     private CommentService commentService;
     @Autowired

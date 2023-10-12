@@ -26,7 +26,7 @@ import java.util.Map;
 public class MessageService {
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
-    private static final int MENTIONED_MESSAGE_LENGTH = 33;
+    private static final int MENTIONED_MESSAGE_LENGTH = 39;
     private static final String MENTIONED_MESSAGE_SUFFIX = "...";
     @Autowired
     private MessageRepository messageRepository;

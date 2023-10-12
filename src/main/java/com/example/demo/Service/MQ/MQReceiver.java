@@ -46,7 +46,6 @@ public class MQReceiver {
             ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
             UserLikeSaveDTO userLikeSaveDTO = (UserLikeSaveDTO) activeMqObjectMessage.getObject();
             Integer status = userLikeSaveDTO.getStatus();
-
             try {
                 //save game active
                 if (userLikeSaveDTO.getTypeId() == 4) {

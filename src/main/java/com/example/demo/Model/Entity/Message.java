@@ -18,11 +18,11 @@ public class Message {
     @Column(name = "message_id", nullable = false)
     private Long id;
     @NotNull
-    @Column(name = "post_id", nullable = false)
+    @Column(name = "post_id")
     private Long postId;
     
     @NotNull
-    @Column(name = "comment_reply_id", nullable = false)
+    @Column(name = "comment_reply_id")
     private Long commentReplyId;
 
     @Size(max = 4095)
@@ -31,7 +31,7 @@ public class Message {
     private String content;
 
     @NotNull
-    @Column(name = "from_uid", nullable = false)
+    @Column(name = "from_uid")
     private Long fromUid;
 
     @NotNull

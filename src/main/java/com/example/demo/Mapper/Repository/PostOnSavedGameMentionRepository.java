@@ -12,4 +12,5 @@ public interface PostOnSavedGameMentionRepository extends JpaRepository<PostOnSa
     @Modifying
     @Query(value = "UPDATE afk.post_on_saved_game_mentions SET mention_on = :status WHERE user_id = :userId", nativeQuery = true)
     void UpdateStatus(@Param("status") Integer status, @Param("userId") Long userId);
+
 }

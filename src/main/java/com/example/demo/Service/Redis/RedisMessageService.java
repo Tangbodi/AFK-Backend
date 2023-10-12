@@ -87,7 +87,23 @@ public class RedisMessageService {
         }
         return Collections.emptyList();
     }
-
+    public void UpdateUnreadMessageFromRedis(List<MessageVO> updatedMessage){
+        logger.info("Updating unread message cache");
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String new_unread_json = objectMapper.writeValueAsString(updatedMessage);
+            Long userId = Long.valueOf(updatedMessage.get(0).getToUid());
+            jedis.set(MESSAGE_MENTION_KEY + userId, new_unread_json);
+            jedis.expire(MESSAGE_MENTION_KEY + userId, 1800);
+        } catch (Exception e) {
+            logger.error("Failed to update unread message cache: {}", e.getMessage(), e);
+        } finally {
+            if (null != jedis)
+                logger.info("Closing the jedis connection:::");
+            jedis.close();
+        }
+    }
     public void DeleteUnreadMessage(Long userId) {
         logger.info("Deleting user read status cache: userId = {}", userId);
         Jedis jedis = null;

@@ -34,6 +34,7 @@ public class CommentService {
     private static final String COMMENT = "comment";
     private static final String REPLY = "reply";
     private static final String MESSAGE_MENTION_KEY = "UNREAD:";
+    private static final Integer TypeId = 5;
     @Autowired
     private CommentRepository commentRepository;
     @Lazy
@@ -63,7 +64,7 @@ public class CommentService {
             long commentId = Snowflake.generateUniqueId();
             commentReplyDTO.setCommentId(commentId);
             commentReplyDTO.setCreatedAt(Instant.now());
-            commentReplyDTO.setTypeId(5);
+            commentReplyDTO.setTypeId(TypeId);
             PostComment postComment = new PostComment();
             postComment.setId(commentId);
             postComment.setContent(commentReplyDTO.getContent());
