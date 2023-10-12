@@ -34,12 +34,13 @@ public class GameSubConsumer {
     private MessageRepository messageRepository;
     @Autowired
     private RedisMessageService redisMessageService;
-    @JmsListener(destination = "new-post-redis", containerFactory = "activeMQFactory")
+    @JmsListener(destination = "new-post-redis")
     public void NewPostNotification(Message message) throws JMSException {
         // Implement logic to send notifications to subscribed users.
         ActiveMQObjectMessage activeMqObjectMessage = (ActiveMQObjectMessage) message;
         NewPostNotificationDTO newPostNotificationDTO = (NewPostNotificationDTO) activeMqObjectMessage.getObject();
         try {
+            logger.info("Sending new post notification");
             List<Map<Short, Object>> userSavedGameAndMentionOn = userFavoriteGameRepository.findUserSavedGameAndMentionOn(newPostNotificationDTO.getGameId());
             if (!userSavedGameAndMentionOn.isEmpty()) {
                 String gameName = gameRepository.findById(newPostNotificationDTO.getGameId()).get().getGameName();
@@ -62,7 +63,7 @@ public class GameSubConsumer {
                     }
                 }
             } else {
-                //
+                logger.info("No user subscribed to this game or mention on");
             }
         } catch (Exception e) {
             logger.error("Error occurred when sending new post notification: " + e.getMessage(), e);
