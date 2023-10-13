@@ -16,8 +16,8 @@ import javax.validation.constraints.Size;
 @Table(name = "games")
 public class Game {
     @Id
-    @Column(name = "game_id", columnDefinition = "SMALLINT UNSIGNED not null")
-    private Integer id;
+    @Column(name = "game_id", nullable = false)
+    private Short id;
 
     @Size(max = 127)
     @NotNull

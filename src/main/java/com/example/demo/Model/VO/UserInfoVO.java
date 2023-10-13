@@ -14,6 +14,6 @@ public class UserInfoVO {
     private String email;
     private String avatarUrl;
     private String JSESSIONID;
-    private Instant createdAt;
-    private Instant modifiedAt;
+    private String createdAt;
+    private String modifiedAt;
 }

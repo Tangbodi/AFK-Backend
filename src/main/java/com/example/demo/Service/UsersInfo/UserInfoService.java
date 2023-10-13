@@ -12,6 +12,7 @@ import com.example.demo.Model.Entity.UsersLogin;
 import com.example.demo.Model.VO.UserInfoVO;
 import com.example.demo.Service.Redis.RedisEmailService;
 import com.example.demo.Service.UsersVerification.UserVerificationService;
+import com.example.demo.Util.DateTimeConverter;
 import com.example.demo.Util.Snowflake;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ public class UserInfoService {
     //    private static final String AVATAR_URL = "http://31.220.21.110:8180/IMAGE/AVATAR/";
     private static final String AVATAR_URL = "https://www.away-from-keyboard.com/IMAGE/AVATAR/";
     private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat2/webapps/IMAGE/AVATAR/";
-    private static final String USER_SETTING = "USER_SETTING";
 
     //    private static final String NGINX_AVATAR_PATH = "/usr/local/nginx2/html/IMAGE/AVATAR/";
     @Autowired
@@ -184,8 +184,10 @@ public class UserInfoService {
         userInfoVO.setUsername(userInfoDTO.getUsername());
         userInfoVO.setEmail(userInfoDTO.getEmail());
         userInfoVO.setAvatarUrl(userInfoDTO.getAvatarUrl());
-        userInfoVO.setCreatedAt(userInfoDTO.getCreatedAt());
-        userInfoVO.setModifiedAt(userInfoDTO.getModifiedAt());
+        String formattedCreatedDateTime = DateTimeConverter.DateTimeConvertFromInstant(userInfoDTO.getCreatedAt());
+        String formattedModifiedDateTime = DateTimeConverter.DateTimeConvertFromInstant(userInfoDTO.getModifiedAt());
+        userInfoVO.setCreatedAt(formattedCreatedDateTime);
+        userInfoVO.setModifiedAt(formattedModifiedDateTime);
         return userInfoVO;
     }
 
@@ -315,7 +317,8 @@ public class UserInfoService {
         }
         return false;
     }
-    private String CapitalizeFirstLetter(String username){
+
+    private String CapitalizeFirstLetter(String username) {
         return username.substring(0, 1).toUpperCase() + username.substring(1).toLowerCase();
     }
 }

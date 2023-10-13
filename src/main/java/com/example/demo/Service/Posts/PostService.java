@@ -90,7 +90,8 @@ public class PostService {
                 newPostNotificationDTO.setPostId(postId);
                 newPostNotificationDTO.setGenreId(postDTO.getGenreId());
                 newPostNotificationDTO.setGameId(postDTO.getGameId());
-                newPostNotificationDTO.setUserId(postDTO.getUserId());
+                newPostNotificationDTO.setAuthorId(postDTO.getUserId());
+                newPostNotificationDTO.setCreatedAt(postDTO.getCreatedAt());
                 mqSender.SendNewPostNotification(newPostNotificationDTO);
             } else {
                 return null;
