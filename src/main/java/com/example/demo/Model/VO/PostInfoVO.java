@@ -9,6 +9,7 @@ public class PostInfoVO {
     private String postId;
     private String title;
     private String username;
+    private String avatarUrl;
     private String view;
     private String reply;
     private String like;

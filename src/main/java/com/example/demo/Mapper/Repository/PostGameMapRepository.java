@@ -27,7 +27,7 @@ public interface PostGameMapRepository extends JpaRepository<PostsGamesMap, Long
             "LIMIT 6;", nativeQuery = true)
     List<Map<String, Object>> findLatestPostsGamesMap();
 
-    @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment_reply, pi.like, pi.save , ui.username, pgm.created_at\n" +
+    @Query(value = "SELECT pgm.post_id, p.title, pi.view, pi.comment_reply, pi.like, pi.save , ui.username, ifnull(ui.avatar_url,''） AS avatar_url, pgm.created_at\n" +
             "FROM afk.posts_games_map pgm \n" +
             "JOIN afk.posts_info pi ON pi.post_id = pgm.post_id \n" +
             "JOIN afk.posts p ON p.post_id = pgm.post_id\n" +
