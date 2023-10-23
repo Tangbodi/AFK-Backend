@@ -33,7 +33,8 @@ import java.util.Map;
 @Service
 public class PostService {
     private static final Logger logger = LoggerFactory.getLogger(PostService.class);
-
+    private static final int MAX_TEXT_RENDER = 297;
+    private static final int MAX_TITLE = 90;
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -192,7 +193,16 @@ public class PostService {
                     searchPostVO.setPostId(String.valueOf(result.get("post_id")));
                     searchPostVO.setGameId(String.valueOf(result.get("game_id")));
                     searchPostVO.setGenreId(String.valueOf(result.get("genre_id")));
-                    searchPostVO.setTitle(String.valueOf(result.get("title")));
+                    if (String.valueOf(result.get("title")).length() >= MAX_TITLE) {
+                        searchPostVO.setTitle(String.valueOf(result.get("title")).substring(0, MAX_TITLE) + "...");
+                    } else {
+                        searchPostVO.setTitle(String.valueOf(result.get("title")));
+                    }
+                    if (String.valueOf(result.get("text_render")).length() >= MAX_TEXT_RENDER) {
+                        searchPostVO.setTextRender(String.valueOf(result.get("text_render")).substring(0, MAX_TEXT_RENDER) + "...");
+                    } else {
+                        searchPostVO.setTextRender(String.valueOf(result.get("text_render")));
+                    }
                     searchPostVO.setTextRender(String.valueOf(result.get("text_render")));
                     searchPostVOList.add(searchPostVO);
                 }
