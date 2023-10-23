@@ -1,6 +1,7 @@
 package com.example.demo.Service.News;
 
-import com.example.demo.Constant.Enum.NewsEnum;
+import com.example.demo.Constant.Enum.NewsMediaEnum;
+import com.example.demo.Constant.Enum.NewsRSSEnum;
 import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.Entity.News;
 import com.example.demo.Util.Snowflake;
@@ -40,7 +41,7 @@ public class GameRantNewsService {
 
     public void ProxyXML(Integer gameId) {
         logger.info("Starting proxy XML for gameId: {}",gameId);
-        String rssFeedUrl = NewsEnum.GetRSSUrl(gameId);
+        String rssFeedUrl = NewsRSSEnum.GetRSSUrl(gameId);
         logger.info("rssFeedUrl: {}",rssFeedUrl);
         try{
             HttpClient httpClient = HttpClientBuilder.create().build();
@@ -106,7 +107,11 @@ public class GameRantNewsService {
 
                 String mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
-                news.setMediaContentUrl(mediaContentUrl);
+                if (mediaContentUrl != null && !mediaContentUrl.isEmpty()){
+                    news.setMediaContentUrl(mediaContentUrl);
+                } else {
+                    news.setMediaContentUrl(NewsMediaEnum.GetMediaUrl(gameId));
+                }
 
                 if(newsRepository.save(news)!= null){;
                     logger.info("News saved");

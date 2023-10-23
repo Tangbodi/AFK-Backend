@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum NewsEnum {
+public enum NewsRSSEnum {
     STARDEW_VALLEY(102,"http://steamcommunity.com/games/413150/rss/"),//1
     DOTA2(123,"http://steamcommunity.com/games/dota2/rss/"),//1
     THE_WITCHER_3(126,"http://steamcommunity.com/games/292030/rss/"),//1
@@ -51,17 +51,17 @@ public enum NewsEnum {
     private final String RSSUrl;
 
     public static String GetRSSUrl(Integer gameId) {
-        for (NewsEnum newsEnum : NewsEnum.values()) {
-            if (gameId.equals(newsEnum.getGameId())) {
-                return newsEnum.getRSSUrl();
+        for (NewsRSSEnum newsRSSEnum : NewsRSSEnum.values()) {
+            if (gameId.equals(newsRSSEnum.getGameId())) {
+                return newsRSSEnum.getRSSUrl();
             }
         }
         return null;
     }
     public static Integer GetGameId (String RSSUrl) {
-        for (NewsEnum newsEnum : NewsEnum.values()) {
-            if (RSSUrl.equals(newsEnum.getRSSUrl())) {
-                return newsEnum.getGameId();
+        for (NewsRSSEnum newsRSSEnum : NewsRSSEnum.values()) {
+            if (RSSUrl.equals(newsRSSEnum.getRSSUrl())) {
+                return newsRSSEnum.getGameId();
             }
         }
         return null;

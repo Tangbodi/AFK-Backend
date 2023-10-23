@@ -1,6 +1,7 @@
 package com.example.demo.Service.News;
 
-import com.example.demo.Constant.Enum.NewsEnum;
+import com.example.demo.Constant.Enum.NewsMediaEnum;
+import com.example.demo.Constant.Enum.NewsRSSEnum;
 import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.Entity.News;
 import com.example.demo.Service.Redis.RedisNewsService;
@@ -50,7 +51,7 @@ public class SteamNewsService {
 
     public void ProxyXML(Integer gameId) {
         logger.info("Starting proxy XML for gameId: {}", gameId);
-        String rssFeedUrl = NewsEnum.GetRSSUrl(gameId);
+        String rssFeedUrl = NewsRSSEnum.GetRSSUrl(gameId);
         Integer res = 0;
         logger.info("rssFeedUrl: {}", rssFeedUrl);
         if (rssFeedUrl.contains(SteamCommunity)) {
@@ -107,7 +108,7 @@ public class SteamNewsService {
                 logger.info("Parsed Description: {}" + content);
 //                news.setDescription(description);
                 news.setContent(content);
-                String descriptionHTML = content.length() >=MaxLength ? content.substring(0, MaxLength) : content;
+                String descriptionHTML = content.length() >= MaxLength ? content.substring(0, MaxLength) : content;
                 String cleanedDescription = RemoveHTMLTags(descriptionHTML);
                 news.setDescription(cleanedDescription);
                 if (res == 1) {
@@ -125,13 +126,17 @@ public class SteamNewsService {
                 }
                 String mediaContentUrl = "";
                 NodeList enclosures = item.getElementsByTagName("enclosure");
-                if(enclosures.getLength() > 0){
+                if (enclosures.getLength() > 0) {
                     mediaContentUrl = item.getElementsByTagName("enclosure").item(0).getAttributes().getNamedItem("url").getTextContent();
                 } else {
                     mediaContentUrl = ParseImage(content);
                 }
                 logger.info("MediaContentUrl: {}" + mediaContentUrl);
-                news.setMediaContentUrl(mediaContentUrl);
+                if (mediaContentUrl != null && !mediaContentUrl.isEmpty()) {
+                    news.setMediaContentUrl(mediaContentUrl);
+                } else {
+                    news.setMediaContentUrl(NewsMediaEnum.GetMediaUrl(gameId));
+                }
                 news.setId(newsId);
                 news.setLink(link);
 
@@ -178,17 +183,19 @@ public class SteamNewsService {
 //        cleanedDescription = Jsoup.parse(cleanedDescription).text();
         return cleanedString;
     }
+
     private static String RemoveHTMLTags(String description) {
         logger.info("Removing HTML Tags");
         // Remove CDATA section
-        String cleanedDescription= description.replaceAll("<.*?>", "");
-        if(cleanedDescription.contains("<")){
+        String cleanedDescription = description.replaceAll("<.*?>", "");
+        if (cleanedDescription.contains("<")) {
             int index = cleanedDescription.indexOf("<");
             cleanedDescription = cleanedDescription.substring(0, index);
         }
         // Remove HTML tags
         return cleanedDescription;
     }
+
     private static String ParseImage(String str) {
         logger.info("ParseImage:::");
         String imageSrc = "";
