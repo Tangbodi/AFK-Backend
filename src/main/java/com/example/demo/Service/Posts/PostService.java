@@ -183,15 +183,17 @@ public class PostService {
     public List<SearchPostVO> SearchByKeyword(String keyword) {
         logger.info("Searching by keyword: {}", keyword);
         try {
-            List<Post> postList = postRepository.findByKeyword(keyword);
-            if (postList != null) {
-                logger.info("Content found related to keyword: {}", keyword);
+            List<Map<Short, Object>> results = postRepository.findByKeyword(keyword);
+            if (!results.isEmpty()) {
+                logger.info("Results found related to keyword: {}");
                 List<SearchPostVO> searchPostVOList = new ArrayList<>();
-                for (Post post : postList) {
+                for (Map<Short,Object> result : results) {
                     SearchPostVO searchPostVO = new SearchPostVO();
-                    searchPostVO.setPostId(post.getId().toString());
-                    searchPostVO.setTitle(post.getTitle());
-                    searchPostVO.setTextRender(post.getTextRender());
+                    searchPostVO.setPostId(String.valueOf(result.get("post_id")));
+                    searchPostVO.setGameId(String.valueOf(result.get("game_id")));
+                    searchPostVO.setGenreId(String.valueOf(result.get("genre_id")));
+                    searchPostVO.setTitle(String.valueOf(result.get("title")));
+                    searchPostVO.setTextRender(String.valueOf(result.get("text_render")));
                     searchPostVOList.add(searchPostVO);
                 }
                 return searchPostVOList;
