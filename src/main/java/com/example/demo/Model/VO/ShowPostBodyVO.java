@@ -15,6 +15,7 @@ public class ShowPostBodyVO {
     private String gameName;
     private String userId;
     private String userName;
+    private String avatarURL;
     private String title;
     private String textRender;
     private String view;

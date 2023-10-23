@@ -154,6 +154,7 @@ public class PostService {
                 showPostBodyVO.setUserId(post.get("user_id").toString());
                 logger.info("User ID: {}", post.get("user_id"));
                 showPostBodyVO.setUserName(String.valueOf(post.get("username")));
+                showPostBodyVO.setAvatarURL(String.valueOf(post.get("avatar_url")));
                 showPostBodyVO.setTitle(String.valueOf(post.get("title")));
                 showPostBodyVO.setTextRender(String.valueOf(post.get("text_render")));
                 showPostBodyVO.setView(String.valueOf( post.get("view")));

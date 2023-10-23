@@ -32,8 +32,6 @@ public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
     private static final String AFK_GAME_NEWS = "AFK_GAME_NEWS:";
     private static final String ALL_AFK_GAME_NEWS = "ALL_AFK_GAME_NEWS";
-    private static final List<Integer> STEAM_SET = Arrays.asList(102, 123, 126, 129, 138, 201, 204, 225, 243, 405, 417, 423, 426, 315, 324, 231, 234, 207, 402, 249, 420, 507, 603, 609, 612, 618, 621, 624, 630, 135, 117);
-    private static final List<Integer> GAME_RANT_SET = Arrays.asList(447, 237, 111, 114, 210, 240, 516, 600);
 
     @Autowired
     private NewsService newsService;
@@ -42,29 +40,7 @@ public class NewsController {
     @Autowired
     private RedisNewsService redisNewsService;
     @Autowired
-    private SteamNewsService steamNewsService;
-    @Autowired
-    private GameRantNewsService gameRantNewsService;
-    @Autowired
     private GameGenreMapService gameGenreMapService;
-
-    @PostMapping("/set-game-news")
-    public ResponseEntity SetAllGameNewsCache() {
-        ApiResponse apiResponse;
-        redisNewsService.DeleteAllGameNewsCache();
-        redisNewsService.DeleteOneGameNewsListCache();
-        for (Integer gameId : STEAM_SET) {
-            steamNewsService.ProxyXML(gameId);
-        }
-        //Delete all news by source = GameRant for avoiding duplicate news
-        gameRantNewsService.DeleteNews();
-        for (Integer gameId : GAME_RANT_SET) {
-            gameRantNewsService.ProxyXML(gameId);
-        }
-        newsService.SetAllNews();
-        apiResponse = ApiResponse.success("Set all game news cache successfully");
-        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
-    }
 
     @GetMapping("/all-game-news")
     public ResponseEntity GetAllGameNewsCache( @RequestParam(value = "page") int page,
