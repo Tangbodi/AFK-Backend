@@ -30,7 +30,7 @@ public class UpdateReplyTotalLike {
     @Autowired
     private ReplyInfoService replyInfoService;
 
-    @Scheduled(fixedRate = 9000)
+    @Scheduled(fixedRate = 3000)
     @PutMapping("/update-reply-like")
     public ResponseEntity UpdateReplyTotalLike() {
         ApiResponse apiResponse;

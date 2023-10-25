@@ -30,7 +30,7 @@ public class UpdateCommentTotalLike {
     @Autowired
     private CommentInfoService commentInfoService;
 
-    @Scheduled(fixedRate = 9000)
+    @Scheduled(fixedRate = 3000)
     @PutMapping("/update-comment-like")
     public ResponseEntity UpdateCommentTotalLike() {
         ApiResponse apiResponse;
