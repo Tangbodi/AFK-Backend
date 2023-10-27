@@ -12,14 +12,14 @@ import java.util.Map;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<PostReply, Long> {
-    @Query(value = "SELECT pr.reply_id, pr.comment_id,ifnull(pr.to_reply_id,'0') AS to_reply_id, pr.from_uid, pr.to_uid, fui.username as fm_username, " +
-            "tui.username as to_username, ifnull(fui.avatar_url,'') AS fm_avatar_url, pr.content, ifnull(ulr.like_status,false) AS like_status, ifnull(ri.like, 0) AS like_num, pr.created_at\n" +
+    @Query(value = "SELECT pr.reply_id, pr.comment_id, IFNULL(pr.to_reply_id,'0') AS to_reply_id, pr.from_uid, pr.to_uid, fui.username AS fm_username, \n" +
+            "       tui.username AS to_username, IFNULL(fui.avatar_url,'') AS fm_avatar_url, pr.content, IFNULL(ulr.like_status, false) AS like_status, IFNULL(ri.like, 0) AS like_num, pr.created_at\n" +
             "FROM afk.post_replies pr\n" +
             "JOIN afk.post_comments pc ON pr.comment_id = pc.comment_id \n" +
+            "JOIN afk.replies_info ri ON pr.reply_id = ri.reply_id\n" +
             "LEFT JOIN afk.users_info fui ON pr.from_uid = fui.user_id\n" +
             "LEFT JOIN afk.users_info tui ON pr.to_uid = tui.user_id\n" +
             "LEFT JOIN afk.users_like_replies ulr ON pr.reply_id = ulr.reply_id\n" +
-            "LEFT JOIN afk.replies_info ri ON pr.reply_id = ri.reply_id\n" +
             "AND ulr.user_id = :userId\n" +
             "WHERE pc.comment_id IN  (:ids) ORDER BY pr.created_at ASC", nativeQuery = true)
     List<Map<String, Object>> findByCommentId(@Param("ids") List<Long> commentIds, @Param("userId") Long userId);
