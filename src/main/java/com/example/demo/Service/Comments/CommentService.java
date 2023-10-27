@@ -150,6 +150,7 @@ public class CommentService {
                 logger.info("Replies found");
                 //final result list
                 //traverse all comments and pick out replies with same comment id
+                logger.info("comment list:{}", commentsList);
                 for (Map<String, Object> comment : commentsList) {
                     //get comment id
                     Long commentId = ((BigInteger) comment.get("comment_id")).longValue();
