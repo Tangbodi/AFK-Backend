@@ -38,8 +38,7 @@ public class UsersController {
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
     @Autowired
     private UserRegistrationService userRegistrationService;
-    @Autowired
-    private ProcessEmailService processEmailService;
+
     @Autowired
     private UserAuthService userAuthService;
     @Autowired
@@ -52,8 +51,6 @@ public class UsersController {
     private UserLoginService userLoginService;
     @Autowired
     private MQSender mqSender;
-    @Autowired
-    private RedisMessageService redisMessageService;
     @Autowired
     private MessageService messageService;
     @Autowired

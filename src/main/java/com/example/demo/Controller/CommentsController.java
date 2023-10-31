@@ -34,14 +34,7 @@ public class CommentsController {
     private CommentService commentService;
     @Autowired
     private IpService ipService;
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private MessageService messageService;
-    @Autowired
-    private RedisMessageService redisMessageService;
-    @Autowired
-    private MQSender mqSender;
+
     @PostMapping("/edit-comment")
     public ResponseEntity EditComment(HttpServletRequest request, @Validated @RequestBody CommentReplyDTO commentReplyDTO, HttpSession session) {
         logger.info("EditComment");

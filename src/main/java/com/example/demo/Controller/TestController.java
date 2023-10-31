@@ -1,36 +1,31 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Constant.Enum.ReturnCode;
+import com.example.demo.Model.DTO.UserLikeSaveDTO;
+import com.example.demo.Util.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
 //@RestController
 //public class TestController {
-//    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
 //    @Autowired
-//    private RedisLikeSaveService redisLikeSaveService;
-//    @Autowired
-//    private UserLikeSaveService userLikeSaveService;
-//    @Autowired
-//    private KafkaTemplate<Object, Object> template;
+//    private KafkaTemplate<String, Object> kafkaTemplate;
+//    @Value("${kafka.like-save}")
+//    private String likeSaveTopic;
 //
-//    @PostMapping("/getData")
-//    public ResponseEntity getData() {
+//    //http:localhost:8080/api/v1/publish?message=hello
+//    @PostMapping("/publish")
+//    public ResponseEntity<String> publish(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpServletRequest request){
 //        ApiResponse apiResponse;
-//        Map<String,Map<String,String>> res = new HashMap();
-//        Set<String> postIds =  redisLikeSaveService.GetAllSetMembers("POST_LIKE");
-//        List<UsersFavoritePostId> postUserIdMap = new ArrayList<>();
-//        for(String postId: postIds){
-//            //userId,date
-//            Map<String, String> fieldValue = redisLikeSaveService.GetHashValue("POST_LIKE:::"+postId);
-//            fieldValue.entrySet().stream().forEach(entry -> {
-//                UsersFavoritePostId usersFavoritePostId = new UsersFavoritePostId();
-//                usersFavoritePostId.setPostId(Long.valueOf(postId));
-//                usersFavoritePostId.setUserId(Long.valueOf(entry.getKey()));
-//                postUserIdMap.add(usersFavoritePostId);
-//            });
-//        }
-//        for(UsersFavoritePostId usersFavoritePostId: postUserIdMap){
-//            userFavoritePostService.SetUserLikePost(usersFavoritePostId);
-//        }
-//        apiResponse = ApiResponse.success(postUserIdMap);
-//        return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
+//        kafkaTemplate.send(likeSaveTopic, userLikeSaveDTO);
+//        return ResponseEntity.ok("Published to like-save-redis successfully");
 //    }
-//
 //}

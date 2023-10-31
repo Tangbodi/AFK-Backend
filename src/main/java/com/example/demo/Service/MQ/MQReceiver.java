@@ -21,7 +21,6 @@ import java.util.Map;
 @Component
 public class MQReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MQReceiver.class);
-    private static final String TypeId = "7";
 
     @Autowired
     private RedisStrategy redisStrategy;

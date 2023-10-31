@@ -33,12 +33,6 @@ public class RepliesController {
     private ReplyService replyService;
     @Autowired
     private IpService ipService;
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private RedisMessageService redisMessageService;
-    @Autowired
-    private RedisService redisService;
 
 
     @PostMapping("/edit-reply")

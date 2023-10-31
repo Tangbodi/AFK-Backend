@@ -48,19 +48,12 @@ public class UsersInfoController {
     @Autowired
     private UserInfoService userInfoService;
     @Autowired
-    private UserVerificationService userVerificationService;
-    @Autowired
     private UserMailAddressService userMailAddressService;
-    @Autowired
-    private PostService postService;
     @Autowired
     private UserLikeSaveService userLikeSaveService;
     @Autowired
     private MessageService messageService;
-    @Autowired
-    private RedisEmailService redisEmailService;
-    @Autowired
-    private ProcessEmailService processEmailService;
+
     @Autowired
     private PostUserMapService postUserMapService;
     @Autowired

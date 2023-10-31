@@ -2,21 +2,22 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserLikeSaveDTO;
-import com.example.demo.Service.Comments.CommentInfoService;
 import com.example.demo.Service.MQ.MQSender;
-import com.example.demo.Service.Posts.PostInfoService;
-import com.example.demo.Service.Replies.ReplyInfoService;
 import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 @RestController
 @Validated
@@ -24,13 +25,7 @@ import javax.servlet.http.HttpSession;
 public class UserLikeSaveController {
     private static final Logger logger = LoggerFactory.getLogger(UserLikeSaveController.class);
     @Autowired
-    private PostInfoService postInfoService;
-    @Autowired
     private MQSender mqSender;
-    @Autowired
-    private CommentInfoService commentInfoService;
-    @Autowired
-    private ReplyInfoService replyInfoService;
     @PostMapping("/genre/user-like-save")
     public ResponseEntity SetUserLikeSavePost(@Validated @RequestBody UserLikeSaveDTO userLikeSaveDTO, HttpServletRequest request) throws JMSException, InterruptedException {
         ApiResponse apiResponse;

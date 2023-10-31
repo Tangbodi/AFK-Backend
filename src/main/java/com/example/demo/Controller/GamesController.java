@@ -42,13 +42,10 @@ public class GamesController {
     @Autowired
     private UserFavoriteGameService userFavoriteGameService;
     @Autowired
-    private GameGenreMapService gameGenreMapService;
-    @Autowired
     private RedisGameIconService redisGameIconService;
     @Autowired
     private RedisUserFavoriteGameService redisUserFavoriteGameService;
-    @Autowired
-    private MQSender mqSender;
+
 
     @GetMapping("/")
     public ResponseEntity GetAllGameIcons() throws JsonProcessingException {

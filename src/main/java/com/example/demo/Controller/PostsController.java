@@ -52,8 +52,6 @@ public class PostsController {
     @Autowired
     private IpService ipService;
     @Autowired
-    private UserInfoService userInfoService;
-    @Autowired
     private CommentService commentService;
     @Autowired
     private PostGameMapService postGameMapService;
@@ -63,8 +61,6 @@ public class PostsController {
     private GameGenreMapService gameGenreMapService;
     @Autowired
     private PostImageService postImageService;
-    @Autowired
-    private UserLikeSaveService userLikeSaveService;
     @Autowired
     private GameIconService gameIconService;
 
