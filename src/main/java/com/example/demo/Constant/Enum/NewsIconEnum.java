@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum NewsMediaEnum {
+public enum NewsIconEnum {
     STARDEW_VALLEY(102,"https://www.away-from-keyboard.com/ICON/GAME/102.png"),//1
     DOTA2(123,"https://www.away-from-keyboard.com/ICON/GAME/123.png"),//1
     THE_WITCHER_3(126,"https://www.away-from-keyboard.com/ICON/GAME/126.png"),//1
@@ -51,17 +51,17 @@ public enum NewsMediaEnum {
     private final String MediaUrl;
 
     public static String GetMediaUrl(Integer gameId) {
-        for (NewsMediaEnum newsMediaEnum : NewsMediaEnum.values()) {
-            if (gameId.equals(newsMediaEnum.getGameId())) {
-                return newsMediaEnum.getMediaUrl();
+        for (NewsIconEnum newsIconEnum : NewsIconEnum.values()) {
+            if (gameId.equals(newsIconEnum.getGameId())) {
+                return newsIconEnum.getMediaUrl();
             }
         }
         return null;
     }
     public static Integer GetGameId (String MediaUrl) {
-        for (NewsMediaEnum newsMediaEnum : NewsMediaEnum.values()) {
-            if (MediaUrl.equals(newsMediaEnum.getMediaUrl())) {
-                return newsMediaEnum.getGameId();
+        for (NewsIconEnum newsIconEnum : NewsIconEnum.values()) {
+            if (MediaUrl.equals(newsIconEnum.getMediaUrl())) {
+                return newsIconEnum.getGameId();
             }
         }
         return null;

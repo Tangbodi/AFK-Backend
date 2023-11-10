@@ -1,6 +1,6 @@
 package com.example.demo.Service.News;
 
-import com.example.demo.Constant.Enum.NewsMediaEnum;
+import com.example.demo.Constant.Enum.NewsIconEnum;
 import com.example.demo.Constant.Enum.NewsRSSEnum;
 import com.example.demo.Mapper.Repository.NewsRepository;
 import com.example.demo.Model.Entity.News;
@@ -135,7 +135,7 @@ public class SteamNewsService {
                 if (mediaContentUrl != null && !mediaContentUrl.isEmpty()) {
                     news.setMediaContentUrl(mediaContentUrl);
                 } else {
-                    news.setMediaContentUrl(NewsMediaEnum.GetMediaUrl(gameId));
+                    news.setMediaContentUrl(NewsIconEnum.GetMediaUrl(gameId));
                 }
                 news.setId(newsId);
                 news.setLink(link);
