@@ -37,15 +37,16 @@ public enum NewsRSSEnum {
     DAVE_THE_DIVER(630,"https://store.steampowered.com/feeds/news/app/1868140/?cc=US&l=english&snr=1_2108_9__2107"),//1
     CYBERPUNK_2077(135,"https://store.steampowered.com/feeds/news/app/1091500/?cc=US&l=english&snr=1_2108_9__2107"),//1
     ELDEN_RING(117,"https://store.steampowered.com/feeds/news/app/1245620/?cc=US&l=english&snr=1_2108_9__2107"),//1
-    LEAGUE_OF_LEGENDS(447,"https://gamerant.com/feed/category/league-of-legends-news/"),//2
-    DENTINY_2(237,"https://gamerant.com/feed/category/tag/destiny-2/"),//2
-    WORLD_OF_WARCRAFT(111,"https://gamerant.com/feed/category/tag/world-of-warcraft/"),//2
-    FINAL_FANTASY_XVI(114,"https://gamerant.com/feed/category/tag/final-fantasy-16/"),//2
-    VALORANT(210,"https://gamerant.com/feed/category/tag/valorant/"),//2
-    FORTNITE(240,"https://gamerant.com/feed/category/fortnite-news/"),//2
-    HEARTHSTONE(516,"https://gamerant.com/feed/category/tag/hearthstone/"),//2
-    THE_LEGEND_OF_ZELDA(600,"https://gamerant.com/feed/category/tag/the-legend-of-zelda/");//2
-    //https://gamerant.com/feed/category/tag/pokemon/
+    LEAGUE_OF_LEGENDS(447,"https://gamerant.com/feed/league-of-legends-news/"),//2
+    DENTINY_2(237,"https://gamerant.com/feed/tag/destiny-2/"),//2
+    WORLD_OF_WARCRAFT(111,"https://gamerant.com/feed/tag/world-of-warcraft/"),//2
+
+    FINAL_FANTASY_XVI(114,"https://gamerant.com/feed/tag/final-fantasy-16/"),//2
+    VALORANT(210,"https://gamerant.com/feed/tag/valorant/"),//2
+    FORTNITE(240,"https://gamerant.com/feed/fortnite-news/"),//2
+    HEARTHSTONE(516,"https://gamerant.com/feed/tag/hearthstone/"),//2
+    THE_LEGEND_OF_ZELDA(600,"https://gamerant.com/feed/tag/the-legend-of-zelda/");//2
+
     private final Integer gameId;
 
     private final String RSSUrl;
