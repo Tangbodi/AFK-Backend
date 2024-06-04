@@ -1,6 +1,7 @@
 package com.example.demo.Configuration;
 
 
+import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
@@ -47,4 +48,12 @@ public class ActiveMQConfig {
         factory.setSessionAcknowledgeMode(3);
         return factory;
     }
+//    @Bean
+//    public RedeliveryPolicy redeliveryPolicy() {
+//        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
+//        redeliveryPolicy.setMaximumRedeliveries(3); // Maximum number of redeliveries before moving to DLQ
+//        redeliveryPolicy.setBackOffMultiplier(2); // Back off multiplier for redelivery delay
+//        redeliveryPolicy.setInitialRedeliveryDelay(5000); // Initial delay before first redelivery
+//        return redeliveryPolicy;
+//    }
 }

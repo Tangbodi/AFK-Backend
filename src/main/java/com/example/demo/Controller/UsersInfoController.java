@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 
+
 @RestController
 @Validated
 @RequestMapping("/user-info")

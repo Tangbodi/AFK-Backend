@@ -2,7 +2,6 @@ package com.example.demo.Controller;
 
 import com.example.demo.Constant.Enum.ReturnCode;
 import com.example.demo.Model.DTO.UserSettingDTO;
-import com.example.demo.Model.VO.UserSettingVO;
 import com.example.demo.Service.MQ.MQSender;
 import com.example.demo.Service.Redis.RedisUserSettingService;
 import com.example.demo.Util.ApiResponse;
@@ -15,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.jms.JMSException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/user")
@@ -27,6 +26,7 @@ public class UserSettingController {
     private MQSender mqSender;
     @Autowired
     private RedisUserSettingService redisUserSettingService;
+
     @GetMapping("/setting")
     public ResponseEntity GetUserSetting(HttpServletRequest request) throws IOException {
         Long userId = (Long) request.getSession().getAttribute("userId");
@@ -34,11 +34,12 @@ public class UserSettingController {
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Please login to access this page");
         } else {
-            Map<String,Object> userSettingVOMap= redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
+            Map<String, Object> userSettingVOMap = redisUserSettingService.GetUserSettingCache(USER_SETTING + ":::" + userId, userId);
             apiResponse = ApiResponse.success(userSettingVOMap);
         }
         return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
     }
+
     @PutMapping("/update-setting")
     public ResponseEntity UpdateUserSetting(HttpServletRequest request, @RequestBody UserSettingDTO userSettingDTO) throws IOException, JMSException {
         Long userId = (Long) request.getSession().getAttribute("userId");
