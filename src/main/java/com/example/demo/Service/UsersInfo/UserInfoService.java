@@ -35,7 +35,7 @@ public class UserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
     //    private static final String AVATAR_URL = "http://31.220.21.110:8180/IMAGE/AVATAR/";
     private static final String AVATAR_URL = "https://www.away-from-keyboard.com/IMAGE/AVATAR/";
-    private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat2/webapps/IMAGE/AVATAR/";
+    private static final String TOMCAT_AVATAR_PATH = "/opt/tomcat/webapps/IMAGE/AVATAR/";
 
     //    private static final String NGINX_AVATAR_PATH = "/usr/local/nginx2/html/IMAGE/AVATAR/";
     @Autowired
