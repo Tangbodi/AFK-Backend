@@ -31,7 +31,7 @@ public class UpdatePostTotalSave {
     @Autowired
     private PostInfoService postInfoService;
 
-    @Scheduled(fixedRate = 14000)
+    @Scheduled(fixedRate = 60000)
     @PutMapping("/update-post-save")
     public ResponseEntity UpdatePostTotalSave() {
         ApiResponse apiResponse;

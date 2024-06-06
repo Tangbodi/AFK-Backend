@@ -31,7 +31,7 @@ public class UpdatePostTotalLike {
     @Autowired
     private PostInfoService postInfoService;
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRate = 60000)
     @PutMapping("/update-post-like")
     public ResponseEntity UpdatePostTotalLike() {
         ApiResponse apiResponse;

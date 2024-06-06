@@ -22,7 +22,7 @@ public class SendEmailService {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-            mimeMessageHelper.setFrom("contactus@nybing.com", "DummyNode");
+            mimeMessageHelper.setFrom("contactus@dummynode.com", "DummyNode");
             mimeMessageHelper.setTo(recipientEmail);
             String subject = " Verify your email to start using AFK";
             String content = "<p>Hello,</p>"
