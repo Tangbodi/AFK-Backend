@@ -22,8 +22,7 @@ public class RedisService {
     //If you want to check if a key exists in the database, regardless of the data type associated with that key, use EXISTS.
     public boolean CacheExists(String cacheKey) {
         logger.info("Checking if cache exists: cacheKey = {}", cacheKey);
-        Jedis jedis = new Jedis("localhost", 6379);
-        jedis.auth("960c3dac4fa81b4204779fd16ad7c954f95942876b9c4fb1a255667a9dbe389d");
+        Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
             if (jedis.exists(cacheKey)) {
