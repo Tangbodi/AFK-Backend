@@ -250,13 +250,14 @@ public class UsersInfoController {
 
 
     @GetMapping("/saved-post")
-    public ResponseEntity GetSavedPostByUser(@Validated @RequestBody ObjectUserDTO objectUserDTO, HttpServletRequest request) {
+    public ResponseEntity GetSavedPostByUser(HttpServletRequest request) {
         ApiResponse apiResponse;
         Long userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) {
             apiResponse = ApiResponse.error(ReturnCode.RC401.getCode(), "Sign in to access posts that you’ve liked or saved");
             return ResponseEntity.status(apiResponse.getCode()).body(apiResponse);
         } else {
+            ObjectUserDTO objectUserDTO = new ObjectUserDTO();
             objectUserDTO.setUserId(userId);
             List<ShowSavedPostVO> showSavedPostVOList = userLikeSaveService.GetSavedPostByUserId(objectUserDTO);
             apiResponse = ApiResponse.success(showSavedPostVOList);
