@@ -17,12 +17,14 @@ public interface MessageRepository extends JpaRepository<Message,Long> {
             "WHERE m.to_uid = :userId ORDER BY m.created_at DESC", nativeQuery = true)
     List<Map<Short, Object>> getMessageHistoryByUserId(@Param("userId") Long userId);
 
-    @Query(value = "SELECT m.message_id, pgm.game_id, pgm.genre_id, m.post_id, ifnull(m.comment_reply_id, 0) AS comment_reply_id, ifnull( m.from_uid, 0 ) AS from_uid, ifnull(ui.username,\"AFK\") AS from_username, ifnull(ui.avatar_url, '') AS from_avatar_url, m.to_uid, m.content, ifnull(m.type_id, '') AS type_id, m.created_at\n" +
-            "FROM afk.messages_users_map mum\n" +
-            "JOIN afk.messages m ON mum.message_id = m.message_id\n" +
-            "LEFT JOIN afk.users_info ui ON m.from_uid = ui.user_id\n" +
-            "JOIN afk.posts_games_map pgm ON m.post_id = pgm.post_id\n" +
-            "WHERE mum.mentioned_uid = :userId AND mum.read_status = 0 \n" +
-            "GROUP BY m.comment_reply_id, m.from_uid, m.type_id ORDER BY mum.message_id DESC", nativeQuery = true)
+    @Query(value = "SELECT m.message_id, pgm.game_id, pgm.genre_id, m.post_id, IFNULL(m.comment_reply_id, 0) AS comment_reply_id, IFNULL(m.from_uid, 0) AS from_uid, IFNULL(ui.username, 'AFK') AS from_username, IFNULL(ui.avatar_url, '') AS from_avatar_url, m.to_uid, m.content, IFNULL(m.type_id, '') AS type_id, m.created_at " +
+            "FROM afk.messages_users_map mum " +
+            "JOIN afk.messages m ON mum.message_id = m.message_id " +
+            "LEFT JOIN afk.users_info ui ON m.from_uid = ui.user_id " +
+            "JOIN afk.posts_games_map pgm ON m.post_id = pgm.post_id " +
+            "WHERE mum.mentioned_uid = :userId AND mum.read_status = 0 " +
+            "GROUP BY m.message_id, pgm.game_id, pgm.genre_id, m.post_id, m.comment_reply_id, m.from_uid, from_username, from_avatar_url, m.to_uid, m.content, m.type_id, m.created_at " +
+            "ORDER BY mum.message_id DESC", nativeQuery = true)
     List<Map<Short, Object>> getUnreadMessagesByUserId(@Param("userId") Long userId);
+
 }
