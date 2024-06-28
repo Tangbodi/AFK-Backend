@@ -220,6 +220,8 @@ public class UserLikeSaveService {
         for (Map<String, Object> savedPost : savedPosts) {
             ShowSavedPostVO showSavedPostVO = new ShowSavedPostVO();
             showSavedPostVO.setPostId(savedPost.get("post_id").toString());
+            showSavedPostVO.setGameId((Short) savedPost.get("game_id"));
+            showSavedPostVO.setGenreId((Byte) savedPost.get("genre_id"));
             showSavedPostVO.setTitle((String) savedPost.get("title"));
             showSavedPostVO.setView((Integer) savedPost.get("view"));
             showSavedPostVO.setCommentReply((Integer) savedPost.get("comment_reply"));

@@ -7,6 +7,8 @@ import java.time.Instant;
 @Data
 public class ShowSavedPostVO {
     private String postId;
+    private Byte genreId;
+    private Short gameId;
     private String title;
     private Integer view;
     private Integer commentReply;
