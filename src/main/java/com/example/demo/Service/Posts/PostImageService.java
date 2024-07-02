@@ -28,7 +28,7 @@ import java.util.Map;
 @Service
 public class PostImageService {
     private static final Logger logger = LoggerFactory.getLogger(PostImageService.class);
-    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat2/webapps/IMAGE/POST/";
+    private static final String TOMCAT_POST_IMAGE_PATH = "/opt/tomcat/webapps/IMAGE/POST/";
 //    private static final String POST_IMAGE_URL = "http://31.220.21.110:8180/IMAGE/POST/";
 private static final String POST_IMAGE_URL = "https://www.away-from-keyboard.com/IMAGE/POST/";
 //    private static final String NGINX_POST_IMAGE_PATH = "/usr/local/nginx2/html/IMAGE/POST/";
@@ -101,11 +101,11 @@ private static final String POST_IMAGE_URL = "https://www.away-from-keyboard.com
                     postImageNameList.add(imageName);
                     logger.info("PostImageNameList: {}", postImageNameList);
                     // Save image to Tomcat and Nginx
-//                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
+                    FileOutputStream fos_tomcat = new FileOutputStream(tomcatImagePath.toFile());
 //                    FileOutputStream fos_nginx = new FileOutputStream(nginxImagePath.toFile());
-//                    fos_tomcat.write(imageData);
+                    fos_tomcat.write(imageData);
 //                    fos_nginx.write(imageData);
-//                    fos_tomcat.close();
+                    fos_tomcat.close();
 //                    fos_nginx.close();
                     logger.info("Saved PostImage to Tomcat");
                     //add image url
